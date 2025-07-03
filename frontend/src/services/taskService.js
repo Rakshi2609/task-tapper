@@ -2,7 +2,7 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_APP_API_URL;
 const API_URL = import.meta.env.MODE === "development"
   ? "http://localhost:5000/api/function"
-  : `{API_BASE_URL}/api/function`;
+  : `${API_BASE_URL}/api/function`;
 
 export const createTask = async (taskData) => {
   const response = await axios.post(`${API_URL}/createtask`, taskData);
