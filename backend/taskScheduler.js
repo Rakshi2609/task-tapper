@@ -2,7 +2,7 @@ import cron from "node-cron";
 import Team from "./models/Team.js";
 
 // Schedule to run every day at 12:05 AM
-cron.schedule("5 0 * * *", async () => {
+cron.schedule("5 19 * * *", async () => {
   console.log("🔁 Running daily task generator");
 
   try {
