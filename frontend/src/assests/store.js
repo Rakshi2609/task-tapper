@@ -4,8 +4,8 @@ import { persist } from "zustand/middleware";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_URL;
 const API_URL = import.meta.env.MODE === "development"
-  ? "http://localhost:5000/api/function"
-  : `${API_BASE_URL}/api/function`;
+  ? "http://localhost:5000/api/auth"
+  : `${API_BASE_URL}/api/auth`;
 
 axios.defaults.withCredentials = true;
 
