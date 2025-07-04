@@ -25,7 +25,7 @@ const Home = () => {
             Ready to manage your day? You can create new tasks, track progress, and stay on top of your team's productivity.
           </p>
           <div className="flex gap-4">
-            <Link to="/createtask">
+            <Link to="/create">
               <button className="bg-green-600 text-white px-6 py-2 rounded-xl hover:bg-green-700 transition">
                 Create Task
               </button>
