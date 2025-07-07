@@ -44,6 +44,13 @@ app.get('/', (req, res) => {
   console.log("Listened")
 });
 
+// inside server.js or routes file
+app.get("/api/ping", (req, res) => {
+  console.log("✅ Pinged by GitHub Action at", new Date().toLocaleString());
+  res.send("pong");
+});
+
+
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
