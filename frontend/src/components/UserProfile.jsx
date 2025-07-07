@@ -48,6 +48,7 @@ const UserProfile = () => {
             <p><strong>Name:</strong> {user.username}</p>
             <p><strong>Email:</strong> {user.email}</p>
             <Link to="/tasks" className="text-blue-600 hover:underline text-sm">View All Tasks</Link>
+             <Link to="/mywork" className="text-blue-600 hover:underline text-sm">View All Tasks</Link>
           </div>
         </div>
 
