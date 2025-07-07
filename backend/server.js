@@ -41,6 +41,7 @@ app.use('/api/function', teamRoutes);
 
 app.get('/', (req, res) => {
   res.send("Hello World!!");
+  console.log("Listened")
 });
 
 io.on('connection', (socket) => {
