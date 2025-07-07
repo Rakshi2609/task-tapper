@@ -9,6 +9,7 @@ import CreateTaskForm from "./components/CreateTaskForm";
 import Navbar from "./components/Navbar";
 import UserProfile from "./components/UserProfile";
 import UserTasks from "./components/UserTasks";
+import AssignedTasks from "./components/AssignedTasks";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/tasks" element={<UserTasks />} />
         <Route path="/assign" element={<AssignTask />} />
         <Route path="/create" element={<CreateTaskForm />} />
+        <Route path="/mywork" element={<AssignedTasks />} />
 
         {/* Fallback Route */}
         <Route
