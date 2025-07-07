@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useAuthStore } from "../assests/store";
 import {
-  acceptTask as acceptTaskAPI,
   completeTask as completeTaskAPI,
 } from "../services/taskService";
 
@@ -32,16 +31,7 @@ const handleComplete = async (taskId) => {
     if (user?.email) getUserTasks(user.email);
   }, [user]);
 
-  const handleAccept = async (taskId) => {
-    if (!user?.email) return;
-    try {
-      await acceptTaskAPI(taskId, user.email);
-      alert("✅ Task accepted!");
-      getUserTasks(user.email); // Refresh
-    } catch (e) {
-      alert("❌ Could not accept task: " + (e.response?.data?.message || e.message));
-    }
-  };
+
 
   // const handleComplete = async (taskId) => {
   //   if (!user?.email) return;
@@ -73,12 +63,7 @@ const handleComplete = async (taskId) => {
               <p><strong>Frequency:</strong> {task.taskFrequency}</p>
 
               <div className="mt-2 flex gap-3">
-                <button
-                  onClick={() => handleAccept(task._id)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                >
-                  🤝 Accept Task
-                </button>
+               
                 <button
                   onClick={() => handleComplete(task._id)}
                   className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"

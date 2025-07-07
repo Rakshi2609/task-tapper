@@ -7,7 +7,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.route.js';
 import teamRoutes from './routes/team.route.js';
 import { connectDB } from './config/connectDB.js';
-import './taskScheduler.js'; 
+// import './taskScheduler.js'; 
 
 
 dotenv.config();
