@@ -24,7 +24,10 @@ app.use(cors({
   origin: 'https://task-tapper-blush.vercel.app',
   credentials: true
 }));
-app.options('*', cors());
+app.options('*', (req, res) => {
+  res.sendStatus(204); // ✅ Clean, no error
+});
+
 
 
 const server = http.createServer(app); // ✅ Create HTTP server
