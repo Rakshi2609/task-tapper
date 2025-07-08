@@ -15,10 +15,16 @@ const app = express();
 app.use(express.json());
 
 // app.use(cros()); 
+// app.use(cors({
+//   origin: process.env.CLIENT_URL,  // ✅ Only allow this origin
+//   credentials: true                 // ✅ Allow cookies/authorization headers
+// }));
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,  // ✅ Only allow this origin
-  credentials: true                 // ✅ Allow cookies/authorization headers
+  origin: 'https://task-tapper-blush.vercel.app',
+  credentials: true
 }));
+app.options('*', cors());
 
 
 const server = http.createServer(app); // ✅ Create HTTP server
