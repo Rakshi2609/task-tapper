@@ -26,4 +26,4 @@ dist-ssr
 .env*
 
 # Do not commit secrets
-backend/services/twilo.js
+# backend/services/twilo.js

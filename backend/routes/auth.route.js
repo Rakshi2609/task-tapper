@@ -1,6 +1,6 @@
 import express from 'express'
 import {glogin, gsignup} from '../controllers/auth.js'
-import { getUserProfile, getUserTasks } from '../controllers/auth.js';
+import { getUserProfile, getUserTasks, getAssignedByMe } from '../controllers/auth.js';
 import User from '../models/User.js'
 
 const router = express.Router();
@@ -10,6 +10,7 @@ router.post('/signup', gsignup);
 
 router.get('/profile/:email', getUserProfile);
 router.get('/tasks/:email', getUserTasks);
+router.get('/assignedByMe', getAssignedByMe);
 // router.post('/save-token', async (req, res) => {
 //   const { email, fcmToken } = req.body;
 //   try {

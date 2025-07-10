@@ -197,3 +197,18 @@ export const getAllEmails = async (req, res) => {
 // The generateTask function is no longer needed as a separate export;
 // its logic has been integrated into updateTask.
 // export const generateTask = async (req, res) => { /* ... */ };
+
+export const getAssignedTasks = async (req, res) => {
+  const { email } = req.query;
+  console.log("Entered getAssignedTasks function");
+  console.log(`[getAssignedTasks] Request query: email=${email}`);
+
+  try {
+    const tasks = await Team.find({ assignedTo: email });
+    console.log(`[getAssignedTasks] Found ${tasks.length} tasks for user ${email}.`);
+    res.json({ tasks });
+  } catch (err) {
+    console.error(`[getAssignedTasks] Get Assigned Tasks Error: ${err.message}`, err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

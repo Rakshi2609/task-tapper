@@ -202,6 +202,18 @@ export const useAuthStore = create(
             });
         }
         },
+        getAssignedByMe: async (email) => {
+  set({ isLoading: true, error: null });
+
+  try {
+    const res = await axios.get(`${API_URL}/assignedByMe`, { params: { email } });
+    console.log("📤 Tasks you assigned:", res.data.tasks);
+    set({ tasks: res.data.tasks || [], isLoading: false });
+  } catch (error) {
+    console.error("❌ Failed to fetch assigned tasks:", error);
+    set({ tasks: [], error: "Failed to fetch assigned tasks", isLoading: false });
+  }
+},
     getUserTasks: async (email) => {
   set({ isLoading: true, error: null });
 

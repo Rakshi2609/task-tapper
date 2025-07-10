@@ -5,58 +5,66 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const AssignedTasks = () => {
-  const { user, tasks, getUserTasks } = useAuthStore();
+  const { user, tasks, getAssignedByMe } = useAuthStore();
   const [assignedTasks, setAssignedTasks] = useState([]);
   const [sortBy, setSortBy] = useState("none");
   const [searchTask, setSearchTask] = useState("");
   const [searchEmail, setSearchEmail] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // Fetch tasks assigned by the current user
   useEffect(() => {
-    if (user?.email) getUserTasks(user.email);
+    if (user?.email) {
+      getAssignedByMe(user.email);
+    }
   }, [user]);
 
+  // Filtering and sorting
   useEffect(() => {
-    if (!tasks) return;
-    let assigned = tasks.filter((task) => task.createdBy === user.email);
+    if (!Array.isArray(tasks)) return;
+
+    let filtered = tasks;
 
     if (searchTask.trim()) {
-      const words = searchTask.trim().toLowerCase().split(" ");
-      assigned = assigned.filter(task =>
-        words.every(word => task.task.toLowerCase().includes(word))
+      const words = searchTask.toLowerCase().split(" ");
+      filtered = filtered.filter(task =>
+        words.every(word => task?.task?.toLowerCase().includes(word))
       );
     }
 
     if (searchEmail.trim()) {
-      const words = searchEmail.trim().toLowerCase().split(" ");
-      assigned = assigned.filter(task =>
-        words.every(word => (task.assignedTo || "").toLowerCase().includes(word))
+      const words = searchEmail.toLowerCase().split(" ");
+      filtered = filtered.filter(task =>
+        words.every(word => (task?.assignedTo || "").toLowerCase().includes(word))
       );
     }
 
     if (selectedDate) {
-      assigned = assigned.filter(task =>
-        new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+      filtered = filtered.filter(task =>
+        new Date(task?.dueDate).toDateString() === selectedDate.toDateString()
       );
     }
 
     if (sortBy === "name") {
-      assigned.sort((a, b) => a.task.localeCompare(b.task));
+      filtered.sort((a, b) => a?.task?.localeCompare(b?.task));
     } else if (sortBy === "email") {
-      assigned.sort((a, b) => (a.assignedTo || "").localeCompare(b.assignedTo || ""));
+      filtered.sort((a, b) => (a?.assignedTo || "").localeCompare(b?.assignedTo || ""));
     } else if (sortBy === "frequency") {
-      assigned.sort((a, b) => a.taskFrequency.localeCompare(b.taskFrequency));
+      filtered.sort((a, b) => (a?.taskFrequency || "").localeCompare(b?.taskFrequency || ""));
     } else if (sortBy === "dueDate") {
-      assigned.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      filtered.sort((a, b) => new Date(a?.dueDate) - new Date(b?.dueDate));
     }
 
-    setAssignedTasks(assigned);
+    setAssignedTasks(filtered);
   }, [tasks, sortBy, searchTask, searchEmail, selectedDate]);
 
   return (
     <div className="max-w-5xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">📋 Assigned Tasks</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+        📤 Tasks You've Assigned
+      </h2>
 
+      {/* Filter Controls */}
       <div className="flex flex-wrap justify-between gap-4 mb-6">
         <div className="flex items-center gap-2">
           <FaSort className="text-xl text-gray-600" />
@@ -88,13 +96,13 @@ const AssignedTasks = () => {
           <FaSearch className="text-xl text-gray-600" />
           <input
             type="text"
-            placeholder="Search Email"
+            placeholder="Search Assigned Email"
             value={searchEmail}
             onChange={(e) => setSearchEmail(e.target.value)}
             className="border px-3 py-1 rounded shadow"
           />
         </div>
-        
+
         <div className="flex items-center gap-2">
           <FaCalendarAlt className="text-xl text-gray-600" />
           <DatePicker
@@ -114,8 +122,9 @@ const AssignedTasks = () => {
         </div>
       </div>
 
+      {/* Display Tasks */}
       {assignedTasks.length === 0 ? (
-        <p className="text-center text-gray-500">You haven't assigned any tasks yet.</p>
+        <p className="text-center text-gray-500">You haven’t assigned any tasks yet.</p>
       ) : (
         <ul className="space-y-4">
           {assignedTasks.map((task, index) => (
@@ -127,9 +136,9 @@ const AssignedTasks = () => {
               <p className="text-sm text-gray-600">Frequency: {task.taskFrequency}</p>
               <p className="text-sm text-gray-600">
                 Status: {task.completedDate ? (
-                  <span className="text-green-600 font-medium">Completed</span>
+                  <span className="text-green-600 font-medium">✅ Completed</span>
                 ) : (
-                  <span className="text-yellow-600 font-medium">Pending</span>
+                  <span className="text-yellow-600 font-medium">🕒 Pending</span>
                 )}
               </p>
             </li>

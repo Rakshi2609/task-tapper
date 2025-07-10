@@ -6,6 +6,8 @@ import cors from 'cors';
 import authRoutes from './routes/auth.route.js';
 import teamRoutes from './routes/team.route.js';
 import { connectDB } from './config/connectDB.js';
+import { checkAndSendDailySummary } from './utils/checkAndSendDailySummary.js';
+
 
 dotenv.config();
 const app = express();
@@ -35,10 +37,18 @@ app.get('/', (req, res) => {
   console.log("Listened");
 });
 
-app.get("/api/ping", (req, res) => {
+app.get("/api/ping", async (req, res) => {
   console.log("✅ Pinged by GitHub Action at", new Date().toLocaleString());
-  res.send("pong");
+
+  try {
+    await checkAndSendDailySummary('your-email@example.com'); // <-- pass actual email
+    res.send("✅ Daily summary check completed");
+  } catch (err) {
+    console.error("❌ Error sending summary:", err.message);
+    res.status(500).send("❌ Failed to send summary");
+  }
 });
+
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

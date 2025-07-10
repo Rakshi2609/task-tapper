@@ -30,3 +30,14 @@ export const getAllEmails = async () => {
   console.log("Fetched emails:", res.data.emails);
   return res.data.emails; // returns array of emails
 };
+
+export const getAssignedTasks = async (email) => {
+  try {
+    const res = await axios.get(`${API_URL}/getTask`, { params: { email } });
+    console.log("Fetched assigned tasks:", res.data.tasks);
+    return res.data.tasks; // returns array of tasks
+  } catch (error) {
+    console.error("❌ Failed to fetch assigned tasks:", error);
+    throw error;
+  }
+};

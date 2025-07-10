@@ -97,3 +97,19 @@ export const getUserTasks = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+// ✅ Get tasks assigned BY the user (creator)
+export const getAssignedByMe = async (req, res) => {
+  const { email } = req.query;
+  console.log(`[getAssignedByMe] Fetching tasks created by ${email}`);
+
+  try {
+    const tasks = await Team.find({ createdBy: email });
+    console.log(`[getAssignedByMe] Found ${tasks.length} tasks`);
+    res.json({ tasks });
+  } catch (err) {
+    console.error(`[getAssignedByMe] Error:`, err.message);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
