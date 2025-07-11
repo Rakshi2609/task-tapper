@@ -41,7 +41,7 @@ app.get("/api/ping", async (req, res) => {
   console.log("✅ Pinged by GitHub Action at", new Date().toLocaleString());
 
   try {
-    await checkAndSendDailySummary('your-email@example.com'); // <-- pass actual email
+    await checkAndSendDailySummary('rakshithganjimut@gmail.com'); // <-- pass actual email
     res.send("✅ Daily summary check completed");
   } catch (err) {
     console.error("❌ Error sending summary:", err.message);
