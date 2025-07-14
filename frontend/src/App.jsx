@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+
 
 import Home from "./components/Home";
 import Login from "./components/Login";
@@ -10,8 +12,11 @@ import Navbar from "./components/Navbar";
 import UserProfile from "./components/UserProfile";
 import UserTasks from "./components/UserTasks";
 import AssignedTasks from "./components/AssignedTasks";
+import WorldChat from "./components/WorldChat";
+import { useAuthStore } from "./assests/store";
 
 const App = () => {
+  const user = useAuthStore((state) => state.user); 
   return (
     <BrowserRouter>
       <Navbar />
@@ -24,6 +29,8 @@ const App = () => {
         <Route path="/assign" element={<AssignTask />} />
         <Route path="/create" element={<CreateTaskForm />} />
         <Route path="/mywork" element={<AssignedTasks />} />
+        <Route path="/chat" element={user ? <WorldChat user={user} /> : <Navigate to="/login" />} />
+
 
         {/* Fallback Route */}
         <Route

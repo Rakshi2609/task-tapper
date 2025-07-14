@@ -109,48 +109,58 @@ export const useAuthStore = create(
     message: null,
     tasks: [],
 
-    signup: async (email, username ) => {
-        set({ isLoading: true, error: null });
-        try {
-            const response = await axios.post(`${API_URL}/signup`, {
-                email,
-                username
-            });
+    signup: async (email, username) => {
+  set({ isLoading: true, error: null });
+  try {
+    const response = await axios.post(`${API_URL}/signup`, {
+      email,
+      username
+    });
 
-            set({ user: response.data.user, isAuthenticated: true, isLoading: false });
-        } catch (error) {
-            set({
-                error: error.response?.data?.message || "Error signing up",
-                isLoading: false,
-            });
-            throw error;
-        }
-    },
+    set({
+      user: response.data.user,
+      isAuthenticated: true,
+      isLoading: false
+    });
+
+    return true; // ✅ RETURN success
+  } catch (error) {
+    set({
+      error: error.response?.data?.message || "Error signing up",
+      isLoading: false,
+    });
+    console.error("❌ Signup failed in store:", error);
+    return false; // ❌ RETURN failure
+  }
+},
+
     
     login: async (email) => {
-        set({ isLoading: true, error: null });
-        console.log("EMAIL SENDING TO BACKEND:", email);
-        try {
-            const response = await axios.post(`${API_URL}/login`, {
-                email, 
-            });
-            set({
-                isAuthenticated: true,
-                user: response.data.user,
-                error: null,
-                isLoading: false,
-            });
-            console.log("RESPONSE FROM BACKEND:", response.data.user);
-            // console.log("RESPONSE FROM Front:", user);
+  set({ isLoading: true, error: null });
+  console.log("EMAIL SENDING TO BACKEND:", email);
+  try {
+    const response = await axios.post(`${API_URL}/login`, { email });
 
-        } catch (error) {
-            set({
-                error: error.response?.data?.message || "Error logging in",
-                isLoading: false,
-            });
-            throw error;
-        }
-    },
+    set({
+      isAuthenticated: true,
+      user: response.data.user,
+      error: null,
+      isLoading: false,
+    });
+
+    console.log("RESPONSE FROM BACKEND:", response.data.user);
+
+    return true; // ✅ RETURN success
+  } catch (error) {
+    set({
+      error: error.response?.data?.message || "Error logging in",
+      isLoading: false,
+    });
+    console.error("❌ Login failed in store:", error);
+    return false; // ❌ RETURN failure
+  }
+},
+
 
     // checkAuthStatus: async () => {
     //     set({ isCheckingAuth: true });

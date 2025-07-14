@@ -39,6 +39,9 @@ const Navbar = () => {
           {user ? (
             <>
               <span className="hidden lg:inline">Welcome, {user.displayName || user.email}</span>
+              <Link to='/chat' className='bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded'>
+               Chat
+              </Link>
               <Link to='/create' className='bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded'>
                 Create Task
               </Link>

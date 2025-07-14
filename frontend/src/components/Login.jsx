@@ -1,53 +1,65 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../firebase/firebase"; // Your Firebase config
+import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 import { toast } from "react-toastify";
-import { useAuthStore } from "../assests/store"; // Your Zustand store
+import { useAuthStore } from "../assests/store";
 
 const Login = () => {
   const navigate = useNavigate();
   const googleProvider = new GoogleAuthProvider();
 
-  const { login, user } = useAuthStore(); // optional: pull user for logging
+  const { login, user } = useAuthStore();
 
   const handleGoogleSignUp = async () => {
     try {
-      // Step 1: Sign in with Google popup
-      await signInWithPopup(auth, googleProvider);
+      console.log("🔐 Initiating Google sign-in...");
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log("✅ Firebase sign-in successful");
 
-      const email = auth.currentUser?.email;
-      const displayName = auth.currentUser?.displayName;
+      const currentUser = auth.currentUser;
+      console.log("👤 Firebase user:", currentUser);
+
+      const email = currentUser?.email;
+      const displayName = currentUser?.displayName;
 
       if (!email) {
+        console.error("❌ No email found from Firebase user.");
         toast.error("Google email not found");
         return;
       }
 
-      console.log("📤 Sending email to backend:", email);
+      console.log("📤 Sending email to backend login API:", email);
+      const loginSuccess = await login(email);
+      if (!loginSuccess) {
+        useAuthStore.setState({ user: null });
+        await signOut(auth);
+        toast.error("Login failed. Please try again.");
+        return;
+      }
 
-      // Step 2: Call backend login via Zustand
-      await login(email);
-
-      console.log("✅ User from Zustand:", user); // optional log
-
-      navigate("/");
+      console.log("✅ Zustand login success, user stored:", user);
       toast.success(`Welcome ${displayName || "User"}!`);
-      
-      // Step 3: Navigate after successful login
-      console.log("🔁 Navigating to /home");
+      navigate("/");
     } catch (error) {
+      console.error("❌ Google Sign-In failed:", error);
       toast.error("Google Sign-In failed: " + error.message);
-      console.error("❌ Google Login Error:", error);
+
+      // Fail-safe logout
+      try {
+        await signOut(auth);
+        console.log("🧹 Firebase logout after failure.");
+      } catch (logoutErr) {
+        console.error("❌ Error logging out from Firebase:", logoutErr);
+      }
+
+      useAuthStore.setState({ user: null });
     }
   };
 
   return (
     <div className="relative h-[91vh] overflow-hidden">
-      
-
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0d1b2a]/80 to-[#1b263b]/90 z-0"></div>
-
       <div className="relative z-10 flex justify-center items-center h-full">
         <button
           onClick={handleGoogleSignUp}

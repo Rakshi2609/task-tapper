@@ -1,5 +1,6 @@
 import Team from '../models/Team.js';
 import User from '../models/User.js';
+import { emitSystemMessage } from '../socket/worldChat.js';
 
 /**
  * Helper function to calculate the next due date based on frequency, skipping Sundays.
@@ -7,6 +8,9 @@ import User from '../models/User.js';
  * @param {string} frequency - The frequency ('Daily', 'Weekly', 'Monthly').
  * @returns {Date | null} The calculated next due date, or null if frequency is 'OneTime' or invalid.
  */
+
+
+
 const calculateNextDueDate = (baseDate, frequency) => {
   console.log(`[calculateNextDueDate] Calculating next due date for baseDate: ${baseDate}, frequency: ${frequency}`);
   let newDate = new Date(baseDate); 
@@ -42,6 +46,7 @@ const calculateNextDueDate = (baseDate, frequency) => {
 
 export const createTask = async (req, res) => {
   const { createdBy, task, assignedTo, assignedName, taskFrequency, dueDate, priority } = req.body;
+  const io = req.io;
 
   console.log("Entered createTask function");
   console.log(`[createTask] Request body: ${JSON.stringify(req.body)}`);
@@ -72,6 +77,11 @@ export const createTask = async (req, res) => {
 
     await newTask.save();
     console.log("Task Created successfully:", newTask._id);
+//     const user = await User.findOne({ email }); // ✅ fetch user using email
+// if (user) {
+  await emitSystemMessage(io, `${user.username} has completed task: "${task.task}"`);
+// }
+
 
     user.TasksAssigned += 1;
     user.TasksNotStarted += 1;
@@ -100,6 +110,7 @@ export const createTask = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   const { taskId, email } = req.body;
+  const io = req.io;
 
   console.log("Entered updateTask function");
   console.log(`[updateTask] Request body: taskId=${taskId}, email=${email}`);
@@ -163,6 +174,11 @@ export const updateTask = async (req, res) => {
     } else {
       console.log(`[updateTask] Task frequency '${task.taskFrequency}' is not recurring. No new task generated.`);
     }
+
+    const user = await User.findOne({ email }); // ✅ fetch user using email
+if (user) {
+  await emitSystemMessage(io, `${user.username} has completed task: "${task.task}"`);
+}
 
     
     res.status(200).json({
