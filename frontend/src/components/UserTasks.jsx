@@ -3,10 +3,19 @@ import { useAuthStore } from "../assests/store";
 import {
   completeTask as completeTaskAPI,
 } from "../services/taskService";
-import { FaSort, FaCalendarAlt, FaCheck } from "react-icons/fa";
+import {
+  FaSort,
+  FaCalendarAlt,
+  FaCheck,
+  FaTasks,
+  FaRegSadTear,
+  FaSpinner,
+  FaUserCircle
+} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 const UserTasks = () => {
   const {
@@ -15,8 +24,8 @@ const UserTasks = () => {
     isLoading,
     error,
     getUserTasks,
+    getUserProfile,
   } = useAuthStore();
-  const { getUserProfile } = useAuthStore();
 
   const [sortBy, setSortBy] = useState("none");
   const [selectedDate, setSelectedDate] = useState(null);
@@ -36,142 +45,282 @@ const UserTasks = () => {
   };
 
   useEffect(() => {
-    if (user?.email) getUserTasks(user.email);
-  }, [user]);
+    if (user?.email) {
+      getUserTasks(user.email);
+    }
+  }, [user, getUserTasks]);
 
   useEffect(() => {
     if (!tasks) return;
 
-    let sorted = [...tasks];
+    let filteredAndSortedTasks = [...tasks];
 
     if (selectedDate) {
-      sorted = sorted.filter((task) =>
+      filteredAndSortedTasks = filteredAndSortedTasks.filter((task) =>
         new Date(task.dueDate).toDateString() === selectedDate.toDateString()
       );
     }
 
     if (sortBy === "dueDate") {
-      sorted.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-    } else if(sortBy === "daily"){
-      sorted = sorted.filter(task => task.taskFrequency === "Daily");
-    } else if(sortBy === "monthly"){
-      
-      sorted = sorted.filter(task => task.taskFrequency === "Monthly");
-    } else if(sortBy === "weekly"){
-      
-      sorted = sorted.filter(task => task.taskFrequency === "Weekly");
-    }else if (sortBy === "priority") {
+      filteredAndSortedTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    } else if (sortBy === "priority") {
       const priorityOrder = { High: 1, Medium: 2, Low: 3 };
-      sorted.sort((a, b) => (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4));
+      filteredAndSortedTasks.sort((a, b) => (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4));
+    } else if (sortBy === "daily") {
+      filteredAndSortedTasks = filteredAndSortedTasks.filter(task => task.taskFrequency === "Daily");
+    } else if (sortBy === "weekly") {
+      filteredAndSortedTasks = filteredAndSortedTasks.filter(task => task.taskFrequency === "Weekly");
+    } else if (sortBy === "monthly") {
+      filteredAndSortedTasks = filteredAndSortedTasks.filter(task => task.taskFrequency === "Monthly");
     } else if (sortBy === "all") {
       const priorityOrder = { High: 1, Medium: 2, Low: 3 };
-      sorted.sort((a, b) => {
+      filteredAndSortedTasks.sort((a, b) => {
         const dateDiff = new Date(a.dueDate) - new Date(b.dueDate);
         if (dateDiff !== 0) return dateDiff;
         return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
       });
     }
 
-    setPendingTasks(sorted.filter(task => !task.completedDate));
-    setCompletedTasks(sorted.filter(task => task.completedDate));
+    setPendingTasks(filteredAndSortedTasks.filter(task => !task.completedDate));
+    setCompletedTasks(filteredAndSortedTasks.filter(task => task.completedDate));
   }, [tasks, sortBy, selectedDate]);
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        when: "beforeChildren",
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const linkButtonVariants = {
+    hover: { scale: 1.05, boxShadow: "0px 4px 15px rgba(59, 130, 246, 0.3)" },
+    tap: { scale: 0.95 },
+  };
+
+  const taskCardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
+    hover: { scale: 1.02, boxShadow: "0px 6px 20px rgba(59, 130, 246, 0.15)" },
+  };
+
+  // Helper function to get border color based on priority
+  const getPriorityBorderColor = (priority) => {
+    switch (priority) {
+      case "High":
+        return "border-red-500";
+      case "Medium":
+        return "border-orange-500"; // Changed from blue
+      case "Low":
+        return "border-cyan-500"; // Changed from blue
+      default:
+        return "border-gray-300"; // Fallback
+    }
+  };
+
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center">📝 Your Tasks</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
+      <motion.div
+        className="max-w-4xl mx-auto mt-8 p-6 sm:p-8 bg-white rounded-3xl shadow-2xl border border-blue-200 relative overflow-hidden"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/50 via-transparent to-indigo-100/50 opacity-60 rounded-3xl pointer-events-none"></div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-2">
-          <FaSort className="text-xl text-gray-600" />
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="border rounded px-3 py-1 shadow focus:outline-none"
-          >
-            <option value="none">Sort: None</option>
-            <option value="dueDate">Due Date</option>
-            <option value="priority">Priority</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="all">Both</option>
-          </select>
-        </div>
+        <motion.h2
+          className="text-4xl sm:text-5xl font-extrabold mb-8 text-center text-gray-900 drop-shadow-md flex items-center justify-center gap-4"
+          variants={itemVariants}
+        >
+          <FaTasks className="text-blue-600 text-4xl sm:text-5xl" /> Your Tasks
+        </motion.h2>
 
-        {/* Calendar Filter */}
-        <div className="flex items-center gap-2">
-          <FaCalendarAlt className="text-xl text-gray-600" />
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            placeholderText="Filter by Due Date"
-            className="border px-3 py-1 rounded shadow"
-          />
-          {selectedDate && (
-            <button
-              onClick={() => setSelectedDate(null)}
-              className="ml-2 text-red-500 underline text-sm"
+        <motion.div
+          className="bg-blue-50 p-5 rounded-xl shadow-md border border-blue-100 mb-8 flex flex-wrap justify-between items-center gap-4"
+          variants={itemVariants}
+        >
+          <div className="flex items-center gap-3">
+            <FaSort className="text-2xl text-blue-600" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border border-blue-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200"
             >
-              Clear
-            </button>
-          )}
-        </div>
-      </div>
+              <option value="none">Sort: Default</option>
+              <option value="dueDate">Due Date</option>
+              <option value="priority">Priority</option>
+              <option value="daily">Frequency: Daily</option>
+              <option value="weekly">Frequency: Weekly</option>
+              <option value="monthly">Frequency: Monthly</option>
+              <option value="all">Due Date & Priority</option>
+            </select>
+          </div>
 
-      {/* Loading or Error */}
-      {isLoading ? (
-        <p>Loading tasks...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : (
-        <>
-          {/* Pending Tasks */}
-          <h3 className="text-xl font-semibold mt-6 mb-2 text-green-600">🕒 Pending Tasks</h3>
-          {pendingTasks.length === 0 ? (
-            <p className="text-gray-600">No pending tasks.</p>
-          ) : (
-            <ul className="space-y-4">
-              {pendingTasks.map((task, index) => (
-                <li key={index} className="bg-white border-l-4 border-blue-500 p-4 rounded shadow-md">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-lg font-semibold">{task.task}</p>
-                      <p className="text-sm text-gray-600">📅 Due: {new Date(task.dueDate).toLocaleDateString()}</p>
-                      <p className="text-sm text-gray-600">🔥 Priority: <span className="font-bold">{task.priority}</span></p>
-                      <p className="text-sm text-gray-600">🔁 Frequency: {task.taskFrequency}</p>
+          <div className="flex items-center gap-3">
+            <FaCalendarAlt className="text-2xl text-blue-600" />
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              placeholderText="Filter by Due Date"
+              className="border border-blue-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200 w-44"
+              wrapperClassName="w-full"
+            />
+            {selectedDate && (
+              <motion.button
+                onClick={() => setSelectedDate(null)}
+                className="ml-2 text-red-500 hover:text-red-700 font-medium text-sm transition-colors duration-200"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                Clear
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
+
+        {isLoading ? (
+          <motion.p
+            className="text-center text-blue-600 text-lg font-medium py-10 flex items-center justify-center gap-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <FaSpinner className="animate-spin text-2xl" /> Loading tasks...
+          </motion.p>
+        ) : error ? (
+          <motion.p
+            className="text-red-600 text-center text-lg font-medium py-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <FaRegSadTear className="inline-block mr-2 text-2xl" /> {error}
+          </motion.p>
+        ) : (
+          <>
+            <motion.h3
+              className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2"
+              variants={itemVariants}
+            >
+              <span className="text-yellow-600">🕒</span> Pending Tasks
+            </motion.h3>
+            {pendingTasks.length === 0 ? (
+              <motion.p
+                className="text-gray-600 italic text-center py-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                No pending tasks found. Time to relax!
+              </motion.p>
+            ) : (
+              <ul className="space-y-4">
+                {pendingTasks.map((task, index) => (
+                  <motion.li
+                    key={task._id || index}
+                    className={`bg-white border-l-4 ${getPriorityBorderColor(task.priority)} p-5 rounded-lg shadow-md flex justify-between items-center transition-all duration-300`}
+                    variants={taskCardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover="hover"
+                    style={{ willChange: "transform, box-shadow" }}
+                  >
+                    <div className="flex-grow">
+                      <p className="text-lg font-semibold text-gray-800">{task.task}</p>
+                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <span className={`font-bold ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>
+                          🔥 Priority: {task.priority}
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <span className="text-purple-500">🔁</span> Frequency: {task.taskFrequency}
+                      </p>
+                      {task.assignedTo && (
+                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                          <FaUserCircle className="text-indigo-400" /> Assigned To: <span className="font-medium text-blue-700">{task.assignedTo}</span>
+                        </p>
+                      )}
                     </div>
-                    <button
+                    <motion.button
                       onClick={() => handleComplete(task._id)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow flex items-center gap-1"
+                      className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full shadow-lg flex items-center gap-2 font-semibold transition-all duration-300"
+                      whileHover={{ scale: 1.08, boxShadow: "0px 8px 20px rgba(59, 130, 246, 0.4)" }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       <FaCheck /> Complete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                    </motion.button>
+                  </motion.li>
+                ))}
+              </ul>
+            )}
 
-          {/* Completed Tasks */}
-          <h3 className="text-xl font-semibold mt-8 mb-2 text-gray-600">✅ Completed Tasks</h3>
-          {completedTasks.length === 0 ? (
-            <p className="text-gray-500">No completed tasks.</p>
-          ) : (
-            <ul className="space-y-4">
-              {completedTasks.map((task, index) => (
-                <li key={index} className="bg-gray-100 border-l-4 border-green-500 p-4 rounded shadow-sm">
-                  <div>
-                    <p className="text-lg line-through font-medium text-gray-700">{task.task}</p>
-                    <p className="text-sm text-gray-500">✔ Completed on: {new Date(task.completedDate).toLocaleDateString()}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
-      )}
+            <motion.h3
+              className="text-2xl font-bold mt-10 mb-4 text-blue-800 flex items-center gap-2"
+              variants={itemVariants}
+            >
+              <span className="text-green-600">✅</span> Completed Tasks
+            </motion.h3>
+            {completedTasks.length === 0 ? (
+              <motion.p
+                className="text-gray-500 italic text-center py-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                No completed tasks yet. Keep up the good work!
+              </motion.p>
+            ) : (
+              <ul className="space-y-4">
+                {completedTasks.map((task, index) => (
+                  <motion.li
+                    key={task._id || index}
+                    className="bg-gray-100 border-l-4 border-green-500 p-5 rounded-lg shadow-sm flex justify-between items-center transition-all duration-300"
+                    variants={taskCardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover={{ scale: 1.01, boxShadow: "0px 4px 15px rgba(0, 128, 0, 0.1)" }}
+                    style={{ willChange: "transform, box-shadow" }}
+                  >
+                    <div className="flex-grow">
+                      <p className="text-lg line-through font-medium text-gray-700">{task.task}</p>
+                      <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                      </p>
+                      {task.assignedTo && (
+                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                          <FaUserCircle className="text-indigo-300" /> Assigned To: <span className="font-light">{task.assignedTo}</span>
+                        </p>
+                      )}
+                    </div>
+                  </motion.li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+      </motion.div>
     </div>
   );
 };
