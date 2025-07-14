@@ -1,4 +1,4 @@
-// backend/utils/checkAndSendDailySummary.js
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Team from '../models/Team.js';
 import { sendMail } from './sendMail.js';
@@ -30,23 +30,41 @@ export const checkAndSendDailySummary = async (userEmail) => {
     return;
   }
 
-  const tasks = await Team.find({ assignedTo: userEmail });
-  const completed = tasks.filter(t => t.completedDate).length;
-  const pending = tasks.length - completed;
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-  console.log(`📊 Summary for ${userEmail} → ✅ Completed: ${completed}, 🕒 Pending: ${pending}`);
+  const tasksToday = await Team.find({
+    assignedTo: userEmail,
+    dueDate: { $gte: startOfDay, $lte: endOfDay }
+  });
+
+  const completed = tasksToday.filter(t => t.completedDate).length;
+  const pending = tasksToday.length - completed;
+
+  const checklist = tasksToday.map(task => {
+    const status = task.completedDate ? '✅' : '🔲';
+    return `${status} ${task.task}`;
+  }).join('\n');
 
   const summary = `
-Hi ${user.name || userEmail},
+Hi ${user.username || userEmail},
 
-Here's your task summary for today:
+📅 **Daily Task Summary** for ${new Date().toLocaleDateString('en-IN')}:
+
 ✅ Completed Tasks: ${completed}
 🕒 Pending Tasks: ${pending}
 
-Regards,
-Task Tapper`;
+📝 **Checklist**:
+${checklist || 'No tasks scheduled for today.'}
 
-  await sendMail(userEmail, '🗓️ Daily Task Summary', summary);
+Keep up the good work!
+
+Regards,  
+Task Tapper
+`;
+
+  await sendMail(userEmail, '🗓️ Your Daily Task Summary', summary);
   await markSent(userEmail);
   console.log(`✅ Summary sent and marked for ${userEmail}`);
 };

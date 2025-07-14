@@ -6,7 +6,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.route.js';
 import teamRoutes from './routes/team.route.js';
 import { connectDB } from './config/connectDB.js';
-import { checkAndSendDailySummary } from './utils/checkAndSendDailySummary.js';
+import { triggerDailySummaries } from './utils/triggerDailySummaries.js';
 
 
 dotenv.config();
@@ -41,8 +41,8 @@ app.get("/api/ping", async (req, res) => {
   console.log("✅ Pinged by GitHub Action at", new Date().toLocaleString());
 
   try {
-    await checkAndSendDailySummary('rakshithganjimut@gmail.com'); // <-- pass actual email
-    res.send("✅ Daily summary check completed");
+    triggerDailySummaries(); // Trigger daily summaries
+    console.log("✅ Daily summary check initiated");
   } catch (err) {
     console.error("❌ Error sending summary:", err.message);
     res.status(500).send("❌ Failed to send summary");
