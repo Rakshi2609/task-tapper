@@ -41,3 +41,14 @@ export const getAssignedTasks = async (email) => {
     throw error;
   }
 };
+
+export const deleteTask = async (taskId) => {
+  try {
+    const res = await axios.post(`${API_URL}/deletetask`, { taskId });
+    console.log("🗑️ Task deleted:", res.data.message);
+    return res.data;
+  } catch (error) {
+    console.error("❌ Failed to delete task:", error);
+    throw error;
+  }
+};

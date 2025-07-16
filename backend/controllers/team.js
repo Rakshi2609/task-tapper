@@ -228,3 +228,49 @@ export const getAssignedTasks = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+
+export const deleteTask = async (req, res) => {
+  const { taskId } = req.body;
+  const io = req.io; // ✅ access Socket.IO instance
+  console.log("Entered deleteTask function");
+  console.log(`[deleteTask] Request body: taskId=${taskId}`);
+
+  try {
+    // 1. Find the task to be deleted
+    const task = await Team.findById(taskId);
+    if (!task) {
+      console.log(`[deleteTask] Task not found for ID: ${taskId}`);
+      return res.status(404).json({ success: false, message: "Task not found" });
+    }
+
+    // 2. Find the user who was assigned the task
+    const user = await User.findOne({ email: task.assignedTo });
+
+    if (user) {
+      // Update task counters
+      user.TasksAssigned = Math.max(0, user.TasksAssigned - 1);
+      if (!task.completedDate) {
+        user.TasksNotStarted = Math.max(0, user.TasksNotStarted - 1);
+      }
+      await user.save();
+      console.log(`[deleteTask] Updated user task counters for ${user.email}`);
+
+      // ✅ Emit a system message to world chat
+      await emitSystemMessage(io, `${user.username} has deleted the task: "${task.task}"`);
+    }
+
+    // 3. Delete the task
+    await Team.deleteOne({ _id: taskId });
+    console.log(`[deleteTask] Task ${taskId} deleted successfully`);
+
+    res.status(200).json({
+      success: true,
+      message: "Task deleted successfully",
+    });
+  } catch (err) {
+    console.error(`[deleteTask] Delete Task Error: ${err.message}`, err);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+

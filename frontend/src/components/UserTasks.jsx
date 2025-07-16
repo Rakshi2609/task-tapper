@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../assests/store";
 import {
   completeTask as completeTaskAPI,
+  deleteTask as deleteTaskAPI,
 } from "../services/taskService";
 import {
   FaSort,
@@ -10,7 +11,7 @@ import {
   FaTasks,
   FaRegSadTear,
   FaSpinner,
-  FaUserCircle
+  FaUserCircle,
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -44,6 +45,18 @@ const UserTasks = () => {
     }
   };
 
+  const handleDelete = async (taskId) => {
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    try {
+      await deleteTaskAPI(taskId);
+      toast.success("🗑️ Task deleted successfully!");
+      getUserTasks(user.email);
+      getUserProfile(user.email);
+    } catch (e) {
+      toast.error("❌ Failed to delete task: " + (e.response?.data?.message || e.message));
+    }
+  };
+
   useEffect(() => {
     if (user?.email) {
       getUserTasks(user.email);
@@ -52,12 +65,11 @@ const UserTasks = () => {
 
   useEffect(() => {
     if (!tasks) return;
-
     let filteredAndSortedTasks = [...tasks];
 
     if (selectedDate) {
-      filteredAndSortedTasks = filteredAndSortedTasks.filter((task) =>
-        new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+      filteredAndSortedTasks = filteredAndSortedTasks.filter(
+        (task) => new Date(task.dueDate).toDateString() === selectedDate.toDateString()
       );
     }
 
@@ -111,31 +123,20 @@ const UserTasks = () => {
     },
   };
 
-  const linkButtonVariants = {
-    hover: { scale: 1.05, boxShadow: "0px 4px 15px rgba(59, 130, 246, 0.3)" },
-    tap: { scale: 0.95 },
-  };
-
   const taskCardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
     hover: { scale: 1.02, boxShadow: "0px 6px 20px rgba(59, 130, 246, 0.15)" },
   };
 
-  // Helper function to get border color based on priority
   const getPriorityBorderColor = (priority) => {
     switch (priority) {
-      case "High":
-        return "border-red-500";
-      case "Medium":
-        return "border-orange-500"; // Changed from blue
-      case "Low":
-        return "border-cyan-500"; // Changed from blue
-      default:
-        return "border-gray-300"; // Fallback
+      case "High": return "border-red-500";
+      case "Medium": return "border-orange-500";
+      case "Low": return "border-cyan-500";
+      default: return "border-gray-300";
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
@@ -198,36 +199,21 @@ const UserTasks = () => {
         </motion.div>
 
         {isLoading ? (
-          <motion.p
-            className="text-center text-blue-600 text-lg font-medium py-10 flex items-center justify-center gap-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
+          <motion.p className="text-center text-blue-600 text-lg font-medium py-10 flex items-center justify-center gap-3">
             <FaSpinner className="animate-spin text-2xl" /> Loading tasks...
           </motion.p>
         ) : error ? (
-          <motion.p
-            className="text-red-600 text-center text-lg font-medium py-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
+          <motion.p className="text-red-600 text-center text-lg font-medium py-10">
             <FaRegSadTear className="inline-block mr-2 text-2xl" /> {error}
           </motion.p>
         ) : (
           <>
-            <motion.h3
-              className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2"
-              variants={itemVariants}
-            >
+            <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2">
               <span className="text-yellow-600">🕒</span> Pending Tasks
             </motion.h3>
+
             {pendingTasks.length === 0 ? (
-              <motion.p
-                className="text-gray-600 italic text-center py-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
+              <motion.p className="text-gray-600 italic text-center py-4">
                 No pending tasks found. Time to relax!
               </motion.p>
             ) : (
@@ -235,57 +221,58 @@ const UserTasks = () => {
                 {pendingTasks.map((task, index) => (
                   <motion.li
                     key={task._id || index}
-                    className={`bg-white border-l-4 ${getPriorityBorderColor(task.priority)} p-5 rounded-lg shadow-md flex justify-between items-center transition-all duration-300`}
+                    className={`bg-white border-l-4 ${getPriorityBorderColor(task.priority)} p-5 rounded-lg shadow-md transition-all duration-300`}
                     variants={taskCardVariants}
                     initial="hidden"
                     animate="visible"
                     whileHover="hover"
-                    style={{ willChange: "transform, box-shadow" }}
                   >
-                    <div className="flex-grow">
+                    <div>
                       <p className="text-lg font-semibold text-gray-800">{task.task}</p>
                       <p className="text-sm text-gray-600 flex items-center gap-1">
                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                       </p>
-                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                      <p className="text-sm text-gray-600">
                         <span className={`font-bold ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>
                           🔥 Priority: {task.priority}
                         </span>
                       </p>
-                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                      <p className="text-sm text-gray-600">
                         <span className="text-purple-500">🔁</span> Frequency: {task.taskFrequency}
                       </p>
-                      {task.assignedTo && (
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
-                          <FaUserCircle className="text-indigo-400" /> Assigned To: <span className="font-medium text-blue-700">{task.assignedTo}</span>
-                        </p>
-                      )}
+                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <FaUserCircle className="text-indigo-400" /> Assigned To: <span className="font-medium text-blue-700">{task.assignedTo}</span>
+                      </p>
+                      <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
+                        <motion.button
+                          onClick={() => handleComplete(task._id)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <FaCheck className="inline mr-1" /> Complete
+                        </motion.button>
+                        <motion.button
+                          onClick={() => handleDelete(task._id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          🗑 Delete
+                        </motion.button>
+                      </div>
                     </div>
-                    <motion.button
-                      onClick={() => handleComplete(task._id)}
-                      className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full shadow-lg flex items-center gap-2 font-semibold transition-all duration-300"
-                      whileHover={{ scale: 1.08, boxShadow: "0px 8px 20px rgba(59, 130, 246, 0.4)" }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <FaCheck /> Complete
-                    </motion.button>
                   </motion.li>
                 ))}
               </ul>
             )}
 
-            <motion.h3
-              className="text-2xl font-bold mt-10 mb-4 text-blue-800 flex items-center gap-2"
-              variants={itemVariants}
-            >
+            <motion.h3 className="text-2xl font-bold mt-10 mb-4 text-blue-800 flex items-center gap-2">
               <span className="text-green-600">✅</span> Completed Tasks
             </motion.h3>
+
             {completedTasks.length === 0 ? (
-              <motion.p
-                className="text-gray-500 italic text-center py-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
+              <motion.p className="text-gray-500 italic text-center py-4">
                 No completed tasks yet. Keep up the good work!
               </motion.p>
             ) : (
@@ -293,27 +280,22 @@ const UserTasks = () => {
                 {completedTasks.map((task, index) => (
                   <motion.li
                     key={task._id || index}
-                    className="bg-gray-100 border-l-4 border-green-500 p-5 rounded-lg shadow-sm flex justify-between items-center transition-all duration-300"
+                    className="bg-gray-100 border-l-4 border-green-500 p-5 rounded-lg shadow-sm"
                     variants={taskCardVariants}
                     initial="hidden"
                     animate="visible"
-                    whileHover={{ scale: 1.01, boxShadow: "0px 4px 15px rgba(0, 128, 0, 0.1)" }}
-                    style={{ willChange: "transform, box-shadow" }}
+                    whileHover={{ scale: 1.01 }}
                   >
-                    <div className="flex-grow">
-                      <p className="text-lg line-through font-medium text-gray-700">{task.task}</p>
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
-                      </p>
-                      {task.assignedTo && (
-                        <p className="text-sm text-gray-500 flex items-center gap-1">
-                          <FaUserCircle className="text-indigo-300" /> Assigned To: <span className="font-light">{task.assignedTo}</span>
-                        </p>
-                      )}
-                    </div>
+                    <p className="text-lg line-through font-medium text-gray-700">{task.task}</p>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      <FaUserCircle className="text-indigo-300" /> Assigned To: <span className="font-light">{task.assignedTo}</span>
+                    </p>
                   </motion.li>
                 ))}
               </ul>
