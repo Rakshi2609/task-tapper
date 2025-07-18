@@ -2,16 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../assests/store";
 import { Link } from "react-router-dom";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend // Added CartesianGrid and Legend
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend
 } from "recharts";
 import { motion } from "framer-motion";
 import {
-  FaUserCircle, FaTasks, FaChartBar, FaCalendarDay, FaInfoCircle, FaCheckCircle, FaPlayCircle, FaTimesCircle, FaPlusSquare
+  FaUserCircle, FaTasks, FaChartBar, FaCalendarDay, FaInfoCircle, FaCheckCircle, FaPlayCircle, FaTimesCircle, FaPlusSquare, FaExclamationTriangle
 } from "react-icons/fa";
 
 const UserProfile = () => {
   const { user, isAuthenticated, tasks, getUserTasks } = useAuthStore();
   const [todayTasks, setTodayTasks] = useState([]);
+  const [overdueTasks, setOverdueTasks] = useState([]);
 
   // Fetch tasks when user is available
   useEffect(() => {
@@ -20,16 +21,25 @@ const UserProfile = () => {
     }
   }, [user, getUserTasks]);
 
-  // Filter tasks due today
+  // Filter tasks due today and overdue tasks
   useEffect(() => {
     if (!tasks) return;
-    const today = new Date().toDateString();
-    const filtered = tasks.filter(
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today's date to start of the day
+
+    const filteredToday = tasks.filter(
       (task) =>
-        new Date(task.dueDate).toDateString() === today &&
+        new Date(task.dueDate).toDateString() === today.toDateString() &&
         !task.completedDate
     );
-    setTodayTasks(filtered);
+    setTodayTasks(filteredToday);
+
+    const filteredOverdue = tasks.filter(
+      (task) =>
+        new Date(task.dueDate) < today &&
+        !task.completedDate
+    );
+    setOverdueTasks(filteredOverdue);
   }, [tasks]);
 
   // Framer Motion variants
@@ -172,14 +182,14 @@ const UserProfile = () => {
             <div className="flex-grow h-48 mb-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={taskStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" /> {/* Lighter grid lines */}
-                  <XAxis dataKey="name" stroke="#6b7280" tickLine={false} axisLine={false} /> {/* Darker axis labels */}
-                  <YAxis allowDecimals={false} stroke="#6b7280" /> {/* Darker axis labels */}
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
+                  <XAxis dataKey="name" stroke="#6b7280" tickLine={false} axisLine={false} />
+                  <YAxis allowDecimals={false} stroke="#6b7280" />
                   <Tooltip
-                    cursor={{ fill: 'rgba(59, 130, 246, 0.15)' }} // Slightly more prominent hover
-                    contentStyle={{ borderRadius: '10px', border: '1px solid #bfdbfe', boxShadow: '0px 4px 15px rgba(0,0,0,0.1)' }} // More rounded, subtle border and shadow
+                    cursor={{ fill: 'rgba(59, 130, 246, 0.15)' }}
+                    contentStyle={{ borderRadius: '10px', border: '1px solid #bfdbfe', boxShadow: '0px 4px 15px rgba(0,0,0,0.1)' }}
                     itemStyle={{ color: '#333', padding: '4px 0' }}
-                    labelStyle={{ color: '#0f172a', fontWeight: 'bold' }} // Make label bold
+                    labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
                   />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={40}>
                     {taskStats.map((entry, index) => (
@@ -189,14 +199,13 @@ const UserProfile = () => {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {/* Moved legend here for better integration within the chart card */}
             <div className="flex flex-wrap justify-center text-xs mt-4 text-gray-700 gap-x-4 gap-y-2">
-                {taskStats.map((stat, index) => (
-                    <div key={index} className="flex items-center gap-1">
-                        <span style={{ color: stat.color }} className="text-lg">{stat.icon}</span>
-                        {stat.name}
-                    </div>
-                ))}
+              {taskStats.map((stat, index) => (
+                <div key={index} className="flex items-center gap-1">
+                  <span style={{ color: stat.color }} className="text-lg">{stat.icon}</span>
+                  {stat.name}
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
@@ -224,7 +233,40 @@ const UserProfile = () => {
                     <p><strong>Due:</strong> {new Date(task.dueDate).toLocaleDateString()}</p>
                     <p><strong>Priority:</strong> <span className={`font-medium ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>{task.priority}</span></p>
                     <p><strong>Frequency:</strong> {task.taskFrequency}</p>
-                    {task.assignedTo && <p className="col-span-2 sm:col-span-1"><strong>Assigned To:</strong> <span className="font-medium text-blue-700">{task.assignedTo}</span></p>}
+                    {/* Changed to createdBy */}
+                    {task.createdBy && <p className="col-span-2 sm:col-span-1"><strong>Assigned By:</strong> <span className="font-medium text-blue-700">{task.createdBy}</span></p>}
+                  </div>
+                </motion.li>
+              ))}
+            </ul>
+          )}
+        </motion.div>
+
+        {/* Overdue Tasks Section */}
+        <motion.div className="mt-6 p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100" variants={itemVariants}>
+          <h3 className="text-xl font-bold mb-4 text-red-700 flex items-center gap-2">
+            <FaExclamationTriangle /> Overdue Tasks
+          </h3>
+          {overdueTasks.length === 0 ? (
+            <p className="text-gray-500 italic text-center py-4">No overdue tasks. Great job!</p>
+          ) : (
+            <ul className="space-y-4">
+              {overdueTasks.map((task, index) => (
+                <motion.li
+                  key={index}
+                  className="border border-red-200 p-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <p className="text-md font-semibold text-gray-800 mb-1">{task.task}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-1 text-sm text-gray-600">
+                    <p><strong>Due:</strong> <span className="text-red-500">{new Date(task.dueDate).toLocaleDateString()}</span></p>
+                    <p><strong>Priority:</strong> <span className={`font-medium ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>{task.priority}</span></p>
+                    <p><strong>Frequency:</strong> {task.taskFrequency}</p>
+                    {/* Changed to createdBy */}
+                    {task.createdBy && <p className="col-span-2 sm:col-span-1"><strong>Assigned By:</strong> <span className="font-medium text-blue-700">{task.createdBy}</span></p>}
                   </div>
                 </motion.li>
               ))}

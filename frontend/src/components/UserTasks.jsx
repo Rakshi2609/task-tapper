@@ -241,7 +241,7 @@ const UserTasks = () => {
                         <span className="text-purple-500">🔁</span> Frequency: {task.taskFrequency}
                       </p>
                       <p className="text-sm text-gray-600 flex items-center gap-1">
-                        <FaUserCircle className="text-indigo-400" /> Assigned To: <span className="font-medium text-blue-700">{task.assignedTo}</span>
+                        <FaUserCircle className="text-indigo-400" /> Assigned By: <span className="font-medium text-blue-700">{task.createdBy}</span>
                       </p>
                       <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
                         <motion.button
@@ -294,7 +294,7 @@ const UserTasks = () => {
                       <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                     </p>
                     <p className="text-sm text-gray-500 flex items-center gap-1">
-                      <FaUserCircle className="text-indigo-300" /> Assigned To: <span className="font-light">{task.assignedTo}</span>
+                      <FaUserCircle className="text-indigo-300" /> Assigned By: <span className="font-light">{task.createdBy}</span>
                     </p>
                   </motion.li>
                 ))}
