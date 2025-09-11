@@ -2,14 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../assests/store";
 import { getAllEmails, createTask } from "../services/taskService";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaPaperPlane, FaUser, FaCalendarAlt, FaStar, FaClock, FaTimesCircle, FaChevronDown } from "react-icons/fa";
+import { FaPaperPlane, FaUser, FaCalendarAlt, FaStar, FaClock, FaTimesCircle, FaChevronDown, FaAlignLeft } from "react-icons/fa";
 import toast, { Toaster } from 'react-hot-toast'; // Import toast and Toaster
+import { Link } from "react-router-dom";
 
 const CreateTaskForm = () => {
   const { user } = useAuthStore();
   const [formData, setFormData] = useState({
     createdBy: user?.email || "",
-    task: "",
+    taskName: "",
+    taskDescription: "", // This is the state property for description
     assignedTo: "",
     assignedName: "",
     taskFrequency: "",
@@ -19,7 +21,6 @@ const CreateTaskForm = () => {
 
   const [allEmails, setAllEmails] = useState([]);
   const [filteredEmails, setFilteredEmails] = useState([]);
-  // No more error/submissionSuccess states needed here directly for alerts
   const [loadingEmails, setLoadingEmails] = useState(true);
 
   // States for dropdown visibility
@@ -56,7 +57,6 @@ const CreateTaskForm = () => {
         setAllEmails(sorted);
       } catch (err) {
         console.error("Error fetching emails:", err);
-        // Use toast for error
         toast.error("Could not load email list. Please try again later.");
       } finally {
         setLoadingEmails(false);
@@ -119,6 +119,7 @@ const CreateTaskForm = () => {
 
   // --- Generic Change Handler for Inputs (not custom dropdowns) ---
   const handleChange = (e) => {
+    // This correctly uses the input's name attribute to update the corresponding state
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -131,10 +132,9 @@ const CreateTaskForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // No more setError/setSubmissionSuccess states to manage alerts
 
-    // Basic validation
-    if (!formData.task || !formData.assignedTo || !formData.assignedName || !formData.taskFrequency || !formData.dueDate || !formData.priority) {
+    // Basic validation (updated to check taskName and taskDescription)
+    if (!formData.taskName || !formData.taskDescription || !formData.assignedTo || !formData.assignedName || !formData.taskFrequency || !formData.dueDate || !formData.priority) {
       toast.error("All fields are required. Please fill them out."); // Use toast for validation error
       return;
     }
@@ -145,7 +145,8 @@ const CreateTaskForm = () => {
       // Reset form after successful submission
       setFormData({
         createdBy: user?.email || "",
-        task: "",
+        taskName: "",        // Reset taskName
+        taskDescription: "", // Reset taskDescription
         assignedTo: "",
         assignedName: "",
         taskFrequency: "",
@@ -196,15 +197,13 @@ const CreateTaskForm = () => {
       initial="hidden"
       animate="visible"
     >
-      {/* Add the Toaster component at the top level of your form or even higher up in your app, e.g., App.js */}
       <Toaster />
 
       <h2 className="text-4xl font-extrabold mb-4 text-center text-gray-900 drop-shadow-md">
         <span className="text-blue-600">📝</span> Create New Task
       </h2>
 
-      {/* Removed the conditional rendering for `error` and `submissionSuccess` alerts */}
-      {/* Task Description */}
+      {/* Task Name */}
       <motion.div
         className="flex items-center bg-white rounded-xl shadow-sm border border-blue-100 focus-within:border-blue-400 transition-all duration-200"
         whileHover="hover"
@@ -213,9 +212,27 @@ const CreateTaskForm = () => {
       >
         <FaPaperPlane className="text-blue-500 ml-4 mr-2" />
         <input
-          name="task"
+          name="taskName"
+          placeholder="Task Name"
+          value={formData.taskName}
+          onChange={handleChange}
+          className="p-3 rounded-r-xl w-full bg-transparent outline-none text-gray-800 placeholder-gray-400"
+          required
+        />
+      </motion.div>
+
+      {/* Task Description */}
+      <motion.div
+        className="flex items-center bg-white rounded-xl shadow-sm border border-blue-100 focus-within:border-blue-400 transition-all duration-200"
+        whileHover="hover"
+        whileFocus="focus"
+        variants={inputVariants}
+      >
+        <FaAlignLeft className="text-blue-500 ml-4 mr-2" />
+        <input
+          name="taskDescription" // <-- Changed name from "task" to "taskDescription"
           placeholder="Task Description"
-          value={formData.task}
+          value={formData.taskDescription}
           onChange={handleChange}
           className="p-3 rounded-r-xl w-full bg-transparent outline-none text-gray-800 placeholder-gray-400"
           required
@@ -423,6 +440,9 @@ const CreateTaskForm = () => {
           <FaPaperPlane /> Create Task
         </span>
       </motion.button>
+      <Link to="/recurring/create" className="text-blue-600 hover:underline text-center block mt-4">
+        Create Recurring Task
+      </Link>
     </motion.form>
   );
 };

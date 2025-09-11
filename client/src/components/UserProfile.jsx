@@ -1,18 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../assests/store";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
 } from "recharts";
 import { motion } from "framer-motion";
 import {
-  FaUserCircle, FaTasks, FaChartBar, FaCalendarDay, FaInfoCircle, FaCheckCircle, FaPlayCircle, FaTimesCircle, FaPlusSquare, FaExclamationTriangle
+  FaUserCircle,
+  FaTasks,
+  FaChartBar,
+  FaCalendarDay,
+  FaInfoCircle,
+  FaCheckCircle,
+  FaPlayCircle,
+  FaTimesCircle,
+  FaPlusSquare,
+  FaExclamationTriangle,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 const UserProfile = () => {
   const { user, isAuthenticated, tasks, getUserTasks } = useAuthStore();
   const [todayTasks, setTodayTasks] = useState([]);
   const [overdueTasks, setOverdueTasks] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch tasks when user is available
   useEffect(() => {
@@ -35,12 +55,19 @@ const UserProfile = () => {
     setTodayTasks(filteredToday);
 
     const filteredOverdue = tasks.filter(
-      (task) =>
-        new Date(task.dueDate) < today &&
-        !task.completedDate
+      (task) => new Date(task.dueDate) < today && !task.completedDate
     );
     setOverdueTasks(filteredOverdue);
   }, [tasks]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   // Framer Motion variants
   const containerVariants = {
@@ -85,8 +112,12 @@ const UserProfile = () => {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <FaInfoCircle className="text-red-500 text-5xl mb-4 mx-auto" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
-          <p className="text-gray-600 mb-4">You need to be logged in to view this page.</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Access Denied
+          </h2>
+          <p className="text-gray-600 mb-4">
+            You need to be logged in to view this page.
+          </p>
           <Link to="/login">
             <motion.button
               className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-md hover:bg-blue-700 transition-all duration-200"
@@ -103,10 +134,30 @@ const UserProfile = () => {
 
   // Map task stats with icons and specific colors for better visual representation
   const taskStats = [
-    { name: "Assigned", value: user.TasksAssigned || 0, icon: <FaTasks />, color: "#4299E1" }, // Blue
-    { name: "In Progress", value: user.TasksInProgress || 0, icon: <FaPlayCircle />, color: "#ECC94B" }, // Yellow
-    { name: "Completed", value: user.TasksCompleted || 0, icon: <FaCheckCircle />, color: "#48BB78" }, // Green
-    { name: "Not Started", value: user.TasksNotStarted || 0, icon: <FaTimesCircle />, color: "#F56565" }, // Red
+    {
+      name: "Assigned",
+      value: user.TasksAssigned || 0,
+      icon: <FaTasks />,
+      color: "#4299E1",
+    }, // Blue
+    {
+      name: "In Progress",
+      value: user.TasksInProgress || 0,
+      icon: <FaPlayCircle />,
+      color: "#ECC94B",
+    }, // Yellow
+    {
+      name: "Completed",
+      value: user.TasksCompleted || 0,
+      icon: <FaCheckCircle />,
+      color: "#48BB78",
+    }, // Green
+    {
+      name: "Not Started",
+      value: user.TasksNotStarted || 0,
+      icon: <FaTimesCircle />,
+      color: "#F56565",
+    }, // Red
   ];
 
   return (
@@ -140,10 +191,14 @@ const UserProfile = () => {
               </h3>
               <div className="space-y-3 text-md text-gray-700 mb-6">
                 <p>
-                  <strong>Name:</strong> <span className="font-semibold">{user.username || user.displayName || user.email?.split('@')[0]}</span>
+                  <strong>Name:</strong>{" "}
+                  <span className="font-semibold">
+                    {user.username || user.displayName || user.email?.split("@")[0]}
+                  </span>
                 </p>
                 <p>
-                  <strong>Email:</strong> <span className="font-semibold">{user.email}</span>
+                  <strong>Email:</strong>{" "}
+                  <span className="font-semibold">{user.email}</span>
                 </p>
               </div>
             </div>
@@ -169,6 +224,17 @@ const UserProfile = () => {
                 </motion.button>
               </Link>
             </div>
+            {/* Logout Button inside the user details card */}
+            <div className="mt-6 flex justify-center">
+              <motion.button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg text-lg font-bold shadow-md hover:bg-red-700 transition-all duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FaSignOutAlt /> Logout
+              </motion.button>
+            </div>
           </motion.div>
 
           {/* Task Stats Chart Card */}
@@ -181,15 +247,22 @@ const UserProfile = () => {
             </h3>
             <div className="flex-grow h-48 mb-2">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={taskStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <BarChart
+                  data={taskStats}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
                   <XAxis dataKey="name" stroke="#6b7280" tickLine={false} axisLine={false} />
                   <YAxis allowDecimals={false} stroke="#6b7280" />
                   <Tooltip
-                    cursor={{ fill: 'rgba(59, 130, 246, 0.15)' }}
-                    contentStyle={{ borderRadius: '10px', border: '1px solid #bfdbfe', boxShadow: '0px 4px 15px rgba(0,0,0,0.1)' }}
-                    itemStyle={{ color: '#333', padding: '4px 0' }}
-                    labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
+                    cursor={{ fill: "rgba(59, 130, 246, 0.15)" }}
+                    contentStyle={{
+                      borderRadius: "10px",
+                      border: "1px solid #bfdbfe",
+                      boxShadow: "0px 4px 15px rgba(0,0,0,0.1)",
+                    }}
+                    itemStyle={{ color: "#333", padding: "4px 0" }}
+                    labelStyle={{ color: "#0f172a", fontWeight: "bold" }}
                   />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={40}>
                     {taskStats.map((entry, index) => (
@@ -202,7 +275,9 @@ const UserProfile = () => {
             <div className="flex flex-wrap justify-center text-xs mt-4 text-gray-700 gap-x-4 gap-y-2">
               {taskStats.map((stat, index) => (
                 <div key={index} className="flex items-center gap-1">
-                  <span style={{ color: stat.color }} className="text-lg">{stat.icon}</span>
+                  <span style={{ color: stat.color }} className="text-lg">
+                    {stat.icon}
+                  </span>
                   {stat.name}
                 </div>
               ))}
@@ -211,12 +286,17 @@ const UserProfile = () => {
         </div>
 
         {/* Today's Due Tasks Section */}
-        <motion.div className="mt-6 p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100" variants={itemVariants}>
+        <motion.div
+          className="mt-6 p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100"
+          variants={itemVariants}
+        >
           <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center gap-2">
             <FaCalendarDay /> Today's Due Tasks
           </h3>
           {todayTasks.length === 0 ? (
-            <p className="text-gray-500 italic text-center py-4">No tasks are due today. Enjoy your day!</p>
+            <p className="text-gray-500 italic text-center py-4">
+              No tasks are due today. Enjoy your day!
+            </p>
           ) : (
             <ul className="space-y-4">
               {todayTasks.map((task, index) => (
@@ -228,13 +308,40 @@ const UserProfile = () => {
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <p className="text-md font-semibold text-gray-800 mb-1">{task.task}</p>
+                  <p className="text-md font-semibold text-gray-800 mb-1">
+                    {task.task}
+                  </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-1 text-sm text-gray-600">
-                    <p><strong>Due:</strong> {new Date(task.dueDate).toLocaleDateString()}</p>
-                    <p><strong>Priority:</strong> <span className={`font-medium ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>{task.priority}</span></p>
-                    <p><strong>Frequency:</strong> {task.taskFrequency}</p>
+                    <p>
+                      <strong>Due:</strong>{" "}
+                      {new Date(task.dueDate).toLocaleDateString()}
+                    </p>
+                    <p>
+                      <strong>Priority:</strong>{" "}
+                      <span
+                        className={`font-medium ${
+                          task.priority === "High"
+                            ? "text-red-500"
+                            : task.priority === "Medium"
+                            ? "text-yellow-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {task.priority}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>Frequency:</strong> {task.taskFrequency}
+                    </p>
                     {/* Changed to createdBy */}
-                    {task.createdBy && <p className="col-span-2 sm:col-span-1"><strong>Assigned By:</strong> <span className="font-medium text-blue-700">{task.createdBy}</span></p>}
+                    {task.createdBy && (
+                      <p className="col-span-2 sm:col-span-1">
+                        <strong>Assigned By:</strong>{" "}
+                        <span className="font-medium text-blue-700">
+                          {task.createdBy}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </motion.li>
               ))}
@@ -243,12 +350,17 @@ const UserProfile = () => {
         </motion.div>
 
         {/* Overdue Tasks Section */}
-        <motion.div className="mt-6 p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100" variants={itemVariants}>
+        <motion.div
+          className="mt-6 p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100"
+          variants={itemVariants}
+        >
           <h3 className="text-xl font-bold mb-4 text-red-700 flex items-center gap-2">
             <FaExclamationTriangle /> Overdue Tasks
           </h3>
           {overdueTasks.length === 0 ? (
-            <p className="text-gray-500 italic text-center py-4">No overdue tasks. Great job!</p>
+            <p className="text-gray-500 italic text-center py-4">
+              No overdue tasks. Great job!
+            </p>
           ) : (
             <ul className="space-y-4">
               {overdueTasks.map((task, index) => (
@@ -260,13 +372,42 @@ const UserProfile = () => {
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <p className="text-md font-semibold text-gray-800 mb-1">{task.task}</p>
+                  <p className="text-md font-semibold text-gray-800 mb-1">
+                    {task.task}
+                  </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-1 text-sm text-gray-600">
-                    <p><strong>Due:</strong> <span className="text-red-500">{new Date(task.dueDate).toLocaleDateString()}</span></p>
-                    <p><strong>Priority:</strong> <span className={`font-medium ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>{task.priority}</span></p>
-                    <p><strong>Frequency:</strong> {task.taskFrequency}</p>
+                    <p>
+                      <strong>Due:</strong>{" "}
+                      <span className="text-red-500">
+                        {new Date(task.dueDate).toLocaleDateString()}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>Priority:</strong>{" "}
+                      <span
+                        className={`font-medium ${
+                          task.priority === "High"
+                            ? "text-red-500"
+                            : task.priority === "Medium"
+                            ? "text-yellow-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {task.priority}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>Frequency:</strong> {task.taskFrequency}
+                    </p>
                     {/* Changed to createdBy */}
-                    {task.createdBy && <p className="col-span-2 sm:col-span-1"><strong>Assigned By:</strong> <span className="font-medium text-blue-700">{task.createdBy}</span></p>}
+                    {task.createdBy && (
+                      <p className="col-span-2 sm:col-span-1">
+                        <strong>Assigned By:</strong>{" "}
+                        <span className="font-medium text-blue-700">
+                          {task.createdBy}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </motion.li>
               ))}

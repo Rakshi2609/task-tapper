@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const teamSchema = new mongoose.Schema({
   createdBy: String,
-  task: String,
+  taskName: String,
+  taskDescription: String,
   assignedTo: String,
   assignedName: String,
   taskFrequency: {

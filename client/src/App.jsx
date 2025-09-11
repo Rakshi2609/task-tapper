@@ -12,8 +12,12 @@ import Navbar from "./components/Navbar";
 import UserProfile from "./components/UserProfile";
 import UserTasks from "./components/UserTasks";
 import AssignedTasks from "./components/AssignedTasks";
+import TaskDetail from "./components/TaskDetail";
 import WorldChat from "./components/WorldChat";
 import { useAuthStore } from "./assests/store";
+import CreateRecurringTask from "./components/RecurringTaskForm";
+import RecurringTaskList from "./components/RecurringTaskList";
+import RecurringTaskDetail from "./components/RecurringTaskDetail";
 
 const App = () => {
   const user = useAuthStore((state) => state.user); 
@@ -29,7 +33,11 @@ const App = () => {
         <Route path="/assign" element={<AssignTask />} />
         <Route path="/create" element={<CreateTaskForm />} />
         <Route path="/mywork" element={<AssignedTasks />} />
+        <Route path="/recurring/create" element={<CreateRecurringTask />} />
+        <Route path="/recurring/list" element={<RecurringTaskList />} />
         <Route path="/chat" element={user ? <WorldChat user={user} /> : <Navigate to="/login" />} />
+        <Route path="/tasks/:taskId" element={<TaskDetail />} /> 
+        <Route path="/recurring/tasks/:taskId" element={<RecurringTaskDetail />} />
 
 
         {/* Fallback Route */}

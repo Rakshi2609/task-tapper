@@ -1,5 +1,6 @@
 import User from '../models/User.js'
 import Team from '../models/Team.js'; 
+import { UserDetail } from '../models/userDetail.js';
 
 
 export const glogin = async (req, res) => {
@@ -113,3 +114,42 @@ export const getAssignedByMe = async (req, res) => {
   }
 };
 
+/**
+ * Route to get a user's detailed information (phone number, role)
+ * by their email address.
+ * It also populates the linked User data for completeness.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ */
+export const getUserDetail = async (req, res) => {
+  const { email, phoneNumber, role } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    let userDetail = await UserDetail.findOne({ user: user._id });
+
+    if (userDetail) {
+      // Update
+      userDetail.phoneNumber = phoneNumber;
+      userDetail.role = role;
+      await userDetail.save();
+    } else {
+      // Create
+      userDetail = new UserDetail({ user: user._id, phoneNumber, role });
+      await userDetail.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User details saved successfully",
+      userDetail
+    });
+  } catch (err) {
+    console.error("[saveUserDetail] Error:", err.message);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};

@@ -1,81 +1,129 @@
 import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../assests/store";
-import { FaSearch, FaCalendarAlt, FaCheckCircle, FaHourglassHalf } from "react-icons/fa"; // Added FaCheckCircle, FaHourglassHalf
+import { Link } from "react-router-dom";
+import { FaSearch, FaCalendarAlt, FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { motion } from "framer-motion";
+import { getAllRecurringTasks } from "../services/rexurring";
 
 const AssignedTasks = () => {
   const { user, tasks, getAssignedByMe } = useAuthStore();
-  const [assignedTasks, setAssignedTasks] = useState([]);
-  const [sortBy, setSortBy] = useState("none"); // Keeping sortBy for now, but not directly exposed via a dropdown. Can be removed if not needed for internal sorting.
+  const [allAssignedTasks, setAllAssignedTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [sortBy, setSortBy] = useState("none");
   const [searchTask, setSearchTask] = useState("");
   const [searchEmail, setSearchEmail] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("All"); // New state for status filter
+  const [filterStatus, setFilterStatus] = useState("All");
 
-  // Fetch tasks assigned by the current user
   useEffect(() => {
     if (user?.email) {
-      getAssignedByMe(user.email);
+      const fetchAllTasks = async () => {
+        await getAssignedByMe(user.email);
+        try {
+          const res = await getAllRecurringTasks();
+          const recurringAssignedByMe = res.data.filter(
+            (task) => task.taskAssignedBy?.email === user.email
+          );
+          setAllAssignedTasks([...tasks, ...recurringAssignedByMe]);
+        } catch (err) {
+          console.error("Error fetching recurring tasks:", err);
+        }
+      };
+      fetchAllTasks();
     }
-  }, [user, getAssignedByMe]); // Added getAssignedByMe to dependency array
+  },[] );
+  // }, [user, getAssignedByMe, tasks]);
 
-  // Filtering and sorting
   useEffect(() => {
-    if (!Array.isArray(tasks)) return;
+    if (!Array.isArray(allAssignedTasks)) return;
 
-    let filtered = [...tasks]; // Create a mutable copy
+    let tempFiltered = [...allAssignedTasks];
 
-    // Status Filter
     if (filterStatus === "Pending") {
-      filtered = filtered.filter((task) => !task.completedDate);
+      tempFiltered = tempFiltered.filter((task) => !task.completedDate);
     } else if (filterStatus === "Completed") {
-      filtered = filtered.filter((task) => task.completedDate);
+      tempFiltered = tempFiltered.filter((task) => task.completedDate);
     }
 
-    // Search Filters
     if (searchTask.trim()) {
       const words = searchTask.toLowerCase().split(" ");
-      filtered = filtered.filter((task) =>
-        words.every((word) => task?.task?.toLowerCase().includes(word))
+      tempFiltered = tempFiltered.filter((task) =>
+        words.every(
+          (word) =>
+            (task?.taskName || "").toLowerCase().includes(word) ||
+            (task?.taskDescription || "").toLowerCase().includes(word)
+        )
       );
     }
 
     if (searchEmail.trim()) {
       const words = searchEmail.toLowerCase().split(" ");
-      filtered = filtered.filter((task) =>
+      tempFiltered = tempFiltered.filter((task) =>
         words.every((word) =>
-          (task?.assignedTo || "").toLowerCase().includes(word)
+          (task?.taskAssignedTo?.email || task?.assignedTo || "").toLowerCase().includes(word)
         )
       );
     }
 
-    // Date Filter
     if (selectedDate) {
-      filtered = filtered.filter(
+      tempFiltered = tempFiltered.filter(
         (task) =>
-          new Date(task?.dueDate).toDateString() === selectedDate.toDateString()
+          new Date(task?.dueDate || task?.taskStartDate).toDateString() ===
+          selectedDate.toDateString()
       );
     }
 
-    // Sorting (still applied internally, but dropdown is removed)
     if (sortBy === "name") {
-      filtered.sort((a, b) => a?.task?.localeCompare(b?.task));
+      tempFiltered.sort((a, b) => (a?.taskName || "").localeCompare(b?.taskName || ""));
     } else if (sortBy === "email") {
-      filtered.sort((a, b) =>
-        (a?.assignedTo || "").localeCompare(b?.assignedTo || "")
+      tempFiltered.sort((a, b) =>
+        (a?.assignedTo?.email || a?.assignedTo || "").localeCompare(
+          b?.assignedTo?.email || b?.assignedTo || ""
+        )
       );
     } else if (sortBy === "frequency") {
-      filtered.sort((a, b) =>
+      tempFiltered.sort((a, b) =>
         (a?.taskFrequency || "").localeCompare(b?.taskFrequency || "")
       );
-    } else if (sortBy === "dueDate") {
-      filtered.sort((a, b) => new Date(a?.dueDate) - new Date(b?.dueDate));
+    } else {
+      // Default: latest created first, then earliest due date
+      tempFiltered.sort((a, b) => {
+        const createdA = new Date(a.createdAt || a.taskStartDate || a.dueDate);
+        const createdB = new Date(b.createdAt || b.taskStartDate || b.dueDate);
+        const dueA = new Date(a.dueDate || a.taskStartDate || a.createdAt);
+        const dueB = new Date(b.dueDate || b.taskStartDate || b.createdAt);
+
+        if (createdB - createdA !== 0) {
+          return createdB - createdA; // latest created first
+        }
+        return dueA - dueB; // earliest due date next
+      });
     }
 
-    setAssignedTasks(filtered);
-  }, [tasks, sortBy, searchTask, searchEmail, selectedDate, filterStatus]); // Added filterStatus to dependencies
+    setFilteredTasks(tempFiltered);
+  }, [allAssignedTasks, sortBy, searchTask, searchEmail, selectedDate, filterStatus, tasks]);
+
+  const getTaskDetailLink = (task) => {
+    if (task.taskAssignedBy) {
+      return `/recurring/tasks/${task._id}`;
+    }
+    return `/tasks/${task._id}`;
+  };
+
+  const getPriorityBorderColor = (priority) => {
+    switch (priority) {
+      case "High":
+        return "border-red-500";
+      case "Medium":
+        return "border-orange-500";
+      case "Low":
+        return "border-cyan-500";
+      default:
+        return "border-gray-300";
+    }
+  };
 
   return (
     <motion.div
@@ -88,9 +136,9 @@ const AssignedTasks = () => {
         <span className="text-blue-600">📤</span> Tasks You've Assigned
       </h2>
 
-      {/* Filter Controls */}
       <div className="flex flex-wrap justify-center md:justify-between gap-4 mb-8">
-        {/* New Status Filter */}
+        {/* Filters */}
+        {/* Status Filter */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -100,16 +148,15 @@ const AssignedTasks = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-transparent outline-none text-gray-700 font-medium cursor-pointer appearance-none pr-6" // pr-6 for space for potential custom arrow
+            className="bg-transparent outline-none text-gray-700 font-medium cursor-pointer appearance-none pr-6"
           >
             <option value="All">All Tasks</option>
             <option value="Pending">Pending</option>
             <option value="Completed">Completed</option>
           </select>
-          {/* You can add a custom dropdown icon here if desired, like FaChevronDown */}
         </motion.div>
 
-        {/* Search Task */}
+        {/* Task Name Filter */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -119,14 +166,14 @@ const AssignedTasks = () => {
           <FaSearch className="text-xl text-blue-500" />
           <input
             type="text"
-            placeholder="Search Task"
+            placeholder="Search Task Name/Description"
             value={searchTask}
             onChange={(e) => setSearchTask(e.target.value)}
             className="bg-transparent outline-none placeholder-gray-400 text-gray-700"
           />
         </motion.div>
 
-        {/* Search Assigned Email */}
+        {/* Assigned Email Filter */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -143,7 +190,7 @@ const AssignedTasks = () => {
           />
         </motion.div>
 
-        {/* Filter by Due Date */}
+        {/* Date Filter */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -156,7 +203,7 @@ const AssignedTasks = () => {
             onChange={(date) => setSelectedDate(date)}
             placeholderText="Filter by Due Date"
             className="bg-transparent outline-none placeholder-gray-400 text-gray-700 w-36"
-            dateFormat="PPP" // Nicer date format
+            dateFormat="PPP"
           />
           {selectedDate && (
             <button
@@ -169,8 +216,7 @@ const AssignedTasks = () => {
         </motion.div>
       </div>
 
-      {/* Display Tasks */}
-      {assignedTasks.length === 0 ? (
+      {filteredTasks.length === 0 ? (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -181,31 +227,30 @@ const AssignedTasks = () => {
         </motion.p>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {assignedTasks.map((task, index) => (
+          {filteredTasks.map((task, idx) => (
             <motion.li
-              key={index}
+              key={task._id}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 * index }}
+              transition={{ duration: 0.5, delay: 0.1 * idx }}
               whileHover={{
                 scale: 1.02,
-                boxShadow: "0 10px 20px rgba(59, 130, 246, 0.3)", // Blue glow
+                boxShadow: "0 10px 20px rgba(59, 130, 246, 0.3)",
                 transition: { duration: 0.2 },
               }}
-              className="relative p-6 rounded-2xl bg-white shadow-lg border border-blue-100 overflow-hidden cursor-pointer"
+              className="relative p-6 rounded-2xl bg-white shadow-lg border border-blue-100 overflow-hidden cursor-pointer group"
             >
+              <Link to={getTaskDetailLink(task)} className="block h-full w-full absolute inset-0 z-20" />
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
               <div className="relative z-10">
-                <p className="text-xl font-bold mb-1 text-gray-800">
-                  {task.task}
-                </p>
+                <p className="text-xl font-bold mb-1 text-gray-800">{task.taskName || task.task}</p>
                 <p className="text-sm text-gray-600 mb-0.5">
                   <span className="font-semibold">Assigned To:</span>{" "}
-                  {task.assignedName || task.assignedTo}
+                  {task.assignedName || task.assignedTo || task.taskAssignedTo?.email || 'N/A'}
                 </p>
                 <p className="text-sm text-gray-600 mb-0.5">
                   <span className="font-semibold">Due:</span>{" "}
-                  {new Date(task.dueDate).toLocaleDateString("en-US", {
+                  {new Date(task.dueDate || task.taskStartDate).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -215,30 +260,29 @@ const AssignedTasks = () => {
                   <span className="font-semibold">Priority:</span>{" "}
                   <span
                     className={`${
-                      task.priority === "High"
+                      (task.priority || task.taskPriority) === "High"
                         ? "text-red-500"
-                        : task.priority === "Medium"
+                        : (task.priority || task.taskPriority) === "Medium"
                         ? "text-orange-500"
                         : "text-green-500"
                     } font-medium`}
                   >
-                    {task.priority}
+                    {task.priority || task.taskPriority}
                   </span>
                 </p>
                 <p className="text-sm text-gray-600 mb-2">
-                  <span className="font-semibold">Frequency:</span>{" "}
-                  {task.taskFrequency}
+                  <span className="font-semibold">Frequency:</span> {task.taskFrequency}
                 </p>
                 <p className="text-sm text-gray-700 font-semibold flex items-center">
                   Status:{" "}
                   {task.completedDate ? (
                     <span className="ml-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center">
-                      <FaCheckCircle className="w-3 h-3 mr-1" /> {/* Icon added */}
+                      <FaCheckCircle className="w-3 h-3 mr-1" />
                       Completed
                     </span>
                   ) : (
                     <span className="ml-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold flex items-center">
-                      <FaHourglassHalf className="w-3 h-3 mr-1" /> {/* Icon added */}
+                      <FaHourglassHalf className="w-3 h-3 mr-1" />
                       Pending
                     </span>
                   )}

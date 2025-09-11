@@ -5,6 +5,18 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari, and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge, and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
 
 /* You can add this to your main CSS file like index.css or a dedicated styles.css */
 .custom-scrollbar {

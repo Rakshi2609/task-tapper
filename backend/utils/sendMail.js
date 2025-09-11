@@ -20,7 +20,7 @@ const transporter = nodemailer.createTransport({
  * @param {string[]} cc - (Optional) CC emails
  */
 export const sendMail = async (to, subject, text, cc = []) => {
-  const mailOptions = {
+  const mailOptions = { 
     from: process.env.EMAIL,
     to,
     subject,

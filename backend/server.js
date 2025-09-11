@@ -11,6 +11,7 @@ import { connectDB } from './config/connectDB.js';
 import { triggerDailySummaries } from './utils/triggerDailySummaries.js';
 import { setupWorldChat } from './socket/worldChat.js';
 import chatRoutes from './routes/chat.route.js';
+import recurringTaskRoutes from './routes/recurrring.js';
 
 dotenv.config();
 const app = express();
@@ -20,17 +21,19 @@ const io = new Server(server, {
   cors: {
     origin: ['https://task-tapper-blush.vercel.app', 'http://localhost:5173'],
     credentials: true,
-    methods: ['GET', 'POST']
+    // CORRECTED: Allow PUT and DELETE methods for Socket.io
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
   }
 });
 
 setupWorldChat(io);
 
 app.use(express.json());
+// CORRECTED: Allow PUT and DELETE methods for the main Express app
 app.use(cors({
   origin: ['https://task-tapper-blush.vercel.app', 'http://localhost:5173'],
   credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 
 // DB connection
@@ -43,6 +46,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/function', teamRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api', recurringTaskRoutes);
 
 app.get('/', (req, res) => {
   res.send("Hello World!!");
