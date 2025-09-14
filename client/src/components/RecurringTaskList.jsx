@@ -34,8 +34,9 @@ const RecurringTaskList = () => {
     setLoading(true);
     setError(null);
     try {
-  const res = await getAllRecurringTasks();
-  const allTasks = Array.isArray(res?.data?.data) ? res.data.data : [];
+      const res = await getAllRecurringTasks();
+      // Service already returns the response body: { success: true, data: [...] }
+      const allTasks = Array.isArray(res?.data) ? res.data : [];
       const pendingTasks = allTasks.filter(task => !task.completedDate);
       setTasks(pendingTasks);
       setFilteredTasks(pendingTasks);
@@ -220,7 +221,7 @@ const RecurringTaskList = () => {
                   </p>
                   <p className="flex items-center">
                     <FaUser className="mr-2 text-gray-500" />
-                    <strong>Created By:</strong> {task.createdBy?.email || 'N/A'}
+                    <strong>Created By:</strong> {task.createdBy || 'N/A'}
                   </p>
                   <p className="flex items-center">
                     <FaBolt className="mr-2 text-orange-500" />

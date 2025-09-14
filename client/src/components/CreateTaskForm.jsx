@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../assests/store";
-import { getAllEmails, createTask } from "../services/taskService";
+import { getAllEmails, createTask, getUserProfile } from "../services/taskService";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaPaperPlane, FaUser, FaCalendarAlt, FaStar, FaClock, FaTimesCircle, FaChevronDown, FaAlignLeft } from "react-icons/fa";
 import toast, { Toaster } from 'react-hot-toast'; // Import toast and Toaster
@@ -14,7 +14,7 @@ const CreateTaskForm = () => {
     taskDescription: "", // This is the state property for description
     assignedTo: "",
     assignedName: "",
-    taskFrequency: "",
+  taskFrequency: "OneTime", // default for one-time task
     dueDate: "",
     priority: "",
   });
@@ -25,21 +25,16 @@ const CreateTaskForm = () => {
 
   // States for dropdown visibility
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
-  const [showFrequencyDropdown, setShowFrequencyDropdown] = useState(false);
+  // Frequency dropdown removed for one-time tasks
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
 
   // Refs for click-outside detection
   const emailInputRef = useRef(null);
-  const frequencyDropdownRef = useRef(null);
+  // const frequencyDropdownRef = useRef(null); // removed
   const priorityDropdownRef = useRef(null);
 
   // Options for Frequency and Priority
-  const frequencyOptions = [
-    { value: "Daily", label: "🕓 Daily" },
-    { value: "Weekly", label: "📆 Weekly" },
-    { value: "Monthly", label: "🗓️ Monthly" },
-    { value: "OneTime", label: "🎯 One Time" },
-  ];
+  // Frequency options removed; always OneTime here
 
   const priorityOptions = [
     { value: "High", label: "🔴 High" },
@@ -80,9 +75,7 @@ const CreateTaskForm = () => {
       if (emailInputRef.current && !emailInputRef.current.contains(event.target)) {
         setShowEmailSuggestions(false);
       }
-      if (frequencyDropdownRef.current && !frequencyDropdownRef.current.contains(event.target)) {
-        setShowFrequencyDropdown(false);
-      }
+      // frequency dropdown removed
       if (priorityDropdownRef.current && !priorityDropdownRef.current.contains(event.target)) {
         setShowPriorityDropdown(false);
       }
@@ -111,10 +104,20 @@ const CreateTaskForm = () => {
     }
   };
 
-  const handleSelectEmail = (email) => {
-    setFormData({ ...formData, assignedTo: email });
-    setFilteredEmails([]); // Clear filters after selection
+  const handleSelectEmail = async (email) => {
+    setFormData(prev => ({ ...prev, assignedTo: email }));
+    setFilteredEmails([]);
     setShowEmailSuggestions(false);
+    // Auto-fill name from profile
+    try {
+      const profile = await getUserProfile(email);
+      const autoName = profile?.user?.username || email.split('@')[0];
+      if (autoName) {
+        setFormData(prev => ({ ...prev, assignedName: autoName }));
+      }
+    } catch (err) {
+      console.warn('Could not auto-fill name for', email, err.message);
+    }
   };
 
   // --- Generic Change Handler for Inputs (not custom dropdowns) ---
@@ -126,7 +129,6 @@ const CreateTaskForm = () => {
   // --- Custom Dropdown Handlers (Frequency, Priority) ---
   const handleSelectDropdownItem = (name, value) => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
-    if (name === "taskFrequency") setShowFrequencyDropdown(false);
     if (name === "priority") setShowPriorityDropdown(false);
   };
 
@@ -134,7 +136,7 @@ const CreateTaskForm = () => {
     e.preventDefault();
 
     // Basic validation (updated to check taskName and taskDescription)
-    if (!formData.taskName || !formData.taskDescription || !formData.assignedTo || !formData.assignedName || !formData.taskFrequency || !formData.dueDate || !formData.priority) {
+    if (!formData.taskName || !formData.taskDescription || !formData.assignedTo || !formData.assignedName || !formData.dueDate || !formData.priority) {
       toast.error("All fields are required. Please fill them out."); // Use toast for validation error
       return;
     }
@@ -149,7 +151,7 @@ const CreateTaskForm = () => {
         taskDescription: "", // Reset taskDescription
         assignedTo: "",
         assignedName: "",
-        taskFrequency: "",
+  taskFrequency: "OneTime",
         dueDate: "",
         priority: "",
       });
@@ -258,6 +260,20 @@ const CreateTaskForm = () => {
                 }
                 setShowEmailSuggestions(true);
             }}
+            onBlur={async () => {
+              const email = formData.assignedTo?.trim();
+              if (email && /.+@.+\..+/.test(email) && !formData.assignedName) {
+                try {
+                  const profile = await getUserProfile(email);
+                  const autoName = profile?.user?.username || email.split('@')[0];
+                  if (autoName) {
+                    setFormData(prev => ({ ...prev, assignedName: autoName }));
+                  }
+                } catch (err) {
+                  console.warn('Manual email blur lookup failed for', email, err.message);
+                }
+              }
+            }}
             placeholder="Search or select assignee email"
             className="p-3 rounded-r-xl w-full bg-transparent outline-none text-gray-800 placeholder-gray-400"
             required
@@ -329,47 +345,7 @@ const CreateTaskForm = () => {
         />
       </motion.div>
 
-      {/* Task Frequency (Custom Dropdown) */}
-      <div className="relative" ref={frequencyDropdownRef}>
-        <motion.div
-          className="flex items-center bg-white rounded-xl shadow-sm border border-blue-100 focus-within:border-blue-400 transition-all duration-200 cursor-pointer"
-          whileHover="hover"
-          whileFocus="focus"
-          variants={inputVariants}
-          onClick={() => setShowFrequencyDropdown(!showFrequencyDropdown)}
-        >
-          <FaClock className="text-blue-500 ml-4 mr-2" />
-          <div className="p-3 rounded-r-xl w-full bg-transparent outline-none text-gray-700 font-medium">
-            {getDisplayLabel(formData.taskFrequency, frequencyOptions, "📅 Select Frequency")}
-          </div>
-          <FaChevronDown className={`absolute right-4 text-blue-500 transition-transform duration-200 ${showFrequencyDropdown ? 'rotate-180' : ''}`} />
-        </motion.div>
-        <AnimatePresence>
-          {showFrequencyDropdown && (
-            <motion.ul
-              className="absolute bg-white border border-blue-200 w-full z-20 max-h-48 overflow-y-auto shadow-lg rounded-b-xl mt-1 custom-scrollbar"
-              variants={dropdownVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              {frequencyOptions.map((option, idx) => (
-                <motion.li
-                  key={idx}
-                  onClick={() => handleSelectDropdownItem("taskFrequency", option.value)}
-                  className={`px-4 py-3 hover:bg-blue-100 cursor-pointer transition-colors duration-200 text-gray-700 ${
-                    formData.taskFrequency === option.value ? "font-bold text-blue-600 bg-blue-50" : ""
-                  }`}
-                  whileHover={{ scale: 1.01, backgroundColor: "#E0F2FE" }}
-                  transition={{ duration: 0.1 }}
-                >
-                  {option.label}
-                </motion.li>
-              ))}
-            </motion.ul>
-          )}
-        </AnimatePresence>
-      </div>
+      {/* Frequency selection removed: tasks created here are OneTime by default */}
 
       {/* Due Date */}
       <motion.div

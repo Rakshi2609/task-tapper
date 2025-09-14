@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../assests/store"; // Assuming this path is correct
-import { getAllEmails } from "../services/taskService"; // Assuming getAllEmails can be used for recurring tasks
+import { getAllEmails, getUserProfile } from "../services/taskService"; // Added getUserProfile for auto-fill names
 import { createRecurringTask } from '../services/rexurring'; // Corrected service import name
 import { motion, AnimatePresence } from "framer-motion";
 import { FaPaperPlane, FaUser, FaCalendarAlt, FaStar, FaClock, FaTimesCircle, FaChevronDown, FaAlignLeft, FaBolt } from "react-icons/fa";
@@ -25,6 +25,8 @@ const RecurringTaskForm = () => {
   const [filteredAssignedByEmails, setFilteredAssignedByEmails] = useState([]);
   const [filteredAssignedToEmails, setFilteredAssignedToEmails] = useState([]);
   const [loadingEmails, setLoadingEmails] = useState(true);
+  const [taskAssignedByName, setTaskAssignedByName] = useState("");
+  const [taskAssignedToName, setTaskAssignedToName] = useState("");
 
   // States for dropdown visibility
   const [showFrequencyDropdown, setShowFrequencyDropdown] = useState(false);
@@ -117,14 +119,22 @@ const RecurringTaskForm = () => {
     }
   };
 
-  const handleSelectEmail = (email, fieldName) => {
-    setFormData({ ...formData, [fieldName]: email });
+  const handleSelectEmail = async (email, fieldName) => {
+    setFormData(prev => ({ ...prev, [fieldName]: email }));
     if (fieldName === "taskAssignedBy") {
       setFilteredAssignedByEmails([]);
       setShowAssignedByEmailSuggestions(false);
     } else if (fieldName === "taskAssignedTo") {
       setFilteredAssignedToEmails([]);
       setShowAssignedToEmailSuggestions(false);
+    }
+    try {
+      const profile = await getUserProfile(email);
+      const name = profile?.user?.username || email.split('@')[0];
+      if (fieldName === 'taskAssignedBy') setTaskAssignedByName(name || "");
+      if (fieldName === 'taskAssignedTo') setTaskAssignedToName(name || "");
+    } catch (err) {
+      console.warn('Could not fetch profile for', email, err.message);
     }
   };
 
@@ -415,6 +425,7 @@ const RecurringTaskForm = () => {
                 setFormData({ ...formData, taskAssignedBy: "" });
                 setFilteredAssignedByEmails([]);
                 setShowAssignedByEmailSuggestions(false);
+                setTaskAssignedByName("");
               }}
               className="mr-3 text-gray-400 hover:text-red-500 transition-colors"
               title="Clear email"
@@ -423,6 +434,9 @@ const RecurringTaskForm = () => {
             </button>
           )}
         </motion.div>
+        {taskAssignedByName && (
+          <p className="text-xs text-gray-600 mt-1 ml-1 italic">Name: <span className="font-medium">{taskAssignedByName}</span></p>
+        )}
         <AnimatePresence>
           {showAssignedByEmailSuggestions && (
             <motion.ul
@@ -490,6 +504,7 @@ const RecurringTaskForm = () => {
                 setFormData({ ...formData, taskAssignedTo: "" });
                 setFilteredAssignedToEmails([]);
                 setShowAssignedToEmailSuggestions(false);
+                setTaskAssignedToName("");
               }}
               className="mr-3 text-gray-400 hover:text-red-500 transition-colors"
               title="Clear email"
@@ -498,6 +513,9 @@ const RecurringTaskForm = () => {
             </button>
           )}
         </motion.div>
+        {taskAssignedToName && (
+          <p className="text-xs text-gray-600 mt-1 ml-1 italic">Name: <span className="font-medium">{taskAssignedToName}</span></p>
+        )}
         <AnimatePresence>
           {showAssignedToEmailSuggestions && (
             <motion.ul
