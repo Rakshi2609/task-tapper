@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useAuthStore } from "../assests/store";
 import { Link } from "react-router-dom";
 import { FaSearch, FaCalendarAlt, FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
@@ -16,24 +16,49 @@ const AssignedTasks = () => {
   const [searchEmail, setSearchEmail] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [filterStatus, setFilterStatus] = useState("All");
+  const [recurringTasks, setRecurringTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  // 1. Fetch one-time tasks you assigned (store) when user changes
   useEffect(() => {
-    if (user?.email) {
-      const fetchAllTasks = async () => {
-        await getAssignedByMe(user.email);
-        try {
-          const res = await getAllRecurringTasks();
-          const recurringAssignedByMe = res.data.filter(
-            (task) => task.taskAssignedBy?.email === user.email
-          );
-          setAllAssignedTasks([...tasks, ...recurringAssignedByMe]);
-        } catch (err) {
-          console.error("Error fetching recurring tasks:", err);
-        }
-      };
-      fetchAllTasks();
-    }
-  },[] );
+    if (!user?.email) return;
+    getAssignedByMe(user.email); // store handles its own loading state
+  }, [user?.email, getAssignedByMe]);
+
+  // 2. Fetch recurring tasks you assigned when user changes (only once per user)
+  useEffect(() => {
+    if (!user?.email) return;
+    let cancelled = false;
+    const fetchRecurring = async () => {
+      setLoading(true);
+      try {
+        const res = await getAllRecurringTasks();
+        const raw = Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.data) ? res.data.data : [];
+        const mine = raw.filter(t => t?.taskAssignedBy?.email === user.email).map(rt => ({
+          ...rt,
+          taskName: rt.taskName,
+          taskDescription: rt.taskDescription,
+          taskFrequency: rt.taskFrequency,
+          assignedTo: rt.taskAssignedTo?.email || rt.taskAssignedTo,
+          assignedName: rt.taskAssignedTo?.username || rt.taskAssignedTo?.email?.split('@')[0] || '',
+          dueDate: rt.taskStartDate,
+        }));
+        if (!cancelled) setRecurringTasks(mine);
+      } catch (e) {
+        if (!cancelled) console.error('Failed to fetch recurring tasks:', e.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchRecurring();
+    return () => { cancelled = true; };
+  }, [user?.email]);
+
+  // 3. Merge tasks (store) + recurring into a unified list whenever either changes
+  useEffect(() => {
+    const merged = [...(tasks || []), ...recurringTasks];
+    setAllAssignedTasks(merged);
+  }, [tasks, recurringTasks]);
   // }, [user, getAssignedByMe, tasks]);
 
   useEffect(() => {
@@ -216,7 +241,12 @@ const AssignedTasks = () => {
         </motion.div>
       </div>
 
-      {filteredTasks.length === 0 ? (
+      {loading && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-gray-600 text-lg font-medium py-6">
+          Loading your assigned tasks...
+        </motion.p>
+      )}
+      {!loading && filteredTasks.length === 0 ? (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
