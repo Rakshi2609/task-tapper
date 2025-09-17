@@ -215,18 +215,11 @@ const RecurringTaskList = () => {
                     <FaUser className="mr-2 text-yellow-500" />
                     <strong>Assigned By:</strong> {task.taskAssignedBy?.email || 'N/A'}
                   </p>
-                  <p className="flex items-center">
+                  {/* <p className="flex items-center">
                     <FaUser className="mr-2 text-indigo-500" />
                     <strong>Assigned To:</strong> {task.taskAssignedTo?.email || 'N/A'}
-                  </p>
-                  <p className="flex items-center">
-                    <FaUser className="mr-2 text-gray-500" />
-                    <strong>Created By:</strong> {task.createdBy || 'N/A'}
-                  </p>
-                  <p className="flex items-center">
-                    <FaBolt className="mr-2 text-orange-500" />
-                    <strong>Create Days Ahead:</strong> {task.taskCreateDaysAhead}
-                  </p>
+                  </p> */}
+                  {/* Removed Created By and Create Days Ahead from UI */}
                 </div>
               </div>
               {/* Action Buttons */}

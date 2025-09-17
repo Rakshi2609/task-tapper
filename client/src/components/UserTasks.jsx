@@ -243,9 +243,9 @@ const UserTasks = () => {
                                                     🔥 Priority: {task.priority}
                                                 </span>
                                             </p>
-                                            <p className="text-sm text-gray-600">
+                                            {/* <p className="text-sm text-gray-600">
                                                 <span className="text-purple-500">🔁</span> Frequency: {task.taskFrequency}
-                                            </p>
+                                            </p> */}
                                             <p className="text-sm text-gray-600 flex items-center gap-1">
                                                 <FaUserCircle className="text-indigo-400" /> Assigned By: <span className="font-medium text-blue-700">{task.createdBy}</span>
                                             </p>

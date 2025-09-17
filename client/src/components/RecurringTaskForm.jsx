@@ -3,7 +3,7 @@ import { useAuthStore } from "../assests/store"; // Assuming this path is correc
 import { getAllEmails, getUserProfile } from "../services/taskService"; // Added getUserProfile for auto-fill names
 import { createRecurringTask } from '../services/rexurring'; // Corrected service import name
 import { motion, AnimatePresence } from "framer-motion";
-import { FaPaperPlane, FaUser, FaCalendarAlt, FaStar, FaClock, FaTimesCircle, FaChevronDown, FaAlignLeft, FaBolt } from "react-icons/fa";
+import { FaPaperPlane, FaUser, FaCalendarAlt, FaStar, FaClock, FaTimesCircle, FaChevronDown, FaAlignLeft } from "react-icons/fa";
 import toast, { Toaster } from 'react-hot-toast';
 import { Link } from "react-router-dom";
 
@@ -152,7 +152,7 @@ const RecurringTaskForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.taskName || !formData.taskDescription || !formData.taskFrequency || !formData.taskCreateDaysAhead || !formData.taskStartDate || !formData.taskAssignedBy || !formData.taskAssignedTo || !formData.createdBy) {
+    if (!formData.taskName || !formData.taskDescription || !formData.taskFrequency || !formData.taskStartDate || !formData.taskAssignedBy || !formData.taskAssignedTo) {
       toast.error("All fields are required. Please fill them out.");
       return;
     }
@@ -320,30 +320,7 @@ const RecurringTaskForm = () => {
         </AnimatePresence>
       </div>
 
-      {/* Task Create Days Ahead */}
-      <div className="space-y-2">
-        <label htmlFor="taskCreateDaysAhead" className="block text-gray-700 font-semibold text-sm">Create Task Days Ahead:</label>
-        <motion.div
-          className="flex items-center bg-white rounded-xl shadow-sm border border-blue-100 focus-within:border-blue-400 transition-all duration-200"
-          whileHover="hover"
-          whileFocus="focus"
-          variants={inputVariants}
-        >
-          <FaBolt className="text-blue-500 ml-4 mr-2" />
-          <input
-            id="taskCreateDaysAhead" // Added id
-            type="number"
-            name="taskCreateDaysAhead"
-            placeholder="e.g., 1 (create 1 day before due)"
-            value={formData.taskCreateDaysAhead}
-            onChange={handleChange}
-            min="0"
-            className="p-3 rounded-r-xl w-full bg-transparent outline-none text-gray-800 placeholder-gray-400"
-            required
-            title="Specify how many days in advance the recurring task should be created before its due date."
-          />
-        </motion.div>
-      </div>
+      {/* Task Create Days Ahead: removed from UI; default kept in state */}
 
       {/* Task Start Date */}
       <div className="space-y-2">
@@ -549,25 +526,7 @@ const RecurringTaskForm = () => {
         </AnimatePresence>
       </div>
 
-      {/* Created By (Pre-filled and read-only) */}
-      <div className="space-y-2">
-        <label htmlFor="createdBy" className="block text-gray-700 font-semibold text-sm">Created By:</label>
-        <motion.div
-          className="flex items-center bg-gray-100 rounded-xl shadow-inner border border-gray-200"
-          variants={inputVariants}
-          title="This field is automatically filled with your email and cannot be changed."
-        >
-          <FaUser className="text-gray-500 ml-4 mr-2" />
-          <input
-            id="createdBy" // Added id
-            name="createdBy"
-            placeholder="Created By"
-            value={formData.createdBy}
-            className="p-3 rounded-r-xl w-full bg-transparent outline-none text-gray-600 placeholder-gray-400 cursor-not-allowed"
-            readOnly
-          />
-        </motion.div>
-      </div>
+      {/* Created By: removed from UI; still included in payload via state */}
 
       <motion.button
         type="submit"
