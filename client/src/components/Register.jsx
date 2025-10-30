@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
     signInWithPopup,
     GoogleAuthProvider,
@@ -387,6 +387,12 @@ const Register = () => {
                         </motion.form>
                     )}
                 </AnimatePresence>
+                            <div className="mt-6 text-gray-700">
+                                Already have an account?{" "}
+                                <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+                                    Log in
+                                </Link>
+                            </div>
             </motion.div>
         </div>
     );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 
@@ -20,25 +20,42 @@ import RecurringTaskList from "./components/RecurringTaskList";
 import RecurringTaskDetail from "./components/RecurringTaskDetail";
 import SideNavbar from "./components/SideNavbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Landing from "./components/Landing";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase/firebase";
 
 const App = () => {
   const user = useAuthStore((state) => state.user); 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setIsAuthed(!!u);
+      if (!u) setSidebarOpen(false); // close sidebar on logout
+    });
+    return () => unsub();
+  }, []);
+
+  const mainOffsetClass = isAuthed && sidebarOpen ? "lg:ml-72" : "lg:ml-0";
 
   return (
     <BrowserRouter>
-      <Navbar onMenuClick={() => setSidebarOpen((v) => !v)} />
-      <div className="flex relative">
-        <SideNavbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <main className="flex-1 min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 lg:ml-0 lg:pl-0">
+      <Navbar onMenuClick={() => setSidebarOpen((v) => !v)} isSidebarOpen={sidebarOpen} showMenu={isAuthed} />
+      <div className={`relative ${mainOffsetClass}`}>
+        {isAuthed && (
+          <SideNavbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        )}
+        <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
           <div className="px-4 py-4">{/* content wrapper */}
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={isAuthed ? <Navigate to="/profile" replace /> : <Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
 
               {/* Protected routes */}
+              <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
               <Route path="/tasks" element={<ProtectedRoute><UserTasks /></ProtectedRoute>} />
               <Route path="/assign" element={<ProtectedRoute><AssignTask /></ProtectedRoute>} />

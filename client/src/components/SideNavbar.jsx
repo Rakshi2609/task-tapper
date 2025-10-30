@@ -21,7 +21,7 @@ const SideNavbar = ({ isOpen, onClose }) => {
 
   const links = useMemo(
     () => [
-      { to: "/", label: "Home", icon: <FaHome /> },
+      { to: "/dashboard", label: "Dashboard", icon: <FaHome /> },
       { to: "/tasks", label: "One-Time Tasks", icon: <FaClipboardList /> },
       { to: "/recurring/list", label: "Recurring Tasks", icon: <FaSyncAlt /> },
       { to: "/mywork", label: "Assigned by Me", icon: <FaTasks /> },
@@ -44,9 +44,9 @@ const SideNavbar = ({ isOpen, onClose }) => {
       />
 
       <aside
-        className={`bg-white ${isOpen ? "border-r border-gray-200" : "lg:border-0"} w-72 flex-shrink-0 
-          fixed lg:static top-16 left-0 z-40 lg:z-auto overflow-y-auto custom-scrollbar
-          h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)]
+        className={`bg-white ${isOpen ? "border-r border-gray-200" : "lg:border-0"} w-72
+          fixed top-16 left-0 z-40 overflow-y-auto custom-scrollbar
+          h-[calc(100vh-4rem)]
           transition-[transform,width] duration-200 ease-in-out
           ${isOpen ? "translate-x-0 lg:w-72" : "-translate-x-full lg:translate-x-0 lg:w-0"}`}
       >

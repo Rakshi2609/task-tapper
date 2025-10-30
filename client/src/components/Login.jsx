@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { toast } from 'react-toastify'; // ONLY import toast, not ToastContainer
@@ -46,7 +46,7 @@ const Login = () => {
 
       console.log("✅ Zustand login success, user stored.");
       toast.success(`Welcome back, ${displayName || email.split("@")[0]}!`);
-      navigate("/");
+  navigate("/profile");
     } catch (error) {
       console.error("❌ Google Sign-In failed:", error);
       let errorMessage = "Google Sign-In failed. Please try again.";
@@ -143,6 +143,13 @@ const Login = () => {
         >
           <FaGoogle className="text-2xl" /> Sign In with Google
         </motion.button>
+
+        <div className="mt-6 text-gray-700">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-blue-600 font-semibold hover:underline">
+            Sign up
+          </Link>
+        </div>
       </motion.div>
     </div>
   );

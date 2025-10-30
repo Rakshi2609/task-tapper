@@ -5,8 +5,9 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { FaTasks, FaUserCircle } from "react-icons/fa";
 import { HiOutlineMenu } from "react-icons/hi";
+import { IoClose } from "react-icons/io5";
 
-const Navbar = ({ onMenuClick }) => {
+const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -35,13 +36,16 @@ const Navbar = ({ onMenuClick }) => {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <button
-            className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-blue-800/40"
-            onClick={onMenuClick}
-            aria-label="Toggle sidebar"
-          >
-            <HiOutlineMenu className="text-2xl" />
-          </button>
+          {showMenu && (
+            <button
+              className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-blue-800/40"
+              onClick={onMenuClick}
+              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+              aria-expanded={isSidebarOpen}
+            >
+              {isSidebarOpen ? <IoClose className="text-2xl" /> : <HiOutlineMenu className="text-2xl" />}
+            </button>
+          )}
           <Link to="/" className="flex items-center space-x-2 group">
           <motion.div
             initial={{ rotate: 0 }}

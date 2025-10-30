@@ -4,7 +4,7 @@ import { useAuthStore } from '../assests/store'; // Assuming useAuthStore gives 
 import { getTaskById, getTaskUpdates, createTaskUpdate } from '../services/taskService';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaCommentAlt, FaPaperPlane, FaSpinner, FaTimesCircle, FaCalendarAlt, FaStar, FaClock, FaUserCircle } from 'react-icons/fa';
+import { FaCommentAlt, FaPaperPlane, FaSpinner, FaTimesCircle, FaCalendarAlt, FaStar, FaClock, FaUserCircle, FaCheck } from 'react-icons/fa';
 
 const TaskDetail = () => {
     const { taskId } = useParams();

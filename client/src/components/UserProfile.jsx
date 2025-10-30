@@ -63,6 +63,8 @@ const UserProfile = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      // Clear local auth store to ensure UI hides authed-only elements like sidebar
+      useAuthStore.setState({ user: null, isAuthenticated: false, userDetail: null, tasks: [] });
       navigate("/login");
     } catch (error) {
       console.error("Error signing out:", error);
@@ -301,12 +303,13 @@ const UserProfile = () => {
             <ul className="space-y-4">
               {todayTasks.map((task, index) => (
                 <motion.li
-                  key={index}
-                  className="border border-blue-200 p-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200"
+                  key={task._id || index}
+                  className="border border-blue-200 p-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   whileHover={{ scale: 1.02 }}
+                  onClick={() => task?._id && navigate(`/tasks/${task._id}`)}
                 >
                   <p className="text-md font-semibold text-gray-800 mb-1">
                     {task.task}
@@ -365,12 +368,13 @@ const UserProfile = () => {
             <ul className="space-y-4">
               {overdueTasks.map((task, index) => (
                 <motion.li
-                  key={index}
-                  className="border border-red-200 p-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200"
+                  key={task._id || index}
+                  className="border border-red-200 p-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   whileHover={{ scale: 1.02 }}
+                  onClick={() => task?._id && navigate(`/tasks/${task._id}`)}
                 >
                   <p className="text-md font-semibold text-gray-800 mb-1">
                     {task.task}
