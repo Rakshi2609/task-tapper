@@ -210,7 +210,7 @@ const UserTasks = () => {
                     className="bg-blue-50 p-5 rounded-xl shadow-md border border-blue-100 mb-8 flex flex-wrap justify-between items-center gap-4"
                     variants={itemVariants}
                 >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                         <FaSort className="text-2xl text-blue-600" />
                         <select
                             value={sortBy}
@@ -227,14 +227,14 @@ const UserTasks = () => {
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
                         <FaCalendarAlt className="text-2xl text-blue-600" />
                         <DatePicker
                             selected={selectedDate}
                             onChange={(date) => setSelectedDate(date)}
                             placeholderText="Filter by Due Date"
-                            className="border border-blue-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200 w-44"
-                            wrapperClassName="w-full"
+                            className="border border-blue-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200 w-full sm:w-44"
+                            wrapperClassName="w-full sm:w-auto"
                         />
                         {selectedDate && (
                             <motion.button
@@ -248,7 +248,7 @@ const UserTasks = () => {
                         )}
                         <motion.button
                             onClick={() => setShowCompleted((v) => !v)}
-                            className="ml-2 inline-flex items-center gap-2 bg-white border border-blue-300 text-blue-700 px-3 py-2 rounded-lg shadow-sm hover:bg-blue-50 transition-all duration-200 text-sm font-medium"
+                            className="ml-0 sm:ml-2 inline-flex items-center gap-2 bg-white border border-blue-300 text-blue-700 px-3 py-2 rounded-lg shadow-sm hover:bg-blue-50 transition-all duration-200 text-sm font-medium w-full sm:w-auto justify-center"
                             whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.97 }}
                             title={showCompleted ? "Show Pending Tasks" : "Show Completed Tasks"}
@@ -294,8 +294,8 @@ const UserTasks = () => {
                                                 whileHover="hover"
                                             >
                                                 <div>
-                                                    <h4 className="text-lg font-semibold text-gray-800">{task.taskName}</h4>
-                                                    <p className="text-lg font-semibold text-gray-600"><span className="text-gray-700">Task Description:</span>{task.taskDescription}</p>
+                                                    <h4 className="text-lg font-semibold text-gray-800 break-words">{task.taskName}</h4>
+                                                    <p className="text-lg font-semibold text-gray-600 break-words"><span className="text-gray-700">Task Description: </span>{task.taskDescription}</p>
                                                     <p className="text-sm text-gray-600 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                                                     </p>
@@ -304,8 +304,10 @@ const UserTasks = () => {
                                                             🔥 Priority: {task.priority}
                                                         </span>
                                                     </p>
-                                                    <p className="text-sm text-gray-600 flex items-center gap-1">
-                                                        <FaUserCircle className="text-indigo-400" /> Assigned By: <span className="font-medium text-blue-700">{task.createdBy}</span>
+                                                    <p className="text-sm text-gray-600 flex items-center gap-1 min-w-0">
+                                                        <FaUserCircle className="text-indigo-400 flex-shrink-0" />
+                                                        <span>Assigned By:</span>
+                                                        <span className="font-medium text-blue-700 break-all">{task.createdBy}</span>
                                                     </p>
                                                     <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
                                                         <Link
@@ -369,17 +371,19 @@ const UserTasks = () => {
                                                 whileHover={{ scale: 1.01 }}
                                             >
                                                 <div>
-                                                    <h4 className="text-lg line-through font-medium text-gray-700">{task.taskName}</h4>
+                                                    <h4 className="text-lg line-through font-medium text-gray-700 break-words">{task.taskName}</h4>
                                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                                         <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
                                                     </p>
                                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                                                     </p>
-                                                    <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                        <FaUserCircle className="text-indigo-300" /> Assigned By: <span className="font-light">{task.createdBy}</span>
+                                                    <p className="text-sm text-gray-500 flex items-center gap-1 min-w-0">
+                                                        <FaUserCircle className="text-indigo-300 flex-shrink-0" />
+                                                        <span>Assigned By:</span>
+                                                        <span className="font-light break-all">{task.createdBy}</span>
                                                     </p>
-                                                    <div className="mt-4 flex justify-end">
+                                                    <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
                                                         <Link
                                                             to={`/tasks/${task._id}`}
                                                             className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
