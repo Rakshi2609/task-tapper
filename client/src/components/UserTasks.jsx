@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "../assests/store";
 import {
     completeTask as completeTaskAPI,
@@ -20,7 +20,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom"; // Import Link for navigation
+import { Link, useSearchParams } from "react-router-dom"; // Import Link and search params
 import Pagination from "./Pagination";
 
 const UserTasks = () => {
@@ -41,6 +41,8 @@ const UserTasks = () => {
     const [pageCompleted, setPageCompleted] = useState(1);
     const pageSize = 10;
     const [showCompleted, setShowCompleted] = useState(false);
+    const [filterOverdue, setFilterOverdue] = useState(false);
+    const [searchParams] = useSearchParams();
 
     const handleComplete = async (taskId) => {
         if (!user?.email) return;
@@ -68,11 +70,37 @@ const UserTasks = () => {
         }
     };
 
+    // Initial data fetch
     useEffect(() => {
         if (user?.email) {
             getUserTasks(user.email);
         }
     }, [user, getUserTasks]);
+
+    // Initialize filters based on URL query params only once on mount
+    useEffect(() => {
+        const view = searchParams.get("view"); // 'completed' | 'pending'
+        const date = searchParams.get("date"); // 'today'
+        const overdue = searchParams.get("overdue"); // 'true'
+
+        if (view === "completed") setShowCompleted(true);
+        if (view === "pending") setShowCompleted(false);
+
+        if (date === "today") {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            setSelectedDate(today);
+            setShowCompleted(false);
+            setFilterOverdue(false);
+        }
+
+        if (overdue === "true") {
+            setFilterOverdue(true);
+            setShowCompleted(false);
+            setSelectedDate(null);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (!tasks) return;
@@ -81,6 +109,14 @@ const UserTasks = () => {
         if (selectedDate) {
             filteredAndSortedTasks = filteredAndSortedTasks.filter(
                 (task) => new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+            );
+        }
+
+        if (filterOverdue && !selectedDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            filteredAndSortedTasks = filteredAndSortedTasks.filter(
+                (task) => new Date(task.dueDate) < today && !task.completedDate
             );
         }
 
@@ -110,7 +146,7 @@ const UserTasks = () => {
         setCompletedTasks(comp);
         setPagePending(1);
         setPageCompleted(1);
-    }, [tasks, sortBy, selectedDate]);
+    }, [tasks, sortBy, selectedDate, filterOverdue]);
 
     const containerVariants = {
         hidden: { opacity: 0, y: 30 },

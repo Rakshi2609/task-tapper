@@ -121,6 +121,7 @@ export const getAssignedByMe = async (req, res) => {
  * @param {object} req - Express request object.
  * @param {object} res - Express response object.
  */
+// Save or update user detail (phone, role)
 export const getUserDetail = async (req, res) => {
   const { email, phoneNumber, role } = req.body;
 
@@ -150,6 +151,25 @@ export const getUserDetail = async (req, res) => {
     });
   } catch (err) {
     console.error("[saveUserDetail] Error:", err.message);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+// Fetch user detail by email (read-only)
+export const fetchUserDetailByEmail = async (req, res) => {
+  const { email } = req.query;
+  try {
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    const userDetail = await UserDetail.findOne({ user: user._id }).lean();
+    return res.status(200).json({ success: true, userDetail: userDetail || null });
+  } catch (err) {
+    console.error("[fetchUserDetailByEmail] Error:", err.message);
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

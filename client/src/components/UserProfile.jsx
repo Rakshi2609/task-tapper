@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "../assests/store";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
@@ -29,7 +29,7 @@ import {
 } from "react-icons/fa";
 
 const UserProfile = () => {
-  const { user, isAuthenticated, tasks, getUserTasks } = useAuthStore();
+  const { user, isAuthenticated, tasks, getUserTasks, userDetail, fetchUserDetail } = useAuthStore();
   const [todayTasks, setTodayTasks] = useState([]);
   const [overdueTasks, setOverdueTasks] = useState([]);
   const navigate = useNavigate();
@@ -38,8 +38,12 @@ const UserProfile = () => {
   useEffect(() => {
     if (user?.email) {
       getUserTasks(user.email);
+      // Fetch extended user details (phone, role) if not present
+      if (!userDetail) {
+        fetchUserDetail(user.email);
+      }
     }
-  }, [user, getUserTasks]);
+  }, [user, getUserTasks, fetchUserDetail, userDetail]);
 
   // Filter tasks due today and overdue tasks
   useEffect(() => {
@@ -162,6 +166,17 @@ const UserProfile = () => {
     }, // Red
   ];
 
+  // Derived totals for progress ring
+  const { totalTasks, completedPct } = useMemo(() => {
+    const assigned = user?.TasksAssigned || 0;
+    const inProgress = user?.TasksInProgress || 0;
+    const completed = user?.TasksCompleted || 0;
+    const notStarted = user?.TasksNotStarted || 0;
+    const total = assigned + inProgress + completed + notStarted;
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { totalTasks: total, completedPct: pct };
+  }, [user]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
       <motion.div
@@ -191,17 +206,73 @@ const UserProfile = () => {
               <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center gap-2">
                 <FaInfoCircle /> User Details
               </h3>
-              <div className="space-y-3 text-md text-gray-700 mb-6">
-                <p>
-                  <strong>Name:</strong>{" "}
-                  <span className="font-semibold">
+              {/* Header with avatar and greeting */}
+              <div className="flex items-center gap-4 mb-5">
+                <FaUserCircle className="text-blue-600 text-5xl" />
+                <div>
+                  <p className="text-sm text-gray-500">Welcome back,</p>
+                  <p className="text-2xl font-extrabold text-gray-900">
                     {user.username || user.displayName || user.email?.split("@")[0]}
+                  </p>
+                </div>
+              </div>
+
+              {/* Contact & Account Info */}
+              <div className="grid grid-cols-1 gap-3 text-sm text-gray-700 mb-6">
+                <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
+                  <span className="font-medium">Email</span>
+                  <span className="font-semibold text-blue-800 truncate max-w-[60%] text-right">{user.email}</span>
+                </div>
+                <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
+                  <span className="font-medium">Phone</span>
+                  <span className="font-semibold text-blue-800">{userDetail?.phoneNumber || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
+                  <span className="font-medium">Role</span>
+                  <span className="font-semibold text-blue-800 capitalize">{userDetail?.role || "user"}</span>
+                </div>
+                <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
+                  <span className="font-medium">Member since</span>
+                  <span className="font-semibold text-blue-800">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
                   </span>
-                </p>
-                <p>
-                  <strong>Email:</strong>{" "}
-                  <span className="font-semibold">{user.email}</span>
-                </p>
+                </div>
+                <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
+                  <span className="font-medium">Last login</span>
+                  <span className="font-semibold text-blue-800">
+                    {auth.currentUser?.metadata?.lastSignInTime
+                      ? new Date(auth.currentUser.metadata.lastSignInTime).toLocaleString()
+                      : "—"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
+                  <span className="font-medium">Email verified</span>
+                  <span className="font-semibold text-blue-800">{auth.currentUser?.emailVerified ? "Yes" : "No"}</span>
+                </div>
+              </div>
+
+              {/* Quick actions */}
+              <div className="grid grid-cols-2 gap-3">
+                <Link to="/create">
+                  <motion.button
+                    className="w-full bg-white border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50"
+                    variants={linkButtonVariants}
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    Create Task
+                  </motion.button>
+                </Link>
+                <Link to="/chat">
+                  <motion.button
+                    className="w-full bg-white border border-indigo-200 text-indigo-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50"
+                    variants={linkButtonVariants}
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    World Chat
+                  </motion.button>
+                </Link>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-3">
@@ -247,6 +318,32 @@ const UserProfile = () => {
             <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center gap-2">
               <FaChartBar /> Task Statistics
             </h3>
+            {/* Completion Progress Ring */}
+            <div className="flex items-center gap-6 mb-6">
+              <div className="relative w-24 h-24">
+                <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" stroke="#e5e7eb" strokeWidth="12" fill="none" />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    stroke="#3b82f6"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 42}`}
+                    strokeDashoffset={`${((100 - completedPct) / 100) * (2 * Math.PI * 42)}`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-bold text-blue-700">{completedPct}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Overall completion</p>
+                <p className="text-2xl font-extrabold text-gray-900">{user?.TasksCompleted || 0} / {totalTasks}</p>
+              </div>
+            </div>
             <div className="flex-grow h-48 mb-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -284,6 +381,50 @@ const UserProfile = () => {
                 </div>
               ))}
             </div>
+
+            {/* Quick Filters */}
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <Link to="/tasks?view=pending">
+                <motion.button
+                  className="w-full bg-white border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50"
+                  variants={linkButtonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  View Pending
+                </motion.button>
+              </Link>
+              <Link to="/tasks?view=completed">
+                <motion.button
+                  className="w-full bg-white border border-green-200 text-green-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-green-50"
+                  variants={linkButtonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  View Completed
+                </motion.button>
+              </Link>
+              <Link to="/tasks?date=today">
+                <motion.button
+                  className="w-full bg-white border border-indigo-200 text-indigo-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50"
+                  variants={linkButtonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  Due Today
+                </motion.button>
+              </Link>
+              <Link to="/tasks?overdue=true">
+                <motion.button
+                  className="w-full bg-white border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-50"
+                  variants={linkButtonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  Overdue
+                </motion.button>
+              </Link>
+            </div>
           </motion.div>
         </div>
 
@@ -292,8 +433,9 @@ const UserProfile = () => {
           className="mt-6 p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100"
           variants={itemVariants}
         >
-          <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center gap-2">
+          <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center justify-between gap-2">
             <FaCalendarDay /> Today's Due Tasks
+            <Link to="/tasks?date=today" className="text-sm font-semibold text-blue-700 hover:underline">View all</Link>
           </h3>
           {todayTasks.length === 0 ? (
             <p className="text-gray-500 italic text-center py-4">
@@ -357,8 +499,9 @@ const UserProfile = () => {
           className="mt-6 p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100"
           variants={itemVariants}
         >
-          <h3 className="text-xl font-bold mb-4 text-red-700 flex items-center gap-2">
+          <h3 className="text-xl font-bold mb-4 text-red-700 flex items-center justify-between gap-2">
             <FaExclamationTriangle /> Overdue Tasks
+            <Link to="/tasks?overdue=true" className="text-sm font-semibold text-red-700 hover:underline">View all</Link>
           </h3>
           {overdueTasks.length === 0 ? (
             <p className="text-gray-500 italic text-center py-4">
