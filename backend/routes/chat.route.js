@@ -7,24 +7,36 @@ const router = express.Router();
 // GET /api/chat/messages
 router.get('/messages', async (req, res) => {
   try {
-    const { before = new Date().toISOString(), limit = 20 } = req.query;
+    const rawLimit = parseInt(req.query.limit ?? '20', 10);
+    const limit = Math.min(Math.max(rawLimit || 20, 1), 100); // clamp 1..100
 
-    const messages = await WorldChatMessage.find({
-      timestamp: { $lt: new Date(before) }
-    })
+    const beforeRaw = req.query.before;
+    let filter = {};
+    if (beforeRaw) {
+      const beforeDate = new Date(beforeRaw);
+      if (!isNaN(beforeDate.getTime())) {
+        filter.timestamp = { $lt: beforeDate };
+      }
+    }
+
+    const messages = await WorldChatMessage.find(filter)
       .sort({ timestamp: -1 })
-      .limit(parseInt(limit))
+      .limit(limit)
       .populate('userId', 'username');
 
-    const formatted = messages.reverse().map((msg) => ({
-      _id: msg._id,
-      userId: msg.userId._id,
-      username: msg.userId.username,
-      message: msg.message,
-      timestamp: msg.timestamp
-    }));
+    // Oldest -> newest for UI
+    const formatted = messages
+      .reverse()
+      .map((msg) => ({
+        _id: msg._id,
+        userId: msg.userId ? msg.userId._id : null,
+        username: msg.userId?.username || 'System',
+        message: msg.message,
+        isSystem: !!msg.isSystem,
+        timestamp: msg.timestamp,
+      }));
 
-    res.json(formatted); // ✅ Return array directly
+    res.json(formatted);
   } catch (err) {
     console.error('❌ Error fetching chat messages:', err);
     res.status(500).json({ error: 'Internal server error' });
