@@ -12,13 +12,16 @@ import {
     FaRegSadTear,
     FaSpinner,
     FaUserCircle,
-    FaCommentAlt // Added for the icon next to "View Details"
+    FaCommentAlt, // Added for the icon next to "View Details"
+    FaToggleOn,
+    FaToggleOff,
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom"; // Import Link for navigation
+import Pagination from "./Pagination";
 
 const UserTasks = () => {
     const {
@@ -34,6 +37,10 @@ const UserTasks = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [pendingTasks, setPendingTasks] = useState([]);
     const [completedTasks, setCompletedTasks] = useState([]);
+    const [pagePending, setPagePending] = useState(1);
+    const [pageCompleted, setPageCompleted] = useState(1);
+    const pageSize = 10;
+    const [showCompleted, setShowCompleted] = useState(false);
 
     const handleComplete = async (taskId) => {
         if (!user?.email) return;
@@ -97,8 +104,12 @@ const UserTasks = () => {
             });
         }
 
-        setPendingTasks(filteredAndSortedTasks.filter(task => !task.completedDate));
-        setCompletedTasks(filteredAndSortedTasks.filter(task => task.completedDate));
+        const pend = filteredAndSortedTasks.filter(task => !task.completedDate);
+        const comp = filteredAndSortedTasks.filter(task => task.completedDate);
+        setPendingTasks(pend);
+        setCompletedTasks(comp);
+        setPagePending(1);
+        setPageCompleted(1);
     }, [tasks, sortBy, selectedDate]);
 
     const containerVariants = {
@@ -199,6 +210,16 @@ const UserTasks = () => {
                                 Clear
                             </motion.button>
                         )}
+                        <motion.button
+                            onClick={() => setShowCompleted((v) => !v)}
+                            className="ml-2 inline-flex items-center gap-2 bg-white border border-blue-300 text-blue-700 px-3 py-2 rounded-lg shadow-sm hover:bg-blue-50 transition-all duration-200 text-sm font-medium"
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            title={showCompleted ? "Show Pending Tasks" : "Show Completed Tasks"}
+                        >
+                            {showCompleted ? <FaToggleOn className="text-green-600" /> : <FaToggleOff className="text-gray-400" />}
+                            {showCompleted ? "Showing Completed" : "Show Completed"}
+                        </motion.button>
                     </div>
                 </motion.div>
 
@@ -212,115 +233,137 @@ const UserTasks = () => {
                     </motion.p>
                 ) : (
                     <>
-                        <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2">
-                            <span className="text-yellow-600">🕒</span> Pending Tasks
-                        </motion.h3>
+                        {!showCompleted ? (
+                            <>
+                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2">
+                                    <span className="text-yellow-600">🕒</span> Pending Tasks
+                                </motion.h3>
 
-                        {pendingTasks.length === 0 ? (
-                            <motion.p className="text-gray-600 italic text-center py-4">
-                                No pending tasks found. Time to relax!
-                            </motion.p>
+                                {pendingTasks.length === 0 ? (
+                                    <motion.p className="text-gray-600 italic text-center py-4">
+                                        No pending tasks found. Time to relax!
+                                    </motion.p>
+                                ) : (
+                                    <>
+                                    <ul className="space-y-4">
+                                        {pendingTasks
+                                          .slice((pagePending - 1) * pageSize, pagePending * pageSize)
+                                          .map((task, index) => (
+                                            <motion.li
+                                                key={task._id || index}
+                                                className={`bg-white border-l-4 ${getPriorityBorderColor(task.priority)} p-5 rounded-lg shadow-md transition-all duration-300`}
+                                                variants={taskCardVariants}
+                                                initial="hidden"
+                                                animate="visible"
+                                                whileHover="hover"
+                                            >
+                                                <div>
+                                                    <h4 className="text-lg font-semibold text-gray-800">{task.taskName}</h4>
+                                                    <p className="text-lg font-semibold text-gray-600"><span className="text-gray-700">Task Description:</span>{task.taskDescription}</p>
+                                                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                                                        <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        <span className={`font-bold ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>
+                                                            🔥 Priority: {task.priority}
+                                                        </span>
+                                                    </p>
+                                                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                                                        <FaUserCircle className="text-indigo-400" /> Assigned By: <span className="font-medium text-blue-700">{task.createdBy}</span>
+                                                    </p>
+                                                    <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
+                                                        <Link
+                                                            to={`/tasks/${task._id}`}
+                                                            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                        >
+                                                            <FaCommentAlt className="inline mr-1" /> View Details
+                                                        </Link>
+                                                        <motion.button
+                                                            onClick={() => handleComplete(task._id)}
+                                                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                        >
+                                                            <FaCheck className="inline mr-1" /> Complete
+                                                        </motion.button>
+                                                        <motion.button
+                                                            onClick={() => handleDelete(task._id)}
+                                                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                        >
+                                                            🗑 Delete
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+                                            </motion.li>
+                                        ))}
+                                    </ul>
+                                    <Pagination
+                                      page={pagePending}
+                                      pageSize={pageSize}
+                                      total={pendingTasks.length}
+                                      onPageChange={setPagePending}
+                                    />
+                                    </>
+                                )}
+                            </>
                         ) : (
-                            <ul className="space-y-4">
-                                {pendingTasks.map((task, index) => (
-                                    <motion.li
-                                        key={task._id || index}
-                                        className={`bg-white border-l-4 ${getPriorityBorderColor(task.priority)} p-5 rounded-lg shadow-md transition-all duration-300`}
-                                        variants={taskCardVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        whileHover="hover"
-                                    >
-                                        <div>
-                                            <h4 className="text-lg font-semibold text-gray-800">{task.taskName}</h4> {/* Use taskName */}
-                                            <p className="text-lg font-semibold text-gray-600"><span className="text-gray-700">Task Description:</span>{task.taskDescription}</p>
-                                            {/* <p className="text-sm text-gray-600">{task.taskDescription}</p> Use taskName */}
-                                            <p className="text-sm text-gray-600 flex items-center gap-1">
-                                                <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
-                                            </p>
-                                            <p className="text-sm text-gray-600">
-                                                <span className={`font-bold ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>
-                                                    🔥 Priority: {task.priority}
-                                                </span>
-                                            </p>
-                                            {/* <p className="text-sm text-gray-600">
-                                                <span className="text-purple-500">🔁</span> Frequency: {task.taskFrequency}
-                                            </p> */}
-                                            <p className="text-sm text-gray-600 flex items-center gap-1">
-                                                <FaUserCircle className="text-indigo-400" /> Assigned By: <span className="font-medium text-blue-700">{task.createdBy}</span>
-                                            </p>
-                                            <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
-                                                <Link
-                                                    to={`/tasks/${task._id}`} // Link to the TaskDetail page
-                                                    className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
-                                                >
-                                                    <FaCommentAlt className="inline mr-1" /> View Details
-                                                </Link>
-                                                <motion.button
-                                                    onClick={() => handleComplete(task._id)}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                >
-                                                    <FaCheck className="inline mr-1" /> Complete
-                                                </motion.button>
-                                                <motion.button
-                                                    onClick={() => handleDelete(task._id)}
-                                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                >
-                                                    🗑 Delete
-                                                </motion.button>
-                                            </div>
-                                        </div>
-                                    </motion.li>
-                                ))}
-                            </ul>
-                        )}
+                            <>
+                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2">
+                                    <span className="text-green-600">✅</span> Completed Tasks
+                                </motion.h3>
 
-                        <motion.h3 className="text-2xl font-bold mt-10 mb-4 text-blue-800 flex items-center gap-2">
-                            <span className="text-green-600">✅</span> Completed Tasks
-                        </motion.h3>
-
-                        {completedTasks.length === 0 ? (
-                            <motion.p className="text-gray-500 italic text-center py-4">
-                                No completed tasks yet. Keep up the good work!
-                            </motion.p>
-                        ) : (
-                            <ul className="space-y-4">
-                                {completedTasks.map((task, index) => (
-                                    <motion.li
-                                        key={task._id || index}
-                                        className="bg-gray-100 border-l-4 border-green-500 p-5 rounded-lg shadow-sm"
-                                        variants={taskCardVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        whileHover={{ scale: 1.01 }}
-                                    >
-                                        <div>
-                                            <h4 className="text-lg line-through font-medium text-gray-700">{task.taskName}</h4> {/* Use taskName */}
-                                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
-                                            </p>
-                                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
-                                            </p>
-                                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                <FaUserCircle className="text-indigo-300" /> Assigned By: <span className="font-light">{task.createdBy}</span>
-                                            </p>
-                                            <div className="mt-4 flex justify-end">
-                                                <Link
-                                                    to={`/tasks/${task._id}`} // Link to the TaskDetail page
-                                                    className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
-                                                >
-                                                    <FaCommentAlt className="inline mr-1" /> View Details
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </motion.li>
-                                ))}
-                            </ul>
+                                {completedTasks.length === 0 ? (
+                                    <motion.p className="text-gray-500 italic text-center py-4">
+                                        No completed tasks yet. Keep up the good work!
+                                    </motion.p>
+                                ) : (
+                                    <>
+                                    <ul className="space-y-4">
+                                        {completedTasks
+                                          .slice((pageCompleted - 1) * pageSize, pageCompleted * pageSize)
+                                          .map((task, index) => (
+                                            <motion.li
+                                                key={task._id || index}
+                                                className="bg-gray-100 border-l-4 border-green-500 p-5 rounded-lg shadow-sm"
+                                                variants={taskCardVariants}
+                                                initial="hidden"
+                                                animate="visible"
+                                                whileHover={{ scale: 1.01 }}
+                                            >
+                                                <div>
+                                                    <h4 className="text-lg line-through font-medium text-gray-700">{task.taskName}</h4>
+                                                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                        <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                        <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                        <FaUserCircle className="text-indigo-300" /> Assigned By: <span className="font-light">{task.createdBy}</span>
+                                                    </p>
+                                                    <div className="mt-4 flex justify-end">
+                                                        <Link
+                                                            to={`/tasks/${task._id}`}
+                                                            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                        >
+                                                            <FaCommentAlt className="inline mr-1" /> View Details
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            </motion.li>
+                                        ))}
+                                    </ul>
+                                    <Pagination
+                                      page={pageCompleted}
+                                      pageSize={pageSize}
+                                      total={completedTasks.length}
+                                      onPageChange={setPageCompleted}
+                                    />
+                                    </>
+                                )}
+                            </>
                         )}
                     </>
                 )}

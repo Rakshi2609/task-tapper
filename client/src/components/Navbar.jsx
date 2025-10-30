@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { FaTasks, FaUserCircle } from "react-icons/fa";
+import { HiOutlineMenu } from "react-icons/hi";
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -30,10 +31,18 @@ const Navbar = () => {
     "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-600 hover:shadow-md";
 
   return (
-    <nav className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-4 py-3 shadow-xl relative z-50">
+    <nav className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-4 py-3 shadow-xl sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2 group">
+        <div className="flex items-center gap-2">
+          <button
+            className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-blue-800/40"
+            onClick={onMenuClick}
+            aria-label="Toggle sidebar"
+          >
+            <HiOutlineMenu className="text-2xl" />
+          </button>
+          <Link to="/" className="flex items-center space-x-2 group">
           <motion.div
             initial={{ rotate: 0 }}
             whileHover={{ rotate: 10 }}
@@ -45,7 +54,8 @@ const Navbar = () => {
           <div className="text-2xl font-extrabold text-white tracking-wide">
             Donezo  
           </div>
-        </Link>
+          </Link>
+        </div>
 
         {/* Desktop Nav */}
         <div className="flex items-center space-x-4">

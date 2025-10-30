@@ -21,6 +21,7 @@ import {
   completeRecurringTask, // <-- Use the correct function
   deleteRecurringTask,
 } from '../services/rexurring';
+import Pagination from './Pagination';
 
 const RecurringTaskList = () => {
   const { user, getUserTasks, getUserProfile } = useAuthStore();
@@ -29,14 +30,20 @@ const RecurringTaskList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const fetchRecurringTasks = async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await getAllRecurringTasks();
-      // Service already returns the response body: { success: true, data: [...] }
-      const allTasks = Array.isArray(res?.data) ? res.data : [];
+      // Service returns body; support both { success, data: [...] } and direct array
+      const allTasks = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.data)
+        ? res.data.data
+        : [];
       const pendingTasks = allTasks.filter(task => !task.completedDate);
       setTasks(pendingTasks);
       setFilteredTasks(pendingTasks);
@@ -62,6 +69,7 @@ const RecurringTaskList = () => {
       task.taskDescription?.toLowerCase().includes(lowercasedSearchTerm)
     );
     setFilteredTasks(filtered);
+    setPage(1); // reset to page 1 on new filter
   }, [searchTerm, tasks]);
 
   const handleComplete = async (taskId) => {
@@ -178,7 +186,9 @@ const RecurringTaskList = () => {
 
       <AnimatePresence>
         <ul className="space-y-4">
-          {filteredTasks.map(task => (
+          {filteredTasks
+            .slice((page - 1) * pageSize, page * pageSize)
+            .map(task => (
             <motion.li
               key={task._id}
               className={`bg-white rounded-xl shadow-md p-5 border-l-4 ${getPriorityBorderColor(task.taskPriority)} flex flex-col sm:flex-row sm:items-center justify-between transition-all duration-200 hover:shadow-lg hover:border-purple-300`}
@@ -257,6 +267,13 @@ const RecurringTaskList = () => {
           ))}
         </ul>
       </AnimatePresence>
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={filteredTasks.length}
+        onPageChange={setPage}
+      />
     </motion.div>
   );
 };

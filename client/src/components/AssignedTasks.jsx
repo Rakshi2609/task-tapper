@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { motion } from "framer-motion";
 import { getAllRecurringTasks } from "../services/rexurring";
+import Pagination from "./Pagination";
 
 const AssignedTasks = () => {
   const { user, tasks, getAssignedByMe } = useAuthStore();
@@ -18,6 +19,8 @@ const AssignedTasks = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [recurringTasks, setRecurringTasks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 12; // grid of 3x4
 
   // 1. Fetch one-time tasks you assigned (store) when user changes
   useEffect(() => {
@@ -128,6 +131,7 @@ const AssignedTasks = () => {
     }
 
     setFilteredTasks(tempFiltered);
+    setPage(1); // reset to first page when filters change
   }, [allAssignedTasks, sortBy, searchTask, searchEmail, selectedDate, filterStatus, tasks]);
 
   const getTaskDetailLink = (task) => {
@@ -256,8 +260,11 @@ const AssignedTasks = () => {
           You haven’t assigned any tasks yet or no tasks match your filters.
         </motion.p>
       ) : (
+        <>
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTasks.map((task, idx) => (
+          {filteredTasks
+            .slice((page - 1) * pageSize, page * pageSize)
+            .map((task, idx) => (
             <motion.li
               key={task._id}
               initial={{ opacity: 0, y: 30 }}
@@ -321,6 +328,13 @@ const AssignedTasks = () => {
             </motion.li>
           ))}
         </ul>
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          total={filteredTasks.length}
+          onPageChange={setPage}
+        />
+        </>
       )}
     </motion.div>
   );

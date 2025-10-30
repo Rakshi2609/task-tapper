@@ -12,8 +12,13 @@ const WorldChat = ({ user }) => {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [atTop, setAtTop] = useState(false);
   const messagesEndRef = useRef(null); // Ref for scrolling to bottom
+  const listRef = useRef(null); // Ref for the scrollable container
   const socketRef = useRef(null);
+  const pendingPrependRef = useRef(false);
+
+  const PAGE_SIZE = 20;
 
   const socketURL =
     import.meta.env.MODE === 'development'
@@ -30,10 +35,14 @@ const WorldChat = ({ user }) => {
     if (loading || !hasMore) return;
 
     setLoading(true);
+    const container = listRef.current;
+    const prevScrollHeight = container?.scrollHeight || 0;
+    const prevScrollTop = container?.scrollTop || 0;
+
     const oldest = messages[0]?.timestamp || new Date().toISOString();
 
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/chat/messages?before=${oldest}&limit=20`); // Use API_BASE_URL for axios
+      const res = await axios.get(`${API_BASE_URL}/api/chat/messages?before=${oldest}&limit=${PAGE_SIZE}`);
 
       if (!Array.isArray(res.data)) {
         console.error("❌ Expected array but got:", res.data);
@@ -41,11 +50,23 @@ const WorldChat = ({ user }) => {
         return;
       }
 
-      if (res.data.length === 0) setHasMore(false);
-      else setMessages((prev) => [...res.data.reverse(), ...prev]);
+      if (res.data.length === 0) {
+        setHasMore(false);
+      } else {
+        pendingPrependRef.current = true; // flag to restore scroll position
+        setMessages((prev) => [...res.data.reverse(), ...prev]);
+
+        // Defer scroll position adjustment until after DOM updates
+        setTimeout(() => {
+          if (listRef.current && pendingPrependRef.current) {
+            const newScrollHeight = listRef.current.scrollHeight;
+            listRef.current.scrollTop = newScrollHeight - prevScrollHeight + prevScrollTop;
+            pendingPrependRef.current = false;
+          }
+        }, 0);
+      }
     } catch (err) {
       console.error("❌ Failed to load messages:", err);
-      // Optionally show a toast error here
     } finally {
       setLoading(false);
     }
@@ -53,13 +74,24 @@ const WorldChat = ({ user }) => {
 
   // 👇 Set up socket connection and initial message load
   useEffect(() => {
+    // Initial REST load for latest 20
+    (async () => {
+      await loadMessages();
+      scrollToBottom();
+    })();
+
+    // Socket for realtime updates
     socketRef.current = io(socketURL, {
       withCredentials: true,
     });
 
     socketRef.current.on('world-chat-init', (initMessages) => {
-      setMessages(initMessages);
-      scrollToBottom(); // Scroll to bottom on initial load
+      // If messages are already loaded via REST, ignore or minimally merge
+      if (messages.length === 0 && Array.isArray(initMessages)) {
+        const last20 = initMessages.slice(-PAGE_SIZE);
+        setMessages(last20);
+        scrollToBottom();
+      }
     });
 
     socketRef.current.on('world-chat-message', (msg) => {
@@ -69,6 +101,7 @@ const WorldChat = ({ user }) => {
     return () => {
       socketRef.current.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socketURL]);
 
   // Scroll to bottom when new messages arrive
@@ -88,9 +121,8 @@ const WorldChat = ({ user }) => {
   };
 
   const handleScroll = (e) => {
-    if (e.target.scrollTop === 0 && hasMore) {
-      loadMessages();
-    }
+    const atTopNow = e.target.scrollTop === 0;
+    setAtTop(atTopNow);
   };
 
   // Framer Motion variants for the main container
@@ -135,14 +167,24 @@ const WorldChat = ({ user }) => {
         </motion.h2>
 
         <div
+          ref={listRef}
           onScroll={handleScroll}
-          className="h-96 overflow-y-auto border border-blue-200 rounded-xl shadow-inner p-4 bg-blue-50 flex flex-col space-y-3 custom-scrollbar" // Added custom-scrollbar
+          className="h-96 overflow-y-auto border border-blue-200 rounded-xl shadow-inner p-4 bg-blue-50 flex flex-col space-y-3 custom-scrollbar"
         >
-          {loading && (
-            <p className="text-blue-600 animate-pulse text-center py-2 flex items-center justify-center gap-2">
-              <FaSpinner className="animate-spin" /> Loading more messages...
-            </p>
+          {hasMore && (
+            <div className="flex justify-center mb-2">
+              <button
+                className={`text-sm px-3 py-1 rounded-md border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 transition ${
+                  atTop && !loading ? '' : 'opacity-0 pointer-events-none'
+                }`}
+                onClick={loadMessages}
+                disabled={loading}
+              >
+                {loading ? 'Loading…' : `Load older messages (+${PAGE_SIZE})`}
+              </button>
+            </div>
           )}
+          {/* Inline spinner can be used elsewhere if desired */}
           {!hasMore && (
             <p className="text-gray-500 text-center text-sm py-2">
               — End of chat history —
