@@ -7,6 +7,7 @@ import { FaPaperPlane, FaSpinner, FaComments, FaUserCircle, FaBell } from 'react
 const WorldChat = ({ user }) => {
   // Ensure VITE_APP_API_URL is correctly defined in your .env file
   const API_BASE_URL = import.meta.env.VITE_APP_API_URL;
+  const REST_BASE_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : API_BASE_URL;
 
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
@@ -42,7 +43,9 @@ const WorldChat = ({ user }) => {
     const oldest = messages[0]?.timestamp || new Date().toISOString();
 
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/chat/messages?before=${oldest}&limit=${PAGE_SIZE}`);
+      const res = await axios.get(`${REST_BASE_URL}/api/chat/messages`, {
+        params: { before: oldest, limit: PAGE_SIZE }
+      });
 
       if (!Array.isArray(res.data)) {
         console.error("❌ Expected array but got:", res.data);
@@ -54,7 +57,13 @@ const WorldChat = ({ user }) => {
         setHasMore(false);
       } else {
         pendingPrependRef.current = true; // flag to restore scroll position
-        setMessages((prev) => [...res.data.reverse(), ...prev]);
+        setMessages((prev) => {
+          // Dedupe by _id to avoid duplicates
+          const existing = new Set(prev.map((m) => m._id));
+          const toPrepend = res.data.filter((m) => !existing.has(m._id));
+          // Server returns ascending order already; prepend as-is to keep timeline ascending
+          return [...toPrepend, ...prev];
+        });
 
         // Defer scroll position adjustment until after DOM updates
         setTimeout(() => {
@@ -106,6 +115,8 @@ const WorldChat = ({ user }) => {
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
+    // Don't jump to bottom when we're prepending older messages
+    if (pendingPrependRef.current) return;
     scrollToBottom();
   }, [messages]);
 
@@ -234,7 +245,7 @@ const WorldChat = ({ user }) => {
           />
           <motion.button
             onClick={sendMessage}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-xl shadow-lg flex items-center gap-2 font-semibold transition-all duration-300"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-xl shadow-lg flex items-center gap-2 transition-all duration-300"
             whileHover={{ scale: 1.08, boxShadow: "0px 8px 20px rgba(59, 130, 246, 0.4)" }}
             whileTap={{ scale: 0.95 }}
           >
