@@ -3,21 +3,11 @@ import { useAuthStore } from "../assests/store";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/firebase";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend,
-} from "recharts";
+// Removed Recharts bar chart in favor of a calendar view
 import { motion } from "framer-motion";
 import {
   FaUserCircle,
   FaTasks,
-  FaChartBar,
   FaCalendarDay,
   FaInfoCircle,
   FaCheckCircle,
@@ -138,33 +128,50 @@ const UserProfile = () => {
     );
   }
 
-  // Map task stats with icons and specific colors for better visual representation
-  const taskStats = [
-    {
-      name: "Assigned",
-      value: user.TasksAssigned || 0,
-      icon: <FaTasks />,
-      color: "#4299E1",
-    }, // Blue
-    {
-      name: "In Progress",
-      value: user.TasksInProgress || 0,
-      icon: <FaPlayCircle />,
-      color: "#ECC94B",
-    }, // Yellow
-    {
-      name: "Completed",
-      value: user.TasksCompleted || 0,
-      icon: <FaCheckCircle />,
-      color: "#48BB78",
-    }, // Green
-    {
-      name: "Not Started",
-      value: user.TasksNotStarted || 0,
-      icon: <FaTimesCircle />,
-      color: "#F56565",
-    }, // Red
-  ];
+  // Calendar state and helpers
+  const [monthCursor, setMonthCursor] = useState(() => {
+    const d = new Date();
+    d.setDate(1);
+    d.setHours(0,0,0,0);
+    return d;
+  });
+
+  const fmtKey = (d) => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const startOfMonth = new Date(monthCursor);
+  const endOfMonth = new Date(monthCursor.getFullYear(), monthCursor.getMonth()+1, 0);
+  const startDay = new Date(startOfMonth);
+  startDay.setDate(startOfMonth.getDate() - startOfMonth.getDay()); // Sunday start
+  const days = Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(startDay);
+    d.setDate(startDay.getDate() + i);
+    d.setHours(0,0,0,0);
+    return d;
+  });
+
+  const today = useMemo(() => {
+    const t = new Date();
+    t.setHours(0,0,0,0);
+    return t;
+  }, []);
+
+  const tasksByDate = useMemo(() => {
+    const map = {};
+    (tasks || []).forEach(t => {
+      if (!t?.dueDate) return;
+      const d = new Date(t.dueDate);
+      d.setHours(0,0,0,0);
+      const key = fmtKey(d);
+      if (!map[key]) map[key] = [];
+      map[key].push(t);
+    });
+    return map;
+  }, [tasks]);
 
   // Derived totals for progress ring
   const { totalTasks, completedPct } = useMemo(() => {
@@ -199,15 +206,15 @@ const UserProfile = () => {
         <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {/* User Details Card */}
           <motion.div
-            className="p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100 flex flex-col justify-between"
+            className="p-5 bg-blue-50 rounded-xl shadow-md border border-blue-100 flex flex-col gap-4"
             variants={itemVariants}
           >
             <div>
-              <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center gap-2">
+              <h3 className="text-xl font-bold mb-3 text-blue-800 flex items-center gap-2">
                 <FaInfoCircle /> User Details
               </h3>
               {/* Header with avatar and greeting */}
-              <div className="flex items-center gap-4 mb-5">
+              <div className="flex items-center gap-4 mb-4">
                 <FaUserCircle className="text-blue-600 text-5xl" />
                 <div>
                   <p className="text-sm text-gray-500">Welcome back,</p>
@@ -218,7 +225,7 @@ const UserProfile = () => {
               </div>
 
               {/* Contact & Account Info */}
-              <div className="grid grid-cols-1 gap-3 text-sm text-gray-700 mb-6">
+              <div className="grid grid-cols-1 gap-3 text-sm text-gray-700 mb-4">
                 <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
                   <span className="font-medium">Email</span>
                   <span className="font-semibold text-blue-800 truncate max-w-[60%] text-right">{user.email}</span>
@@ -252,7 +259,7 @@ const UserProfile = () => {
               </div>
 
               {/* Quick actions */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <Link to="/create">
                   <motion.button
                     className="w-full bg-white border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50"
@@ -274,8 +281,31 @@ const UserProfile = () => {
                   </motion.button>
                 </Link>
               </div>
+
+              {/* Compact Task Summary to balance height */}
+              <div className="mt-3">
+                <h4 className="text-sm font-semibold text-blue-800 mb-2">My Task Summary</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center justify-between bg-white/70 border border-blue-100 rounded-lg px-3 py-2">
+                    <span className="flex items-center gap-2 text-gray-700 text-sm"><FaTasks className="text-blue-500"/> Assigned</span>
+                    <span className="text-blue-900 font-bold">{user?.TasksAssigned || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between bg-white/70 border border-yellow-100 rounded-lg px-3 py-2">
+                    <span className="flex items-center gap-2 text-gray-700 text-sm"><FaPlayCircle className="text-yellow-500"/> In Progress</span>
+                    <span className="text-yellow-700 font-bold">{user?.TasksInProgress || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between bg-white/70 border border-green-100 rounded-lg px-3 py-2">
+                    <span className="flex items-center gap-2 text-gray-700 text-sm"><FaCheckCircle className="text-green-500"/> Completed</span>
+                    <span className="text-green-700 font-bold">{user?.TasksCompleted || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between bg-white/70 border border-red-100 rounded-lg px-3 py-2">
+                    <span className="flex items-center gap-2 text-gray-700 text-sm"><FaTimesCircle className="text-red-500"/> Not Started</span>
+                    <span className="text-red-700 font-bold">{user?.TasksNotStarted || 0}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-3">
+            <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-2">
               <Link to="/tasks">
                 <motion.button
                   className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:bg-blue-700 transition-all duration-200"
@@ -298,7 +328,7 @@ const UserProfile = () => {
               </Link>
             </div>
             {/* Logout Button inside the user details card */}
-            <div className="mt-6 flex justify-center">
+            <div className="mt-4 flex justify-center">
               <motion.button
                 onClick={handleLogout}
                 className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg text-lg font-bold shadow-md hover:bg-red-700 transition-all duration-200"
@@ -310,16 +340,16 @@ const UserProfile = () => {
             </div>
           </motion.div>
 
-          {/* Task Stats Chart Card */}
+          {/* Calendar Card */}
           <motion.div
             className="p-6 bg-blue-50 rounded-xl shadow-md border border-blue-100 flex flex-col"
             variants={itemVariants}
           >
             <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center gap-2">
-              <FaChartBar /> Task Statistics
+              <FaCalendarDay /> Calendar
             </h3>
-            {/* Completion Progress Ring */}
-            <div className="flex items-center gap-6 mb-6">
+            {/* Completion Progress Ring (kept) */}
+            <div className="flex items-center gap-6 mb-4">
               <div className="relative w-24 h-24">
                 <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
                   <circle cx="50" cy="50" r="42" stroke="#e5e7eb" strokeWidth="12" fill="none" />
@@ -344,42 +374,69 @@ const UserProfile = () => {
                 <p className="text-2xl font-extrabold text-gray-900">{user?.TasksCompleted || 0} / {totalTasks}</p>
               </div>
             </div>
-            <div className="flex-grow h-48 mb-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={taskStats}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
-                  <XAxis dataKey="name" stroke="#6b7280" tickLine={false} axisLine={false} />
-                  <YAxis allowDecimals={false} stroke="#6b7280" />
-                  <Tooltip
-                    cursor={{ fill: "rgba(59, 130, 246, 0.15)" }}
-                    contentStyle={{
-                      borderRadius: "10px",
-                      border: "1px solid #bfdbfe",
-                      boxShadow: "0px 4px 15px rgba(0,0,0,0.1)",
-                    }}
-                    itemStyle={{ color: "#333", padding: "4px 0" }}
-                    labelStyle={{ color: "#0f172a", fontWeight: "bold" }}
-                  />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={40}>
-                    {taskStats.map((entry, index) => (
-                      <Bar key={`bar-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            {/* Month selector */}
+            <div className="flex items-center justify-between mb-3">
+              <button
+                className="px-3 py-1 text-sm bg-white border border-blue-200 rounded-lg hover:bg-blue-50"
+                onClick={() => setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1))}
+              >
+                Prev
+              </button>
+              <div className="font-semibold text-blue-900">
+                {monthCursor.toLocaleString(undefined, { month: 'long', year: 'numeric' })}
+              </div>
+              <button
+                className="px-3 py-1 text-sm bg-white border border-blue-200 rounded-lg hover:bg-blue-50"
+                onClick={() => setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1))}
+              >
+                Next
+              </button>
             </div>
-            <div className="flex flex-wrap justify-center text-xs mt-4 text-gray-700 gap-x-4 gap-y-2">
-              {taskStats.map((stat, index) => (
-                <div key={index} className="flex items-center gap-1">
-                  <span style={{ color: stat.color }} className="text-lg">
-                    {stat.icon}
-                  </span>
-                  {stat.name}
-                </div>
+            {/* Weekday headers */}
+            <div className="grid grid-cols-7 text-center text-xs text-gray-600 mb-1">
+              {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
+                <div key={d} className="py-1">{d}</div>
               ))}
+            </div>
+            {/* Calendar grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {days.map((d, idx) => {
+                const key = fmtKey(d);
+                const dayTasks = tasksByDate[key] || [];
+                const pending = dayTasks.filter(t => !t.completedDate);
+                const completed = dayTasks.filter(t => !!t.completedDate);
+                const isCurrentMonth = d.getMonth() === monthCursor.getMonth();
+                const isToday = d.getTime() === today.getTime();
+                const isOverdueDay = d < today && pending.length > 0;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => navigate(`/tasks?date=${key}`)}
+                    className={`relative h-16 rounded-lg border text-left p-2 flex flex-col justify-between transition-colors
+                      ${isCurrentMonth ? 'bg-white border-blue-100' : 'bg-gray-50 border-gray-200 text-gray-400'}
+                      ${isToday ? 'ring-2 ring-blue-400' : ''}
+                      hover:bg-blue-50`}
+                    title={`${pending.length} pending, ${completed.length} completed`}
+                  >
+                    <div className="text-xs font-semibold">{d.getDate()}</div>
+                    <div className="flex items-center gap-1">
+                      {pending.length > 0 && (
+                        <span className={`inline-flex items-center justify-center text-[10px] min-w-[16px] h-4 px-1 rounded-full ${isOverdueDay ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>{pending.length}</span>
+                      )}
+                      {completed.length > 0 && (
+                        <span className="inline-flex items-center justify-center text-[10px] min-w-[16px] h-4 px-1 rounded-full bg-green-500 text-white">{completed.length}</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Legend and quick filters */}
+            <div className="flex flex-wrap justify-center text-xs mt-4 text-gray-700 gap-3">
+              <div className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Pending</div>
+              <div className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Completed</div>
+              <div className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Overdue pending</div>
             </div>
 
             {/* Quick Filters */}

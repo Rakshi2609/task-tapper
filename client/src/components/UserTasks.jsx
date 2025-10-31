@@ -80,18 +80,32 @@ const UserTasks = () => {
     // Initialize filters based on URL query params only once on mount
     useEffect(() => {
         const view = searchParams.get("view"); // 'completed' | 'pending'
-        const date = searchParams.get("date"); // 'today'
+        const date = searchParams.get("date"); // 'today' or 'YYYY-MM-DD'
         const overdue = searchParams.get("overdue"); // 'true'
 
         if (view === "completed") setShowCompleted(true);
         if (view === "pending") setShowCompleted(false);
 
-        if (date === "today") {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            setSelectedDate(today);
-            setShowCompleted(false);
-            setFilterOverdue(false);
+        if (date) {
+            if (date === "today") {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                setSelectedDate(today);
+                setShowCompleted(false);
+                setFilterOverdue(false);
+            } else {
+                // parse YYYY-MM-DD
+                const parts = date.split("-");
+                if (parts.length === 3) {
+                    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                    if (!isNaN(d.getTime())) {
+                        d.setHours(0,0,0,0);
+                        setSelectedDate(d);
+                        setShowCompleted(false);
+                        setFilterOverdue(false);
+                    }
+                }
+            }
         }
 
         if (overdue === "true") {
