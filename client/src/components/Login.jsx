@@ -18,23 +18,23 @@ const Login = () => {
 
   const handleGoogleSignUp = async () => {
     try {
-      console.log("🔐 Initiating Google sign-in...");
+  console.log("Initiating Google sign-in...");
       const result = await signInWithPopup(auth, googleProvider);
-      console.log("✅ Firebase sign-in successful");
+  console.log("Firebase sign-in successful");
 
       const currentUser = auth.currentUser;
-      console.log("👤 Firebase user:", currentUser);
+  console.log("Firebase user:", currentUser);
 
       const email = currentUser?.email;
       const displayName = currentUser?.displayName;
 
       if (!email) {
-        console.error("❌ No email found from Firebase user.");
+  console.error("No email found from Firebase user.");
         toast.error("Google email not found. Please try again.");
         return;
       }
 
-      console.log("📤 Sending email to backend login API:", email);
+  console.log("Sending email to backend login API:", email);
       const loginSuccess = await login(email); // Call the login action from the store
       if (!loginSuccess) {
         // If backend login fails, clear user state and sign out from Firebase
@@ -44,11 +44,11 @@ const Login = () => {
         return;
       }
 
-      console.log("✅ Zustand login success, user stored.");
+  console.log("Zustand login success, user stored.");
       toast.success(`Welcome back, ${displayName || email.split("@")[0]}!`);
   navigate("/profile");
     } catch (error) {
-      console.error("❌ Google Sign-In failed:", error);
+  console.error("Google Sign-In failed:", error);
       let errorMessage = "Google Sign-In failed. Please try again.";
 
       // More specific error messages for common Firebase errors
@@ -62,14 +62,14 @@ const Login = () => {
         errorMessage = `Sign-In failed: ${error.message}`;
       }
 
-      toast.error(`❌ ${errorMessage}`);
+  toast.error(`Error: ${errorMessage}`);
 
       // Fail-safe logout from Firebase if sign-in failed
       try {
         await signOut(auth);
-        console.log("🧹 Firebase logout after failure.");
+  console.log("Firebase logout after failure.");
       } catch (logoutErr) {
-        console.error("❌ Error logging out from Firebase:", logoutErr);
+  console.error("Error logging out from Firebase:", logoutErr);
       }
 
       // Ensure Zustand user state is null on failure

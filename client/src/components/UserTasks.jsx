@@ -48,11 +48,11 @@ const UserTasks = () => {
         if (!user?.email) return;
         try {
             await completeTaskAPI({taskId, email: user.email});
-            toast.success("✅ Task marked as completed!");
+            toast.success("Task marked as completed!");
             getUserTasks(user.email);
             getUserProfile(user.email);
         } catch (e) {
-            toast.error("❌ Could not complete task: " + (e.response?.data?.message || e.message));
+            toast.error("Could not complete task: " + (e.response?.data?.message || e.message));
         }
     };
 
@@ -62,11 +62,11 @@ const UserTasks = () => {
         if (!window.confirm("Are you sure you want to delete this task?")) return;
         try {
             await deleteTaskAPI({taskId});
-            toast.success("🗑️ Task deleted successfully!");
+            toast.success("Task deleted successfully!");
             getUserTasks(user.email);
             getUserProfile(user.email);
         } catch (e) {
-            toast.error("❌ Failed to delete task: " + (e.response?.data?.message || e.message));
+            toast.error("Failed to delete task: " + (e.response?.data?.message || e.message));
         }
     };
 
@@ -271,8 +271,8 @@ const UserTasks = () => {
                     <>
                         {!showCompleted ? (
                             <>
-                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2">
-                                    <span className="text-yellow-600">🕒</span> Pending Tasks
+                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800">
+                                    Pending Tasks
                                 </motion.h3>
 
                                 {pendingTasks.length === 0 ? (
@@ -301,7 +301,7 @@ const UserTasks = () => {
                                                     </p>
                                                     <p className="text-sm text-gray-600">
                                                         <span className={`font-bold ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>
-                                                            🔥 Priority: {task.priority}
+                                                            Priority: {task.priority}
                                                         </span>
                                                     </p>
                                                     <p className="text-sm text-gray-600 flex items-center gap-1 min-w-0">
@@ -330,7 +330,7 @@ const UserTasks = () => {
                                                             whileHover={{ scale: 1.05 }}
                                                             whileTap={{ scale: 0.95 }}
                                                         >
-                                                            🗑 Delete
+                                                            Delete
                                                         </motion.button>
                                                     </div>
                                                 </div>
@@ -348,8 +348,8 @@ const UserTasks = () => {
                             </>
                         ) : (
                             <>
-                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800 flex items-center gap-2">
-                                    <span className="text-green-600">✅</span> Completed Tasks
+                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800">
+                                    Completed Tasks
                                 </motion.h3>
 
                                 {completedTasks.length === 0 ? (

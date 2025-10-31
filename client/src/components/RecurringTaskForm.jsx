@@ -16,7 +16,7 @@ const RecurringTaskForm = () => {
     taskCreateDaysAhead: 1,
     taskStartDate: '',
     taskEndDate: '',
-    taskAssignedBy: '',
+    taskAssignedBy: user?.email || '',
     taskAssignedTo: '',
     createdBy: user?.email || "",
   });
@@ -69,6 +69,7 @@ const RecurringTaskForm = () => {
     setFormData((prevData) => ({
       ...prevData,
       createdBy: user?.email || "",
+      taskAssignedBy: user?.email || '',
     }));
   }, [user?.email]);
 
@@ -152,7 +153,7 @@ const RecurringTaskForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.taskName || !formData.taskDescription || !formData.taskFrequency || !formData.taskStartDate || !formData.taskAssignedBy || !formData.taskAssignedTo) {
+    if (!formData.taskName || !formData.taskDescription || !formData.taskFrequency || !formData.taskStartDate || !user?.email || !formData.taskAssignedTo) {
       toast.error("All fields are required. Please fill them out.");
       return;
     }
@@ -163,7 +164,12 @@ const RecurringTaskForm = () => {
     }
 
     try {
-      await createRecurringTask(formData);
+      const payload = {
+        ...formData,
+        taskAssignedBy: user?.email || '',
+        createdBy: user?.email || '',
+      };
+      await createRecurringTask(payload);
       toast.success("✅ Recurring task created successfully!");
       setFormData({
         taskName: '',
@@ -172,7 +178,7 @@ const RecurringTaskForm = () => {
         taskCreateDaysAhead: 1,
         taskStartDate: '',
         taskEndDate: '',
-        taskAssignedBy: '',
+        taskAssignedBy: user?.email || '',
         taskAssignedTo: '',
         createdBy: user?.email || "",
       });
@@ -368,7 +374,7 @@ const RecurringTaskForm = () => {
         </motion.div>
       </div>
 
-      {/* Task Assigned By (Email dropdown) */}
+      {/* Task Assigned By (Email - locked to current user) */}
       <div className="space-y-2 relative" ref={assignedByEmailInputRef}>
         <label htmlFor="taskAssignedBy" className="block text-gray-700 font-semibold text-sm">Assigned By Email:</label>
         <motion.div
@@ -379,72 +385,19 @@ const RecurringTaskForm = () => {
         >
           <FaUser className="text-blue-500 ml-4 mr-2" />
           <input
-            id="taskAssignedBy" // Added id
+            id="taskAssignedBy"
             name="taskAssignedBy"
             value={formData.taskAssignedBy}
-            onChange={(e) => handleEmailInput(e, "taskAssignedBy")}
-            onFocus={() => {
-                if (formData.taskAssignedBy.length === 0 && allEmails.length > 0 && !loadingEmails) {
-                    setFilteredAssignedByEmails(allEmails);
-                }
-                setShowAssignedByEmailSuggestions(true);
-            }}
-            placeholder="e.g., your.email@example.com (Who assigned this task?)"
+            readOnly
+            disabled
+            placeholder="Your email (auto)"
             className="p-3 rounded-r-xl w-full bg-transparent outline-none text-gray-800 placeholder-gray-400"
             required
             autoComplete="off"
-            title="Enter or select the email of the person who is assigning this recurring task."
+            title="Assigned by is automatically set to your account."
           />
-          {formData.taskAssignedBy && (
-            <button
-              type="button"
-              onClick={() => {
-                setFormData({ ...formData, taskAssignedBy: "" });
-                setFilteredAssignedByEmails([]);
-                setShowAssignedByEmailSuggestions(false);
-                setTaskAssignedByName("");
-              }}
-              className="mr-3 text-gray-400 hover:text-red-500 transition-colors"
-              title="Clear email"
-            >
-              <FaTimesCircle />
-            </button>
-          )}
+          {/* Clear/suggestions removed since field is locked */}
         </motion.div>
-        {taskAssignedByName && (
-          <p className="text-xs text-gray-600 mt-1 ml-1 italic">Name: <span className="font-medium">{taskAssignedByName}</span></p>
-        )}
-        <AnimatePresence>
-          {showAssignedByEmailSuggestions && (
-            <motion.ul
-              className="absolute bg-white border border-blue-200 w-full z-20 max-h-48 overflow-y-auto shadow-lg rounded-b-xl mt-1 custom-scrollbar"
-              variants={dropdownVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              {loadingEmails ? (
-                <li className="px-4 py-2 text-gray-500 text-center">Loading emails...</li>
-              ) : filteredAssignedByEmails.length > 0 ? (
-                filteredAssignedByEmails.map((email, idx) => (
-                  <motion.li
-                    key={idx}
-                    onClick={() => handleSelectEmail(email, "taskAssignedBy")}
-                    className={`px-4 py-3 hover:bg-blue-100 cursor-pointer transition-colors duration-200 text-gray-700 ${
-                      email === user?.email ? "font-bold text-blue-600 bg-blue-50" : ""
-                    }`}
-                    whileHover={{ scale: 1.01, backgroundColor: "#E0F2FE" }}
-                    transition={{ duration: 0.1 }}
-                  >
-                    {email} {email === user?.email && <span className="text-blue-500 font-normal text-xs">(You)</span>}
-                  </motion.li>
-                ))
-              ) : (
-                <li className="px-4 py-3 text-gray-500 text-center">No matching emails found.</li>
-              )}
-            </motion.ul>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Task Assigned To (Email dropdown) */}
@@ -537,7 +490,7 @@ const RecurringTaskForm = () => {
           <FaPaperPlane /> Create Recurring Task
         </span>
       </motion.button>
-      <Link to="/" className="text-blue-600 hover:underline text-center block mt-4">
+      <Link to="/create" className="text-blue-600 hover:underline text-center block mt-4">
         Go Back to Create One-Time Task
       </Link>
     </motion.form>

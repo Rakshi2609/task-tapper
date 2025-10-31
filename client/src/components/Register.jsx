@@ -26,10 +26,10 @@ const Register = () => {
     const roleDropdownRef = useRef(null); // Ref for click-outside detection
 
     const roleOptions = [
-        { value: "user", label: "👤 User" },
-        { value: "admin", label: "👑 Admin" },
-        { value: "manager", label: "💼 Manager" },
-        { value: "guest", label: "👋 Guest" },
+        { value: "user", label: "User" },
+        { value: "admin", label: "Admin" },
+        { value: "manager", label: "Manager" },
+        { value: "guest", label: "Guest" },
     ];
 
     // Effect to check if user is already signed up and has core user data
@@ -63,12 +63,12 @@ const Register = () => {
     const handleGoogleAuth = async () => {
         setLoading(true);
         try {
-            console.log("🔐 Starting Google Sign-Up...");
+            console.log("Starting Google Sign-Up...");
             const result = await signInWithPopup(auth, googleProvider);
             const currentUser = result.user; // Get user from result
 
             if (!currentUser?.email) {
-                toast.error("❌ Google email not found. Please try again.");
+                toast.error("Google email not found. Please try again.");
                 setLoading(false);
                 return;
             }
@@ -77,8 +77,8 @@ const Register = () => {
             // For Google Sign-in, Firebase usually sets emailVerified to true automatically.
             // This check ensures it's indeed true before proceeding.
             if (!currentUser.emailVerified) {
-                console.warn("🚫 Google email not verified by Firebase. Stopping signup.");
-                toast.error("❌ Your Google email is not verified. Please verify your email through Google before signing up.");
+                console.warn("Google email not verified by Firebase. Stopping signup.");
+                toast.error("Your Google email is not verified. Please verify your email through Google before signing up.");
                 // Optionally, you might want to sign them out of Firebase here if their email isn't verified.
                 await signOut(auth);
                 setLoading(false);
@@ -90,27 +90,27 @@ const Register = () => {
             const email = currentUser.email;
             const displayName = currentUser.displayName;
 
-            console.log("📤 Sending signup to backend for:", email, displayName);
+            console.log("Sending signup to backend for:", email, displayName);
 
             const signupSuccess = await signup(email, displayName); // Zustand call
 
             if (signupSuccess) {
-                toast.success("🎉 Google Sign-Up successful! Please provide a few more details.");
+                toast.success("Google Sign-Up successful! Please provide a few more details.");
                 setShowUserDetailsForm(true); // Show the next form
             } else {
-                console.warn("🚫 Zustand backend signup failed. Attempting to delete Firebase user.");
+                console.warn("Zustand backend signup failed. Attempting to delete Firebase user.");
                 useAuthStore.setState({ user: null }); // Clear user from store
 
                 try {
                     await currentUser.delete(); // Delete Firebase Auth user if backend signup failed
-                    console.log("🗑️ Firebase user deleted due to backend signup failure.");
+                    console.log("Firebase user deleted due to backend signup failure.");
                 } catch (err) {
                     console.error("❌ Failed to delete Firebase user:", err);
                 }
                 toast.error("Signup failed. Please try again.");
             }
         } catch (error) {
-            console.error("❌ Google Sign-Up error:", error.message);
+            console.error("Google Sign-Up error:", error.message);
             let errorMessage = "Google Sign-Up failed. Please try again.";
 
             if (error.code === 'auth/popup-closed-by-user') {
@@ -124,15 +124,15 @@ const Register = () => {
                 errorMessage = `Sign-Up failed: ${error.message}`;
             }
 
-            toast.error(`❌ ${errorMessage}`);
+            toast.error(`Error: ${errorMessage}`);
             useAuthStore.setState({ user: null }); // Clear any partial user state
 
             // Attempt to sign out from Firebase to ensure clean state
             try {
                 await signOut(auth);
-                console.log("🧹 Firebase logout after failure.");
+                console.log("Firebase logout after failure.");
             } catch (logoutErr) {
-                console.error("❌ Error logging out from Firebase:", logoutErr);
+                console.error("Error logging out from Firebase:", logoutErr);
             }
         } finally {
             setLoading(false);
@@ -165,7 +165,7 @@ const Register = () => {
         }
 
         try {
-            console.log("📤 Sending user details to backend for:", user.email);
+            console.log("Sending user details to backend for:", user.email);
             const saveSuccess = await saveUserDetail(user.email, userDetails.phoneNumber, userDetails.role);
 
             if (saveSuccess) {
@@ -175,7 +175,7 @@ const Register = () => {
                 toast.error("Failed to save user details. Please try again.");
             }
         } catch (error) {
-            console.error("❌ Error saving user details:", error);
+            console.error("Error saving user details:", error);
             toast.error("An error occurred while saving details.");
         } finally {
             setLoading(false);

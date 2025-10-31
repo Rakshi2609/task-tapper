@@ -80,12 +80,12 @@ const RecurringTaskList = () => {
     try {
       // Use the correct service function for completing a recurring task
       await completeRecurringTask({ taskId, email: user.email });
-      toast.success("✅ Recurring task marked as completed!");
+  toast.success("Recurring task marked as completed!");
       fetchRecurringTasks();
       getUserTasks(user.email);
       getUserProfile(user.email);
     } catch (e) {
-      toast.error("❌ Could not complete task: " + (e.response?.data?.message || e.message));
+  toast.error("Could not complete task: " + (e.response?.data?.message || e.message));
     }
   };
 
@@ -93,12 +93,12 @@ const RecurringTaskList = () => {
     if (!window.confirm("Are you sure you want to delete this recurring task?")) return;
     try {
       await deleteRecurringTask(taskId);
-      toast.success("🗑️ Recurring task deleted successfully!");
+  toast.success("Recurring task deleted successfully!");
       fetchRecurringTasks();
       getUserTasks(user.email);
       getUserProfile(user.email);
     } catch (e) {
-      toast.error("❌ Failed to delete task: " + (e.response?.data?.message || e.message));
+  toast.error("Failed to delete task: " + (e.response?.data?.message || e.message));
     }
   };
 

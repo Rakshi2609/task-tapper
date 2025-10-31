@@ -48,7 +48,7 @@ const WorldChat = ({ user }) => {
       });
 
       if (!Array.isArray(res.data)) {
-        console.error("❌ Expected array but got:", res.data);
+  console.error("Expected array but got:", res.data);
         setLoading(false);
         return;
       }
@@ -75,7 +75,7 @@ const WorldChat = ({ user }) => {
         }, 0);
       }
     } catch (err) {
-      console.error("❌ Failed to load messages:", err);
+  console.error("Failed to load messages:", err);
     } finally {
       setLoading(false);
     }
