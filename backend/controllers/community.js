@@ -85,11 +85,22 @@ export const getCommunityById = async (req, res) => {
     }
 };
 
+export const user1 = async (req, res) => {
+    console.log("Fetching all users");  
+    try{
+        const users = await User.find();
+        console.log(users);
+        res.json(users);
+    } catch (error) {
+        console.log("Error fetching all users:", error.message);    
+    }
+};
+
 export const createCommunity = async (req, res) => {
     console.log("Creating new community");
     try {
-        const { name, description, createdBy } = req.body;
-        const community = new Community({ name, description, createdBy });
+        const { name, description, CreatedBy } = req.body;
+        const community = new Community({ name, description, CreatedBy });
         console.log(community);
         await community.save();
         console.log("Community created successfully");
@@ -101,23 +112,52 @@ export const createCommunity = async (req, res) => {
 };
 
 export const addMemberToCommunity = async (req, res) => {
-    console.log("Adding member to community");
-    try {
-        const { communityId, userId } = req.params;
-        const community = await Community.findById(communityId);
-        if (!community) {
-            console.log("Community not found");
-            return res.status(404).json({ message: 'Community not found' });
-        }
-        community.members.push(userId);
-        await community.save();
-        console.log("Member added successfully");
-        res.json(community);
-    } catch (error) {
-        console.log("Error adding member to community:", error.message);
-        res.status(500).json({ message: 'Server error', error: error.message });
+  console.log("Adding member to community");
+
+  try {
+    const { communityId, userId } = req.params;
+
+    // Check community exists
+    const community = await Community.findById(communityId);
+    if (!community) {
+      console.log("Community not found");
+      return res.status(404).json({ message: "Community not found" });
     }
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      console.log("User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Prevent duplicate members
+    if (community.members.includes(userId)) {
+      return res.status(400).json({ message: "User already a member" });
+    }
+
+    // Add member
+    community.members.push(userId);
+
+    // Update totalMembers
+    community.totalMembers = community.members.length;
+
+    await community.save();
+
+    console.log("Member added successfully");
+
+    // Return populated data
+    const updated = await Community.findById(communityId)
+      .populate("members", "username email");
+
+    res.json(updated);
+
+  } catch (error) {
+    console.log("Error adding member to community:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
+
 
 export const removeMemberFromCommunity = async (req, res) => {
     console.log("Removing member from community");

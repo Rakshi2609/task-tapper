@@ -24,3 +24,19 @@ export const getCommunityMembers = async (communityId) => {
   const res = await axios.get(`${API_URL}/${communityId}/members`);
   return res.data;
 };
+
+export const createCommunity = async (communityData) => {
+    const res = await axios.post(`${API_URL}/create`, communityData);
+    return res.data;
+};
+
+// ADD MEMBER (PARAM BASED — MATCHES BACKEND)
+export const addMemberToCommunity = async (communityId, userId) => {
+  const res = await axios.post(`${API_URL}/addMember/${communityId}/${userId}`);
+  return res.data;
+};
+
+export const getAllUsers = async () => {
+    const res = await axios.get(`${API_URL}/users`);
+    return res.data;   // backend sends array directly
+};

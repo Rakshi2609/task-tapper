@@ -27,6 +27,8 @@ import AllCommunity from "./components/community/AllCommunity";
 import CommunityDepartments from "./components/community/CommunityDepartment";
 import CommunityMembers from "./components/community/CommunityMembers";
 import CommunityTeams from "./components/community/CommunityTeams";
+import CreateCommunity from "./components/community/CreateCommunity";
+import AddPeople from "./components/community/AddPeople";
 
 const App = () => {
   const user = useAuthStore((state) => state.user);
@@ -173,7 +175,19 @@ const App = () => {
                 path="/communities/:communityId/teams"
                 element={<CommunityTeams />}
               />
-
+              <Route
+               path='/communities/create'
+               element={
+                <CreateCommunity />
+               }
+               />
+               <Route
+                path='/communities/:communityId/add-people'
+                element={
+                  <AddPeople />
+                }
+                />
+                
               {/* Fallback Route */}
               <Route
                 path="*"
