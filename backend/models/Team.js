@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import CommumityDept from "./CommunityDept.js";
+import Community from "./Community.js";
 
 const teamSchema = new mongoose.Schema({
   createdBy: String,
@@ -6,6 +8,14 @@ const teamSchema = new mongoose.Schema({
   taskDescription: String,
   assignedTo: String,
   assignedName: String,
+  communityDept: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: CommumityDept,
+  },
+  community: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Community,
+  },
   taskFrequency: {
     type: String,
     enum:['Daily', 'Weekly', 'Monthly', 'OneTime'],

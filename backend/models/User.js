@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Community from './Community.js';
 
 const userSchema = new mongoose.Schema({
   username: String,
@@ -21,6 +22,18 @@ const userSchema = new mongoose.Schema({
   },
   Attendence:{
     type: Number,
+  },
+  CommunitysJoined:{
+    type: Number,
+    default:0,
+  },
+  CommunitysCreated:{
+    type: String,
+    default:null,
+  },
+  Servering:{
+    type: String,
+    default:null,
   },
   fcmToken: {
     type: String,

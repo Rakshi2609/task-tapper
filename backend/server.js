@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 
 import authRoutes from './routes/auth.route.js';
 import teamRoutes from './routes/team.route.js';
+import communityRoutes from './routes/community.route.js';
 import { connectDB } from './config/connectDB.js';
 import { triggerDailySummaries } from './utils/triggerDailySummaries.js';
 import { setupWorldChat } from './socket/worldChat.js';
@@ -47,6 +48,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/function', teamRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api', recurringTaskRoutes);
+app.use('/api/community', communityRoutes);
 
 app.get('/', (req, res) => {
   res.send("Hello World!!");

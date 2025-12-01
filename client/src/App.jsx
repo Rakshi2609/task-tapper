@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 
-
 import Home from "./components/Home";
 import Login from "./components/Login";
 import SignUp from "./components/Register";
@@ -24,8 +23,13 @@ import Landing from "./components/Landing";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase/firebase";
 
+import AllCommunity from "./components/community/AllCommunity";
+import CommunityDepartments from "./components/community/CommunityDepartment";
+import CommunityMembers from "./components/community/CommunityMembers";
+import CommunityTeams from "./components/community/CommunityTeams";
+
 const App = () => {
-  const user = useAuthStore((state) => state.user); 
+  const user = useAuthStore((state) => state.user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
 
@@ -41,36 +45,143 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <Navbar onMenuClick={() => setSidebarOpen((v) => !v)} isSidebarOpen={sidebarOpen} showMenu={isAuthed} />
+      <Navbar
+        onMenuClick={() => setSidebarOpen((v) => !v)}
+        isSidebarOpen={sidebarOpen}
+        showMenu={isAuthed}
+      />
       <div className={`relative ${mainOffsetClass}`}>
         {isAuthed && (
-          <SideNavbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+          <SideNavbar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
         )}
         <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-          <div className="px-4 py-4">{/* content wrapper */}
+          <div className="px-4 py-4">
+            {/* content wrapper */}
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={isAuthed ? <Navigate to="/profile" replace /> : <Landing />} />
+              <Route
+                path="/"
+                element={
+                  isAuthed ? <Navigate to="/profile" replace /> : <Landing />
+                }
+              />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
 
               {/* Protected routes */}
-              <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-              <Route path="/tasks" element={<ProtectedRoute><UserTasks /></ProtectedRoute>} />
-              <Route path="/assign" element={<ProtectedRoute><AssignTask /></ProtectedRoute>} />
-              <Route path="/create" element={<ProtectedRoute><CreateTaskForm /></ProtectedRoute>} />
-              <Route path="/mywork" element={<ProtectedRoute><AssignedTasks /></ProtectedRoute>} />
-              <Route path="/recurring/create" element={<ProtectedRoute><CreateRecurringTask /></ProtectedRoute>} />
-              <Route path="/recurring/list" element={<ProtectedRoute><RecurringTaskList /></ProtectedRoute>} />
-              <Route path="/chat" element={<ProtectedRoute><WorldChat user={user} /></ProtectedRoute>} />
-              <Route path="/tasks/:taskId" element={<ProtectedRoute><TaskDetail /></ProtectedRoute>} />
-              <Route path="/recurring/tasks/:taskId" element={<ProtectedRoute><RecurringTaskDetail /></ProtectedRoute>} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tasks"
+                element={
+                  <ProtectedRoute>
+                    <UserTasks />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assign"
+                element={
+                  <ProtectedRoute>
+                    <AssignTask />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateTaskForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mywork"
+                element={
+                  <ProtectedRoute>
+                    <AssignedTasks />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/recurring/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateRecurringTask />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/recurring/list"
+                element={
+                  <ProtectedRoute>
+                    <RecurringTaskList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute>
+                    <WorldChat user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tasks/:taskId"
+                element={
+                  <ProtectedRoute>
+                    <TaskDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/recurring/tasks/:taskId"
+                element={
+                  <ProtectedRoute>
+                    <RecurringTaskDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/communities" element={<AllCommunity />} />
+              <Route
+                path="/communities/:communityId/departments"
+                element={<CommunityDepartments />}
+              />
+              <Route
+                path="/communities/:communityId/members"
+                element={<CommunityMembers />}
+              />
+              <Route
+                path="/communities/:communityId/teams"
+                element={<CommunityTeams />}
+              />
 
               {/* Fallback Route */}
               <Route
                 path="*"
-                element={<h1 className="text-center mt-10 text-red-600">404 - Page Not Found</h1>}
+                element={
+                  <h1 className="text-center mt-10 text-red-600">
+                    404 - Page Not Found
+                  </h1>
+                }
               />
             </Routes>
           </div>

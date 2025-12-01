@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Community from './Community.js';
 
 const recurringTaskSchema = new mongoose.Schema({
   taskName: {
@@ -49,7 +50,15 @@ const recurringTaskSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  community: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Community,
+  },
+  communityDept: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CommumityDept',
+  },
 });
 
 const RecurringTask = mongoose.model('RecurringTask', recurringTaskSchema);
