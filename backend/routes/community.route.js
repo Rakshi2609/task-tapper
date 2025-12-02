@@ -8,6 +8,9 @@ import {
   createCommunity,
   addMemberToCommunity,
   user1,
+  deleteCommunity,
+  applyToJoinCommunity,
+  indi,
 } from "../controllers/community.js";
 
 const router = express.Router();
@@ -17,8 +20,11 @@ router.get("/:communityId/departments", getCommunityDepts);
 router.get("/:communityId/members", getCommunityMembers);
 router.get("/", getAllCommunities);
 router.get("/users", user1);
+router.get('/:communityId', indi)
 
 router.post('/create', createCommunity);
 router.post('/addMember/:communityId/:userId', addMemberToCommunity);
+router.post('/delete/:communityID', deleteCommunity);
+router.post('/:communityID/:userId/apply', applyToJoinCommunity);
 
 export default router;

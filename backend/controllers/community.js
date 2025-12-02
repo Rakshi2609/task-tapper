@@ -242,3 +242,14 @@ export const approveMemberApplication = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+export const indi = async (req, res) => {
+    console.log("Fetching individual community");
+    try{
+    const { communityId } = req.params;
+    const community = await Community.findById(communityId);
+    console.log(community);
+}catch(error){
+    console.log(error);
+
+}};

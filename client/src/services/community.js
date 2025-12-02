@@ -40,3 +40,15 @@ export const getAllUsers = async () => {
     const res = await axios.get(`${API_URL}/users`);
     return res.data;   // backend sends array directly
 };
+
+export const applyToJoinCommunity = async (communityId, userId) => {
+  try {
+    const res = await axios.post(
+      `${API_URL}/${communityId}/${userId}/apply`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Apply to join community error:", error);
+    throw error;
+  }
+};
