@@ -43,67 +43,65 @@ const calculateNextDueDate = (baseDate, frequency) => {
 };
 
 export const createTask = async (req, res) => {
-    const { createdBy, taskName, taskDescription, assignedTo, assignedName, taskFrequency, dueDate, priority } = req.body;
-    const io = req.io;
+  const {
+    createdBy,
+    taskName,
+    taskDescription,
+    assignedTo,
+    assignedName,
+    taskFrequency,
+    dueDate,
+    priority,
+    community,        // ✅ NEW (optional)
+    communityDept     // ✅ NEW (optional)
+  } = req.body;
 
-    console.log("Entered createTask function");
-    console.log(`[createTask] Request body: ${JSON.stringify(req.body)}`);
+  const io = req.io;
 
-    try {
-        const user = await User.findOne({ email: assignedTo });
-        console.log(`[createTask] User found for assignedTo (${assignedTo}): ${user ? user.email : 'None'}`);
-
-        // If no user, return early with an error message
-        if (!user) {
-            console.log(`[createTask] Error: Assigned email '${assignedTo}' is not registered.`);
-            return res.status(404).json({
-                success: false,
-                message: "The assigned email is not registered in the system.",
-            });
-        }
-
-        // Proceed with task creation
-        const newTask = new Team({
-            createdBy,
-            taskName,
-            taskDescription,
-            assignedTo,
-            assignedName,
-            taskFrequency,
-            dueDate,
-            priority,
-        });
-
-        await newTask.save();
-        console.log("Task Created successfully:", newTask._id);
-
-        // No need for this line here, as `task` is not defined yet from the context of a *created* task
-        // await emitSystemMessage(io, `${user.username} has completed task: "${task.task}"`);
-
-
-        user.TasksAssigned += 1;
-        user.TasksNotStarted += 1;
-        await user.save();
-        console.log(`[createTask] User task count updated for ${user.email}: TasksAssigned=${user.TasksAssigned}, TasksNotStarted=${user.TasksNotStarted}`);
-
-        // Push notification (if token exists) - uncomment if you implement
-        // if (user.fcmToken) {
-        //   sendPushNotification(user.fcmToken, "🎉 New Task!", `You have a new task: ${task}`);
-        //   console.log(`[createTask] Push notification sent to ${user.email}`);
-        // }
-
-        // Send response
-        res.status(201).json({
-            success: true,
-            message: "Task created successfully",
-            task: newTask,
-        });
-        console.log("[createTask] Response sent: Task created successfully.");
-    } catch (err) {
-        console.error(`[createTask] Create Task Error: ${err.message}`, err);
-        res.status(500).json({ success: false, message: "Server Error" });
+  try {
+    const user = await User.findOne({ email: assignedTo });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Assigned email not registered",
+      });
     }
+    console.log(`Creating task "${taskName}" assigned to ${assignedTo}`);
+
+    const newTask = new Team({
+      createdBy,
+      taskName,
+      taskDescription,
+      assignedTo,
+      assignedName,
+      taskFrequency,
+      dueDate,
+      priority,
+
+      // ✅ THESE TWO LINES ENABLE COMMUNITY MODE
+      community: community || null,
+      communityDept: communityDept || null,
+    });
+
+    await newTask.save();
+
+    user.TasksAssigned += 1;
+    user.TasksNotStarted += 1;
+    await user.save();
+    console.log(`User ${user.email} task counts updated for new task.`);
+
+    
+    res.status(201).json({
+      success: true,
+      message: "Task created successfully",
+      task: newTask,
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
 };
+
 
 
 export const updateTask = async (req, res) => {

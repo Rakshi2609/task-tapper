@@ -1,5 +1,4 @@
 import express from "express";
-import Community from "../models/Community.js";
 import {
   getCommunityTeams,
   getCommunityDepts,
@@ -11,29 +10,33 @@ import {
   deleteCommunity,
   applyToJoinCommunity,
   indi,
+  createTaskCommunity,
 } from "../controllers/community.js";
 
 const router = express.Router();
 
-/* ✅ SAFE ROUTE ORDER */
+/* ✅ 1. BASE ROUTES FIRST */
 router.get("/", getAllCommunities);
 router.get("/users", user1);
 
-// ✅ SINGLE COMMUNITY (must be BEFORE nested routes)
-router.get("/:communityId", indi);
-
+/* ✅ 2. NESTED COLLECTION ROUTES */
 router.get("/:communityId/teams", getCommunityTeams);
 router.get("/:communityId/departments", getCommunityDepts);
 router.get("/:communityId/members", getCommunityMembers);
 
+/* ✅ 3. COMMUNITY TASK CREATION (🔥 THIS MUST BE BEFORE :communityId) */
+router.post(
+  "/:communityId/:communityDeptId/task",
+  createTaskCommunity
+);
+
+/* ✅ 4. COMMUNITY CORE ACTIONS */
 router.post("/create", createCommunity);
-
-// ✅ ADD MEMBER
 router.post("/addMember/:communityId/:userId", addMemberToCommunity);
-
-// ✅ APPLY TO JOIN  (🔥 FIXED PARAM NAME)
 router.post("/:communityId/:userId/apply", applyToJoinCommunity);
-// ✅ DELETE COMMUNITY
 router.post("/delete/:communityID", deleteCommunity);
+
+/* ✅ 5. SINGLE COMMUNITY (KEEP THIS LAST!!) */
+router.get("/:communityId", indi);
 
 export default router;

@@ -1,5 +1,6 @@
 import axios from "axios";
 
+
 const API_URL = `${import.meta.env.VITE_API_URL}/community`;
 
 console.log("Loaded API_URL:", API_URL);
@@ -61,4 +62,13 @@ export const applyToJoinCommunity = async (communityId, userId) => {
     console.error("Apply to join community error:", error);
     throw error;
   }
+};
+
+export const createCommunityTask = async (communityId, communityDeptId, taskData) => {
+  const res = await axios.post(
+    `${API_URL}/${communityId}/${communityDeptId}/task`,
+    taskData,
+    { withCredentials: true }
+  );
+  return res.data;
 };

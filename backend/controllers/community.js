@@ -3,6 +3,8 @@ import Team from '../models/Team.js';
 import Community from '../models/Community.js';
 import CommunityDept from '../models/CommunityDept.js';
 
+import {createTask} from './team.js';
+
 export const getCommunityTeams = async (req, res) => {
     console.log("Entered getCommunityTeams function");
     try {
@@ -276,5 +278,26 @@ export const indi = async (req, res) => {
   } catch (error) {
     console.log("Fetch individual community error:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const createTaskCommunity = async (req, res) => {
+  console.log("Creating community task");
+  
+  try {
+    const { communityId, communityDeptId } = req.params;
+    
+    // ✅ Inject community data into body BEFORE calling createTask
+    req.body.community = communityId;
+    req.body.communityDept = communityDeptId || null;
+    
+    console.log("Entered the createTaskCommunity function");
+    // ✅ Reuse existing logic (NO DUPLICATION)
+    return createTask(req, res);
+
+  } catch (err) {
+    console.error("Create Community Task Error:", err);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
