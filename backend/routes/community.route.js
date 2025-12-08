@@ -15,16 +15,25 @@ import {
 
 const router = express.Router();
 
+/* ✅ SAFE ROUTE ORDER */
+router.get("/", getAllCommunities);
+router.get("/users", user1);
+
+// ✅ SINGLE COMMUNITY (must be BEFORE nested routes)
+router.get("/:communityId", indi);
+
 router.get("/:communityId/teams", getCommunityTeams);
 router.get("/:communityId/departments", getCommunityDepts);
 router.get("/:communityId/members", getCommunityMembers);
-router.get("/", getAllCommunities);
-router.get("/users", user1);
-router.get('/:communityId', indi)
 
-router.post('/create', createCommunity);
-router.post('/addMember/:communityId/:userId', addMemberToCommunity);
-router.post('/delete/:communityID', deleteCommunity);
-router.post('/:communityID/:userId/apply', applyToJoinCommunity);
+router.post("/create", createCommunity);
+
+// ✅ ADD MEMBER
+router.post("/addMember/:communityId/:userId", addMemberToCommunity);
+
+// ✅ APPLY TO JOIN  (🔥 FIXED PARAM NAME)
+router.post("/:communityId/:userId/apply", applyToJoinCommunity);
+// ✅ DELETE COMMUNITY
+router.post("/delete/:communityID", deleteCommunity);
 
 export default router;

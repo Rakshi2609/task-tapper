@@ -117,43 +117,52 @@ export const addMemberToCommunity = async (req, res) => {
   try {
     const { communityId, userId } = req.params;
 
-    // Check community exists
+    // ✅ The user who is TRYING to add a member (SENDER)
+    // This must come from token/middleware or frontend param
+    const { requesterId } = req.body;  // 👈 IMPORTANT
+
+    // ✅ Find community
     const community = await Community.findById(communityId);
     if (!community) {
-      console.log("Community not found");
       return res.status(404).json({ message: "Community not found" });
     }
 
-    // Check if user exists
+    // ✅ ONLY CREATOR CAN ADD MEMBERS
+    if (community.CreatedBy.toString() !== requesterId) {
+      return res.status(403).json({
+        message: "Only the community owner can add members",
+      });
+    }
+
+    // ✅ Check if user exists
     const user = await User.findById(userId);
     if (!user) {
-      console.log("User not found");
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Prevent duplicate members
-    if (community.members.includes(userId)) {
+    // ✅ Prevent duplicate members (FIXED ObjectId check)
+    const alreadyMember = community.members.some(
+      (id) => id.toString() === userId
+    );
+
+    if (alreadyMember) {
       return res.status(400).json({ message: "User already a member" });
     }
 
-    // Add member
+    // ✅ Add member
     community.members.push(userId);
-
-    // Update totalMembers
     community.totalMembers = community.members.length;
 
     await community.save();
 
-    console.log("Member added successfully");
+    console.log("✅ Member added successfully");
 
-    // Return populated data
     const updated = await Community.findById(communityId)
       .populate("members", "username email");
 
     res.json(updated);
-
   } catch (error) {
-    console.log("Error adding member to community:", error.message);
+    console.log("❌ Error adding member:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -197,26 +206,35 @@ export const deleteCommunity = async (req, res) => {
 };
 
 export const applyToJoinCommunity = async (req, res) => {
-    console.log("Applying to join community");
-    try {
-        const { communityId, userId } = req.params;
-        const community = await Community.findById(communityId);
-        if(!community){
-            console.log("Community not found");
-            return res.status(404).json({ message: 'Community not found' });
-        }
-        if(community.waitingApproval.includes(userId)){
-            console.log("User has already applied to join this community");
-            return res.status(400).json({ message: 'User has already applied to join this community' });
-        }
-        community.waitingApproval.push(userId);
-        await community.save();
-        console.log("Application to join community submitted successfully");
-        res.json({ message: 'Application to join community submitted successfully' });
-    } catch (error) {
-        console.log("Error applying to join community:", error.message);
-        res.status(500).json({ message: 'Server error', error: error.message });
+  console.log("Applying to join community");
+
+  try {
+    const { communityId, userId } = req.params;
+
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
     }
+
+    const alreadyApplied = community.waitingApproval.some(
+      (id) => id.toString() === userId
+    );
+
+    if (alreadyApplied) {
+      return res.status(400).json({
+        message: "User has already applied to join this community",
+      });
+    }
+
+    community.waitingApproval.push(userId);
+    await community.save();
+
+    console.log("✅ Application submitted");
+    res.json({ message: "Application to join community submitted successfully" });
+  } catch (error) {
+    console.log("❌ Apply error:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
 
 export const approveMemberApplication = async (req, res) => {
@@ -244,12 +262,19 @@ export const approveMemberApplication = async (req, res) => {
 };
 
 export const indi = async (req, res) => {
-    console.log("Fetching individual community");
-    try{
+  console.log("Fetching individual community");
+  try {
     const { communityId } = req.params;
     const community = await Community.findById(communityId);
-    console.log(community);
-}catch(error){
-    console.log(error);
 
-}};
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    console.log(community);
+    res.json(community); // ✅ THIS WAS MISSING
+  } catch (error) {
+    console.log("Fetch individual community error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

@@ -12,27 +12,32 @@ const ApplyToJoinCommunity = () => {
   const [community, setCommunity] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Load community details
   useEffect(() => {
     const loadCommunity = async () => {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/community/${communityId}`
         );
+        console.log("Community data:", res.data);
         setCommunity(res.data);
       } catch (err) {
+        console.error("Load community error:", err);
         toast.error("Error loading community");
       }
     };
+
     loadCommunity();
   }, [communityId]);
 
+  // ✅ Apply handler
   const handleApply = async () => {
     if (!user?._id) return toast.error("You must be signed in");
 
     setLoading(true);
     try {
       await applyToJoinCommunity(communityId, user._id);
-      toast.success("Application submitted successfully!");
+      toast.success("✅ Application submitted successfully!");
     } catch (err) {
       if (err.response?.data?.message) {
         toast.error(err.response.data.message);
@@ -43,6 +48,7 @@ const ApplyToJoinCommunity = () => {
     setLoading(false);
   };
 
+  // ✅ Loading state
   if (!community) {
     return (
       <div className="p-6 text-center">
@@ -52,8 +58,9 @@ const ApplyToJoinCommunity = () => {
     );
   }
 
+  // ✅ Already applied check
   const alreadyApplied =
-    community.waitingApproval?.includes(user._id);
+    community.waitingApproval?.includes(user?._id);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -71,7 +78,7 @@ const ApplyToJoinCommunity = () => {
 
         {alreadyApplied ? (
           <p className="text-yellow-600 font-semibold">
-            You have already applied to join this community.
+            ⏳ You have already applied to join this community.
           </p>
         ) : (
           <button
