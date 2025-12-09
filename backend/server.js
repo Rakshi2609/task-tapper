@@ -12,7 +12,7 @@ import { connectDB } from './config/connectDB.js';
 import { triggerDailySummaries } from './utils/triggerDailySummaries.js';
 import { setupWorldChat } from './socket/worldChat.js';
 import chatRoutes from './routes/chat.route.js';
-import recurringTaskRoutes from './routes/recurrring.js';
+import recurringTaskRoutes from './routes/recurringTaskRoutes.js';
 
 dotenv.config();
 const app = express();

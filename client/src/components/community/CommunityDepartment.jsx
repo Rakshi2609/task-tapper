@@ -34,6 +34,12 @@ const CommunityDepartments = () => {
           >
             ➕ Add Task
           </Link>
+          <Link
+      to={`/communities/${communityId}/${communityDeptId}/recurring/create`}
+      className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+    >
+      🔄 Add Recurring Task
+    </Link>
         </div>
 
         {dept.description && (

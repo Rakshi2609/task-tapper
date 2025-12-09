@@ -3,7 +3,8 @@ import Team from '../models/Team.js';
 import Community from '../models/Community.js';
 import CommunityDept from '../models/CommunityDept.js';
 
-import {createTask} from './team.js';
+import {createTask } from './team.js';
+import { createRecurringTask } from './recurringTaskController.js';
 
 export const getCommunityTeams = async (req, res) => {
     console.log("Entered getCommunityTeams function");
@@ -288,7 +289,6 @@ export const createTaskCommunity = async (req, res) => {
   try {
     const { communityId, communityDeptId } = req.params;
     
-    // ✅ Inject community data into body BEFORE calling createTask
     req.body.community = communityId;
     req.body.communityDept = communityDeptId || null;
     
@@ -298,6 +298,28 @@ export const createTaskCommunity = async (req, res) => {
 
   } catch (err) {
     console.error("Create Community Task Error:", err);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+// ✅ CREATE COMMUNITY RECURRING TASK (WRAPPER)
+export const createRecurringTaskCommunity = async (req, res) => {
+  console.log("Creating community recurring task");
+
+  try {
+    const { communityId, communityDeptId } = req.params;
+
+    // ✅ Inject community references into body
+    req.body.community = communityId;
+    req.body.communityDept = communityDeptId || null;
+
+    console.log("Entered createRecurringTaskCommunity wrapper");
+
+    // ✅ Reuse existing recurring controller (NO DUPLICATION)
+    return createRecurringTask(req, res);
+
+  } catch (err) {
+    console.error("Create Community Recurring Task Error:", err);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };

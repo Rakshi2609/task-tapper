@@ -72,3 +72,18 @@ export const createCommunityTask = async (communityId, communityDeptId, taskData
   );
   return res.data;
 };
+
+// ✅ ✅ ✅ CREATE COMMUNITY RECURRING TASK
+export const createCommunityRecurringTask = async (
+  communityId,
+  communityDeptId,
+  taskData
+) => {
+  const res = await axios.post(
+    `${API_URL}/${communityId}/${communityDeptId}/recurring/create`,
+    taskData,
+    { withCredentials: true }
+  );
+  return res.data;
+};
+

@@ -31,6 +31,8 @@ import CreateCommunity from "./components/community/CreateCommunity";
 import AddPeople from "./components/community/AddPeople";
 import ApplyToJoinCommunity from "./components/community/ApplyToJoinCommunity";
 import CreateCommunityTask from "./components/community/CreateCommunityTask";
+import CreateCommunityRecurringTask from "./components/community/CreateCommunityRecurringTask";
+
 
 
 const App = () => {
@@ -196,6 +198,13 @@ const App = () => {
   path="/communities/:communityId/departments/:communityDeptId"
   element={<CommunityDepartments />}
 />
+<Route
+  path="/communities/:communityId/:communityDeptId/recurring/create"
+  element={
+      <CreateCommunityRecurringTask />
+  }
+/>
+
 
 
               {/* Fallback Route */}

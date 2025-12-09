@@ -11,6 +11,7 @@ import {
   applyToJoinCommunity,
   indi,
   createTaskCommunity,
+  createRecurringTaskCommunity,
 } from "../controllers/community.js";
 
 const router = express.Router();
@@ -29,6 +30,12 @@ router.post(
   "/:communityId/:communityDeptId/task",
   createTaskCommunity
 );
+
+router.post(
+  "/:communityId/:communityDeptId/recurring/create",
+  createRecurringTaskCommunity
+);
+
 
 /* ✅ 4. COMMUNITY CORE ACTIONS */
 router.post("/create", createCommunity);
