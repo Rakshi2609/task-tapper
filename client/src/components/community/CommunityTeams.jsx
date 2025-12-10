@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { getCommunityTeams } from "../../services/community";
 
 const CommunityTeams = () => {
@@ -16,13 +16,28 @@ const CommunityTeams = () => {
   }, [communityId]);
 
   const handleTeamClick = (team) => {
-    // ✅ Navigate to that department
-    navigate(`/communities/${communityId}/departments/${team.communityDept}`);
+    // ✅ Safety check before navigation
+    if (!team.communityDept) return;
+
+    navigate(
+      `/communities/${communityId}/departments/${team.communityDept}`
+    );
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold">Teams</h1>
+
+      {/* ✅ CREATE DEPARTMENT BUTTON */}
+      <div className="mb-4 flex justify-end">
+        <Link
+          to={`/communities/${communityId}/departments/create`}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+        >
+          ➕ Create Department
+        </Link>
+      </div>
+
+      <h1 className="text-2xl font-bold mb-4">Teams</h1>
 
       <ul className="mt-4 space-y-2">
         {teams.length === 0 && <p>No teams found.</p>}

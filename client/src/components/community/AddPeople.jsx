@@ -35,7 +35,12 @@ const AddPeople = () => {
 
     setLoading(true);
     try {
-      await addMemberToCommunity(communityId, selectedUser._id);
+      await addMemberToCommunity(
+  communityId,
+  selectedUser._id,
+  user._id     // ✅ THIS MAKES YOU THE VERIFIED ADMIN
+);
+
       toast.success("User added!");
     } catch (err) {
       console.error("Add Member Error:", err);

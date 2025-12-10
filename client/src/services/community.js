@@ -39,10 +39,11 @@ export const createCommunity = async (communityData) => {
 export const addMemberToCommunity = async (communityId, userId, requesterId) => {
   const res = await axios.post(
     `${API_URL}/addMember/${communityId}/${userId}`,
-    { requesterId }   // ✅ SEND OWNER ID
+    { requesterId }   // ✅ IMPORTANT
   );
   return res.data;
 };
+
 
 
 // ✅ Get all users

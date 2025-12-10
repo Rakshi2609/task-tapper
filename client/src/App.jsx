@@ -32,6 +32,8 @@ import AddPeople from "./components/community/AddPeople";
 import ApplyToJoinCommunity from "./components/community/ApplyToJoinCommunity";
 import CreateCommunityTask from "./components/community/CreateCommunityTask";
 import CreateCommunityRecurringTask from "./components/community/CreateCommunityRecurringTask";
+import CreateCommunityDept from "./components/community/CreateCommunityDept";
+
 
 
 
@@ -204,6 +206,12 @@ const App = () => {
       <CreateCommunityRecurringTask />
   }
 />
+
+<Route
+  path="/communities/:communityId/departments/create"
+  element={<CreateCommunityDept />}
+/>
+
 
 
 

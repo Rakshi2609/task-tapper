@@ -323,3 +323,48 @@ export const createRecurringTaskCommunity = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+export const createCommunityDept = async (req, res) => {
+  console.log("Creating community department");
+
+  try {
+    const { communityId } = req.params;
+    const { name, description, requesterId } = req.body;
+
+    // ✅ Find community
+    const community = await Community.findById(communityId);
+
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // ✅ CHECK: requester must be a member (NOT only owner)
+    const isMember =
+      community.CreatedBy.toString() === requesterId ||
+      community.members.some((id) => id.toString() === requesterId);
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Only community members can create departments",
+      });
+    }
+
+    // ✅ CREATE DEPARTMENT
+    const dept = new CommunityDept({
+      name,
+      description,
+      community: communityId,
+      CreatedBy: requesterId,
+    });
+
+    await dept.save();
+
+    console.log("✅ Department created successfully");
+
+    res.status(201).json(dept);
+  } catch (error) {
+    console.error("❌ Create department error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
