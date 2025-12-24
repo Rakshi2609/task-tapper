@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Team from '../models/Team.js';
 import Community from '../models/Community.js';
 import CommunityDept from '../models/CommunityDept.js';
+import RecurringTask from "../models/recurringTaskModel.js";
 
 import {createTask } from './team.js';
 import { createRecurringTask } from './recurringTaskController.js';
@@ -52,8 +53,17 @@ export const getCommunityMembers = async (req, res) => {
             console.log("Community not found");
             return res.status(404).json({ message: 'Community not found' });
         }
-        const members = await User.find({ _id: { $in: community.members } });
-        console.log(members);
+        
+        // Get all member IDs including the owner
+        const allMemberIds = [...community.members];
+        
+        // Add owner if not already in members
+        if (!allMemberIds.some(id => id.toString() === community.CreatedBy.toString())) {
+            allMemberIds.push(community.CreatedBy);
+        }
+        
+        const members = await User.find({ _id: { $in: allMemberIds } });
+        console.log("Members (including owner):", members.length);
         res.json(members);    
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -101,15 +111,26 @@ export const user1 = async (req, res) => {
 
 export const createCommunity = async (req, res) => {
     console.log("Creating new community");
+    console.log("Request body:", req.body);
     try {
         const { name, description, CreatedBy } = req.body;
+        
+        // Validate required fields
+        if (!name || !description || !CreatedBy) {
+            return res.status(400).json({ 
+                message: 'Missing required fields',
+                received: { name: !!name, description: !!description, CreatedBy: !!CreatedBy }
+            });
+        }
+
         const community = new Community({ name, description, CreatedBy });
-        console.log(community);
+        console.log("Community object:", community);
         await community.save();
         console.log("Community created successfully");
         res.status(201).json(community);
     } catch (error) {
         console.log("Error creating community:", error.message);
+        console.log("Full error:", error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
@@ -244,22 +265,66 @@ export const approveMemberApplication = async (req, res) => {
     console.log("Approving member application");
     try { 
         const { communityId, userId } = req.params;
+        const { requesterId } = req.body;
+        
         const community = await Community.findById(communityId);
         if(!community){
             console.log("Community not found");
             return res.status(404).json({ message: 'Community not found' });
         }
+        
+        // Check if requester is the community owner
+        if(community.CreatedBy.toString() !== requesterId){
+            return res.status(403).json({ message: 'Only the community owner can approve applications' });
+        }
+        
         if(!community.waitingApproval.includes(userId)){
             console.log("No application found for this user");
             return res.status(400).json({ message: 'No application found for this user' });
         }
+        
         community.waitingApproval = community.waitingApproval.filter(member => member.toString() !== userId);
         community.members.push(userId);
+        community.totalMembers = community.members.length;
         await community.save();
+        
         console.log("Member application approved successfully");
         res.json({ message: 'Member application approved successfully' });
     } catch (error) {
         console.log("Error approving member application:", error.message);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+export const rejectMemberApplication = async (req, res) => {
+    console.log("Rejecting member application");
+    try { 
+        const { communityId, userId } = req.params;
+        const { requesterId } = req.body;
+        
+        const community = await Community.findById(communityId);
+        if(!community){
+            console.log("Community not found");
+            return res.status(404).json({ message: 'Community not found' });
+        }
+        
+        // Check if requester is the community owner
+        if(community.CreatedBy.toString() !== requesterId){
+            return res.status(403).json({ message: 'Only the community owner can reject applications' });
+        }
+        
+        if(!community.waitingApproval.includes(userId)){
+            console.log("No application found for this user");
+            return res.status(400).json({ message: 'No application found for this user' });
+        }
+        
+        community.waitingApproval = community.waitingApproval.filter(member => member.toString() !== userId);
+        await community.save();
+        
+        console.log("Member application rejected successfully");
+        res.json({ message: 'Member application rejected successfully' });
+    } catch (error) {
+        console.log("Error rejecting member application:", error.message);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
@@ -338,14 +403,14 @@ export const createCommunityDept = async (req, res) => {
       return res.status(404).json({ message: "Community not found" });
     }
 
-    // ✅ CHECK: requester must be a member (NOT only owner)
+    // ✅ CHECK: requester must be the owner or a member
     const isMember =
       community.CreatedBy.toString() === requesterId ||
       community.members.some((id) => id.toString() === requesterId);
 
     if (!isMember) {
       return res.status(403).json({
-        message: "Only community members can create departments",
+        message: "Only community members and owner can create departments",
       });
     }
 
@@ -368,3 +433,32 @@ export const createCommunityDept = async (req, res) => {
   }
 };
 
+
+export const getDeptTasks = async (req, res) => {
+  try {
+    const { communityDeptId } = req.params;
+    
+    console.log("🔍 Fetching tasks for dept:", communityDeptId);
+
+    // Normal tasks (assignedTo is a String, not a reference)
+    const tasks = await Team.find({ communityDept: communityDeptId });
+    
+    console.log("📋 Tasks found:", tasks.length);
+
+    // Recurring tasks
+    const recurring = await RecurringTask.find({ communityDept: communityDeptId })
+      .populate("taskAssignedTo", "email username")
+      .populate("taskAssignedBy", "email username");
+    
+    console.log("🔁 Recurring tasks found:", recurring.length);
+
+    res.json({
+      success: true,
+      tasks,
+      recurringTasks: recurring
+    });
+  } catch (err) {
+    console.error("❌ Dept tasks error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

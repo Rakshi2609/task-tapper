@@ -16,13 +16,22 @@ const AllCommunity = () => {
 
   return (
     <div className="min-h-screen p-6 bg-gray-100">
-      <h2 className="text-3xl font-bold mb-6">All Communities</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold">All Communities</h2>
+        
+        <Link
+          to="/communities/create"
+          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
+        >
+          ➕ Create Community
+        </Link>
+      </div>
 
       <button
         onClick={handleLoadCommunities}
         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition mb-6"
       >
-        Load Communities
+        🔄 Load Communities
       </button>
 
       {visible && (
@@ -50,12 +59,27 @@ const AllCommunity = () => {
 
                 {/* ✅ ✅ ✅ OWNER ONLY — ADD PEOPLE */}
                 {isOwner && (
-                  <Link
-                    to={`/communities/${c._id}/add-people`}
-                    className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                  >
-                    ➕ Add People
-                  </Link>
+                  <div className="flex gap-2 mt-4">
+                    <Link
+                      to={`/communities/${c._id}/add-people`}
+                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                    >
+                      ➕ Add People
+                    </Link>
+                    
+                    {/* Show pending applications button */}
+                    {c.waitingApproval?.length > 0 && (
+                      <Link
+                        to={`/communities/${c._id}/pending`}
+                        className="inline-block px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition relative"
+                      >
+                        📋 Applications
+                        <span className="ml-1 bg-white text-orange-600 rounded-full px-2 py-0.5 text-xs font-bold">
+                          {c.waitingApproval.length}
+                        </span>
+                      </Link>
+                    )}
+                  </div>
                 )}
 
                 {/* ✅ USER FEATURE — APPLY TO JOIN */}
@@ -91,10 +115,10 @@ const AllCommunity = () => {
                     View Members
                   </Link>
                   <Link
-                    to={`/communities/${c._id}/teams`}
+                    to={`/communities/${c._id}/departments`}
                     className="text-purple-600 hover:underline"
                   >
-                    View Teams
+                    View Dept
                   </Link>
                 </div>
               </div>

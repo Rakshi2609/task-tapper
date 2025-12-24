@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
-import { FaTasks, FaUserCircle } from "react-icons/fa";
+import { FaTasks, FaUserCircle, FaUsers, FaHome } from "react-icons/fa";
 import { HiOutlineMenu } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 
@@ -62,18 +62,77 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
         </div>
 
         {/* Desktop Nav */}
-        <div className="flex items-center space-x-4">
-          {user && (
-            <Link to="/profile">
-              <motion.button
-                className={`${navLinkClasses} bg-transparent`}
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <FaUserCircle /> Profile
-              </motion.button>
-            </Link>
+        <div className="flex items-center space-x-2">
+          {user ? (
+            <>
+              <Link to="/profile">
+                <motion.button
+                  className={`${navLinkClasses} bg-transparent`}
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <FaHome /> Dashboard
+                </motion.button>
+              </Link>
+              
+              <Link to="/communities">
+                <motion.button
+                  className={`${navLinkClasses} bg-transparent`}
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <FaUsers /> Communities
+                </motion.button>
+              </Link>
+              
+              <Link to="/profile">
+                <motion.button
+                  className={`${navLinkClasses} bg-transparent`}
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <FaUserCircle /> Profile
+                </motion.button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/">
+                <motion.button
+                  className={`${navLinkClasses} bg-transparent`}
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <FaHome /> Home
+                </motion.button>
+              </Link>
+              
+              <Link to="/login">
+                <motion.button
+                  className="px-5 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition"
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  Login
+                </motion.button>
+              </Link>
+              
+              <Link to="/signup">
+                <motion.button
+                  className="px-5 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-400 transition"
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  Sign Up
+                </motion.button>
+              </Link>
+            </>
           )}
         </div>
       </div>

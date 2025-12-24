@@ -33,6 +33,8 @@ import ApplyToJoinCommunity from "./components/community/ApplyToJoinCommunity";
 import CreateCommunityTask from "./components/community/CreateCommunityTask";
 import CreateCommunityRecurringTask from "./components/community/CreateCommunityRecurringTask";
 import CreateCommunityDept from "./components/community/CreateCommunityDept";
+import CommunityDeptTasks from "./components/community/CommunityDeptTasks";
+import PendingApplications from "./components/community/PendingApplications";
 
 
 
@@ -182,6 +184,10 @@ const App = () => {
                 path="/communities/:communityId/teams"
                 element={<CommunityTeams />}
               />
+              <Route
+                path="/communities/:communityId/pending"
+                element={<PendingApplications />}
+              />
               <Route path="/communities/create" element={<CreateCommunity />} />
               <Route
                 path="/communities/:communityId/add-people"
@@ -192,26 +198,21 @@ const App = () => {
                 element={<ApplyToJoinCommunity />}
               />
               <Route
-  path="/communities/:communityId/:communityDeptId/create-task"
-  element={<CreateCommunityTask />}
-  
-/>
-<Route
-  path="/communities/:communityId/departments/:communityDeptId"
-  element={<CommunityDepartments />}
-/>
-<Route
-  path="/communities/:communityId/:communityDeptId/recurring/create"
-  element={
-      <CreateCommunityRecurringTask />
-  }
-/>
-
-<Route
-  path="/communities/:communityId/departments/create"
-  element={<CreateCommunityDept />}
-/>
-
+                path="/communities/:communityId/departments/create"
+                element={<CreateCommunityDept />}
+              />
+              <Route
+                path="/communities/:communityId/departments/:communityDeptId"
+                element={<CommunityDepartments />}
+              />
+              <Route
+                path="/communities/:communityId/:communityDeptId/create-task"
+                element={<CreateCommunityTask />}
+              />
+              <Route
+                path="/communities/:communityId/:communityDeptId/recurring/create"
+                element={<CreateCommunityRecurringTask />}
+              />
 
 
 

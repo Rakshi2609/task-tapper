@@ -50,4 +50,10 @@ const CommunityDeptSchema = new mongoose.Schema({
   }
 });
 
+// ✅ Ensure no unique index on CreatedBy (allows same user to create multiple depts)
+CommunityDeptSchema.index({ CreatedBy: 1 }, { unique: false });
+
+// ✅ Make department names unique within each community
+CommunityDeptSchema.index({ community: 1, name: 1 }, { unique: true });
+
 export default mongoose.model("CommunityDept", CommunityDeptSchema);

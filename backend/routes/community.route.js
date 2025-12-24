@@ -9,10 +9,13 @@ import {
   user1,
   deleteCommunity,
   applyToJoinCommunity,
+  approveMemberApplication,
+  rejectMemberApplication,
   indi,
   createTaskCommunity,
   createRecurringTaskCommunity,
   createCommunityDept,
+  getDeptTasks,
 } from "../controllers/community.js";
 
 const router = express.Router();
@@ -32,6 +35,7 @@ router.post(
   createTaskCommunity
 );
 
+router.get("/:communityId/:communityDeptId/tasks", getDeptTasks);
 router.post(
   "/:communityId/:communityDeptId/recurring/create",
   createRecurringTaskCommunity
@@ -42,6 +46,8 @@ router.post(
 router.post("/create", createCommunity);
 router.post("/addMember/:communityId/:userId", addMemberToCommunity);
 router.post("/:communityId/:userId/apply", applyToJoinCommunity);
+router.post("/:communityId/:userId/approve", approveMemberApplication);
+router.post("/:communityId/:userId/reject", rejectMemberApplication);
 router.post("/delete/:communityID", deleteCommunity);
 router.post("/:communityId/dept/create", createCommunityDept);
 

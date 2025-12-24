@@ -9,6 +9,7 @@ import {
   FaRecycle,
   FaUserCircle,
   FaComments,
+  FaUsers,
 } from "react-icons/fa";
 
 // Contract:
@@ -22,6 +23,7 @@ const SideNavbar = ({ isOpen, onClose }) => {
   const links = useMemo(
     () => [
       { to: "/dashboard", label: "Dashboard", icon: <FaHome /> },
+      { to: "/communities", label: "Communities", icon: <FaUsers /> },
       { to: "/tasks", label: "One-Time Tasks", icon: <FaClipboardList /> },
       { to: "/recurring/list", label: "Recurring Tasks", icon: <FaSyncAlt /> },
       { to: "/mywork", label: "Assigned by Me", icon: <FaTasks /> },

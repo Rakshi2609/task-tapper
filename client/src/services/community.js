@@ -88,3 +88,31 @@ export const createCommunityRecurringTask = async (
   return res.data;
 };
 
+export const getDeptTasks = async (communityId, deptId) => {
+  const res = await axios.get(`${API_URL}/${communityId}/${deptId}/tasks`);
+  return res.data;
+};
+
+// ✅ GET COMMUNITY BY ID (with waiting approval list)
+export const getCommunityById = async (communityId) => {
+  const res = await axios.get(`${API_URL}/${communityId}`);
+  return res.data;
+};
+
+// ✅ APPROVE APPLICATION
+export const approveMemberApplication = async (communityId, userId, requesterId) => {
+  const res = await axios.post(
+    `${API_URL}/${communityId}/${userId}/approve`,
+    { requesterId }
+  );
+  return res.data;
+};
+
+// ✅ REJECT APPLICATION
+export const rejectMemberApplication = async (communityId, userId, requesterId) => {
+  const res = await axios.post(
+    `${API_URL}/${communityId}/${userId}/reject`,
+    { requesterId }
+  );
+  return res.data;
+};
