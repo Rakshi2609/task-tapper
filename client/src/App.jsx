@@ -68,7 +68,7 @@ const App = () => {
             onClose={() => setSidebarOpen(false)}
           />
         )}
-        <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-4">
           <div className="px-4 py-4">
             {/* content wrapper */}
             <Routes>
@@ -172,6 +172,10 @@ const App = () => {
                 }
               />
               <Route path="/communities" element={<AllCommunity />} />
+              <Route
+                path="/communities/:communityId"
+                element={<Navigate to="departments" replace />}
+              />
               <Route
                 path="/communities/:communityId/departments"
                 element={<CommunityDepartments />}
