@@ -178,44 +178,91 @@ const App = () => {
               />
               <Route
                 path="/communities/:communityId/departments"
-                element={<CommunityDepartments />}
+                element={
+                  <ProtectedRoute>
+                    <CommunityDepartments />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/members"
-                element={<CommunityMembers />}
+                element={
+                  <ProtectedRoute>
+                    <CommunityMembers />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/teams"
-                element={<CommunityTeams />}
+                element={
+                  <ProtectedRoute>
+                    <CommunityTeams />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/pending"
-                element={<PendingApplications />}
+                element={
+                  <ProtectedRoute>
+                    <PendingApplications />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/communities/create" element={<CreateCommunity />} />
+              <Route 
+                path="/communities/create" 
+                element={
+                  <ProtectedRoute>
+                    <CreateCommunity />
+                  </ProtectedRoute>
+                } 
+              />
               <Route
                 path="/communities/:communityId/add-people"
-                element={<AddPeople />}
+                element={
+                  <ProtectedRoute>
+                    <AddPeople />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/apply"
-                element={<ApplyToJoinCommunity />}
+                element={
+                  <ProtectedRoute>
+                    <ApplyToJoinCommunity />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/departments/create"
-                element={<CreateCommunityDept />}
+                element={
+                  <ProtectedRoute>
+                    <CreateCommunityDept />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/departments/:communityDeptId"
-                element={<CommunityDepartments />}
+                element={
+                  <ProtectedRoute>
+                    <CommunityDepartments />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/:communityDeptId/create-task"
-                element={<CreateCommunityTask />}
+                element={
+                  <ProtectedRoute>
+                    <CreateCommunityTask />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/communities/:communityId/:communityDeptId/recurring/create"
-                element={<CreateCommunityRecurringTask />}
+                element={
+                  <ProtectedRoute>
+                    <CreateCommunityRecurringTask />
+                  </ProtectedRoute>
+                }
               />
 
 
