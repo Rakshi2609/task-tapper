@@ -24,11 +24,10 @@ const SideNavbar = ({ isOpen, onClose }) => {
     () => [
       { to: "/dashboard", label: "Dashboard", icon: <FaHome /> },
       { to: "/communities", label: "Communities", icon: <FaUsers /> },
+      { to: "/communities/create", label: "Create Community", icon: <FaRegCalendarPlus /> },
       { to: "/tasks", label: "One-Time Tasks", icon: <FaClipboardList /> },
       { to: "/recurring/list", label: "Recurring Tasks", icon: <FaSyncAlt /> },
       { to: "/mywork", label: "Assigned by Me", icon: <FaTasks /> },
-      { to: "/create", label: "Create One-Time", icon: <FaRegCalendarPlus /> },
-      { to: "/recurring/create", label: "Create Recurring", icon: <FaRecycle /> },
       { to: "/chat", label: "World Chat", icon: <FaComments /> },
       { to: "/profile", label: "Profile", icon: <FaUserCircle /> },
     ],
