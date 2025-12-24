@@ -3,7 +3,7 @@ import Team from '../models/Team.js';
 import Community from '../models/Community.js';
 import CommunityDept from '../models/CommunityDept.js';
 import RecurringTask from "../models/recurringTaskModel.js";
-import { sendMail } from '../utils/sendMail.js';
+import { sendMail, sendMailWithRetry } from '../utils/sendMail.js';
 import { 
   welcomeEmailTemplate,
   applicationSubmittedTemplate,
@@ -212,7 +212,7 @@ export const addMemberToCommunity = async (req, res) => {
     );
     
     // Send email in background without blocking the response
-    sendMail(
+    sendMailWithRetry(
       user.email,
       `🎉 You've been added to ${community.name}`,
       emailContent
@@ -331,7 +331,7 @@ export const applyToJoinCommunity = async (req, res) => {
           community.description
         );
 
-        sendMail(
+        sendMailWithRetry(
           applicant.email,
           `✅ Application Submitted: ${community.name}`,
           applicantEmail
@@ -350,7 +350,7 @@ export const applyToJoinCommunity = async (req, res) => {
           communityId
         );
 
-        sendMail(
+        sendMailWithRetry(
           owner.email,
           `📬 New Application for ${community.name}`,
           ownerEmail
@@ -408,7 +408,7 @@ export const approveMemberApplication = async (req, res) => {
               communityId
             );
 
-            sendMail(
+            sendMailWithRetry(
               approvedUser.email,
               `🎉 Application Approved: ${community.name}`,
               emailContent
@@ -484,7 +484,7 @@ export const rejectMemberApplication = async (req, res) => {
               community.name
             );
 
-            sendMail(
+            sendMailWithRetry(
               rejectedUser.email,
               `Application Update: ${community.name}`,
               emailContent
