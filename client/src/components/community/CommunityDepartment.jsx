@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getCommunityDepartments, getCommunityById } from "../../services/community";
 import { useAuthStore } from "../../assests/store";
 
 const CommunityDepartments = () => {
   const { communityId, communityDeptId } = useParams();
   const { user } = useAuthStore();
+  const navigate = useNavigate();
 
   const [depts, setDepts] = useState([]);
   const [dept, setDept] = useState(null);
@@ -15,23 +16,45 @@ const CommunityDepartments = () => {
   const [showTasks, setShowTasks] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [recurringTasks, setRecurringTasks] = useState([]);
+  const [taskFilter, setTaskFilter] = useState('all'); // all, completed, overdue, upcoming
 
   useEffect(() => {
     const load = async () => {
-      const data = await getCommunityDepartments(communityId);
-      setDepts(data);
+      try {
+        // Get community info first to check membership
+        const communityData = await getCommunityById(communityId);
+        setCommunity(communityData);
 
-      // Get community info
-      const communityData = await getCommunityById(communityId);
-      setCommunity(communityData);
+        // Check if user is member or owner
+        const isOwner = communityData.CreatedBy?.toString() === user?._id;
+        const isMember = communityData.members?.some((m) => m.toString() === user?._id);
+        
+        if (!isOwner && !isMember) {
+          alert("You must be a member of this community to view departments");
+          navigate("/communities");
+          return;
+        }
 
-      if (communityDeptId) {
-        const selected = data.find((d) => d._id === communityDeptId);
-        setDept(selected);
+        // Load departments with userId for backend verification
+        const data = await getCommunityDepartments(communityId, user?._id);
+        setDepts(data);
+
+        if (communityDeptId) {
+          const selected = data.find((d) => d._id === communityDeptId);
+          setDept(selected);
+        }
+      } catch (error) {
+        console.error("Error loading departments:", error);
+        if (error.response?.status === 403) {
+          alert("You must be a member of this community to view departments");
+          navigate("/communities");
+        }
       }
     };
-    load();
-  }, [communityId, communityDeptId]);
+    if (user?._id) {
+      load();
+    }
+  }, [communityId, communityDeptId, user, navigate]);
 
   // Load tasks only when "View Tasks" is clicked
   useEffect(() => {
@@ -62,6 +85,33 @@ const CommunityDepartments = () => {
 
     loadTasks();
   }, [showTasks, communityId, communityDeptId]);
+
+  // Filter tasks based on selected filter
+  const getFilteredTasks = () => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    let filtered = [...tasks];
+
+    switch (taskFilter) {
+      case 'completed':
+        filtered = filtered.filter(t => t.completedDate);
+        break;
+      case 'overdue':
+        filtered = filtered.filter(t => !t.completedDate && t.dueDate && new Date(t.dueDate) < now);
+        break;
+      case 'upcoming':
+        filtered = filtered.filter(t => !t.completedDate && t.dueDate && new Date(t.dueDate) >= now);
+        break;
+      default:
+        // 'all' - no filter
+        break;
+    }
+
+    return filtered;
+  };
+
+  const filteredTasks = getFilteredTasks();
 
   // -----------------------------------------
   //         SINGLE DEPARTMENT VIEW
@@ -110,35 +160,103 @@ const CommunityDepartments = () => {
         ------------------------------------------ */}
         {showTasks && (
           <div className="mt-6">
-            <h2 className="text-xl font-bold mb-2">Tasks</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Tasks</h2>
+              
+              {/* Filter Buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setTaskFilter('all')}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                    taskFilter === 'all'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setTaskFilter('upcoming')}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                    taskFilter === 'upcoming'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Upcoming
+                </button>
+                <button
+                  onClick={() => setTaskFilter('overdue')}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                    taskFilter === 'overdue'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Overdue
+                </button>
+                <button
+                  onClick={() => setTaskFilter('completed')}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                    taskFilter === 'completed'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Completed
+                </button>
+              </div>
+            </div>
 
-            {tasks.length === 0 && recurringTasks.length === 0 && (
-              <p className="text-gray-600">No tasks yet.</p>
+            {filteredTasks.length === 0 && recurringTasks.length === 0 && (
+              <p className="text-gray-600">No tasks found for the selected filter.</p>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
               {/* NORMAL TASKS */}
-              {tasks.map((t) => (
-                <div
-                  key={t._id}
-                  className="p-4 bg-white rounded shadow hover:bg-blue-50 cursor-pointer transition"
-                >
-                  <h3 className="font-semibold">{t.taskName}</h3>
-                  <p className="text-sm">{t.taskDescription}</p>
-                  <p className="text-sm text-gray-600">
-                    Assigned: {t.assignedTo?.username || t.assignedTo?.email || t.assignedName || 'N/A'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Due: {t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'No due date'}
-                  </p>
-                </div>
-              ))}
+              {filteredTasks.map((t) => {
+                const isCompleted = !!t.completedDate;
+                const isOverdue = !isCompleted && t.dueDate && new Date(t.dueDate) < new Date();
+                
+                return (
+                  <div
+                    key={t._id}
+                    onClick={() => navigate(`/tasks/${t._id}`)}
+                    className={`p-4 rounded shadow hover:shadow-lg cursor-pointer transition ${
+                      isCompleted
+                        ? 'bg-green-50 border border-green-300'
+                        : isOverdue
+                        ? 'bg-red-50 border border-red-300'
+                        : 'bg-white'
+                    }`}
+                  >
+                    <h3 className="font-semibold">
+                      {t.taskName}
+                      {isCompleted && ' ✓'}
+                      {isOverdue && ' ⚠️'}
+                    </h3>
+                    <p className="text-sm">{t.taskDescription}</p>
+                    <p className="text-sm text-gray-600">
+                      Assigned: {t.assignedTo?.username || t.assignedTo?.email || t.assignedName || 'N/A'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Due: {t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'No due date'}
+                    </p>
+                    {isCompleted && (
+                      <p className="text-xs text-green-600 font-semibold mt-1">
+                        Completed: {new Date(t.completedDate).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
 
               {/* RECURRING TASKS */}
               {recurringTasks.map((t) => (
                 <div
                   key={t._id}
+                  onClick={() => navigate(`/recurring/tasks/${t._id}`)}
                   className="p-4 bg-purple-50 border border-purple-300 rounded shadow cursor-pointer hover:bg-purple-100 transition"
                 >
                   <h3 className="font-semibold">{t.taskName} 🔁</h3>
