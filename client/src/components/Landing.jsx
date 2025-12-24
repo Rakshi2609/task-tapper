@@ -30,10 +30,10 @@ const Landing = () => {
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
-              Tap your tasks into shape
+              Manage Tasks, Build Communities
             </h1>
             <p className="mt-4 text-lg text-gray-700">
-              Donezo helps you create one‑time and recurring tasks, assign work, track progress, and chat with your team—all in one place.
+              Task Tapper empowers teams to organize work through communities, departments, and collaborative task management. Create, assign, and track tasks with your team—all in one place.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/login" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow">
@@ -50,11 +50,11 @@ const Landing = () => {
           <div className="relative">
             <div className="rounded-3xl bg-white/70 backdrop-blur border border-blue-100 shadow-xl p-6">
               <ul className="space-y-3 text-sm text-gray-700">
-                <li className="flex items-center gap-2"><FaCalendarCheck className="text-green-600"/> Plan one‑time tasks with due dates and priorities</li>
-                <li className="flex items-center gap-2"><FaSyncAlt className="text-purple-600"/> Schedule recurring tasks (daily/weekly/monthly)</li>
-                <li className="flex items-center gap-2"><FaClipboardList className="text-blue-600"/> Assign work and track what you’ve assigned</li>
-                <li className="flex items-center gap-2"><FaComments className="text-indigo-600"/> Chat in World Chat to coordinate quickly</li>
-                <li className="flex items-center gap-2"><FaUserShield className="text-amber-600"/> Your data stays private to your team</li>
+                <li className="flex items-center gap-2"><FaUserShield className="text-purple-600"/> Create and join communities with departments</li>
+                <li className="flex items-center gap-2"><FaClipboardList className="text-blue-600"/> Department-based task organization and tracking</li>
+                <li className="flex items-center gap-2"><FaSyncAlt className="text-green-600"/> Recurring tasks with flexible schedules</li>
+                <li className="flex items-center gap-2"><FaCalendarCheck className="text-indigo-600"/> Assign tasks to community members</li>
+                <li className="flex items-center gap-2"><FaComments className="text-amber-600"/> Real-time World Chat for team coordination</li>
               </ul>
             </div>
           </div>
@@ -65,29 +65,31 @@ const Landing = () => {
       <section className="max-w-6xl mx-auto px-4 py-10">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">How it works</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Step number={1} title="Sign up or Log in" desc="Create an account or log in with your email to get started." />
-          <Step number={2} title="Complete your profile" desc="Add phone and role to personalize your experience." />
-          <Step number={3} title="Create tasks" desc="Add one‑time tasks or set up recurring ones with flexible schedules." />
-          <Step number={4} title="Assign & accept" desc="Assign tasks to teammates. Assignees can accept and start working." />
-          <Step number={5} title="Update & complete" desc="Post updates, mark done, and review history in task details." />
-          <Step number={6} title="Collaborate in chat" desc="Use World Chat for quick announcements and coordination." />
+          <Step number={1} title="Create your account" desc="Sign up with email and complete your profile to get started." />
+          <Step number={2} title="Join or create communities" desc="Create your own community or apply to join existing ones." />
+          <Step number={3} title="Set up departments" desc="Organize work by creating departments within your communities." />
+          <Step number={4} title="Create & assign tasks" desc="Add tasks to departments and assign them to community members." />
+          <Step number={5} title="Track progress" desc="Monitor task updates, completion status, and team productivity." />
+          <Step number={6} title="Collaborate" desc="Use World Chat and task updates to keep everyone aligned." />
         </div>
         <div className="mt-6 grid md:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl border border-blue-100 p-5 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-2">Roles & Permissions</h3>
             <ul className="list-disc ml-5 text-sm text-gray-700 space-y-1">
-              <li><strong>Assigner:</strong> Creates tasks, sets due dates/frequency, assigns to teammates, and can track what they assigned in “Assigned by Me”.</li>
-              <li><strong>Assignee:</strong> Accepts tasks, posts updates, completes tasks. Everyone can view their own tasks in “Your Tasks”.</li>
-              <li>Routes are protected—only logged‑in users can access work pages.</li>
+              <li><strong>Community Owner:</strong> Creates communities, manages departments, approves/rejects join requests, assigns tasks to any member.</li>
+              <li><strong>Community Member:</strong> Creates departments, creates and receives tasks, tracks progress, and collaborates with team.</li>
+              <li><strong>Applicant:</strong> Can apply to join communities and will be notified upon approval or rejection.</li>
+              <li>Protected routes ensure only authenticated users access work features.</li>
             </ul>
           </div>
           <div className="bg-white rounded-2xl border border-blue-100 p-5 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-2">Task lifecycle</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Community Task Flow</h3>
             <ol className="list-decimal ml-5 text-sm text-gray-700 space-y-1">
-              <li>Create task (title, description, due date, priority)</li>
-              <li>Assign by email (assignee will see it in “Your Tasks”)</li>
-              <li>Assignee accepts and can add updates in the Task Detail</li>
-              <li>Mark completed when done (auto‑moves to Completed)</li>
+              <li>Create or join a community</li>
+              <li>Set up departments to organize different work areas</li>
+              <li>Create tasks within departments (one-time or recurring)</li>
+              <li>Assign tasks to community members by email</li>
+              <li>Track progress through task updates and completion status</li>
             </ol>
           </div>
         </div>
@@ -97,23 +99,24 @@ const Landing = () => {
       <section className="max-w-6xl mx-auto px-4 py-10">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Key features</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <Feature icon={<FaCalendarCheck />} title="One‑time Tasks" desc="Create tasks with due dates, priorities, and details." />
-          <Feature icon={<FaSyncAlt />} title="Recurring Tasks" desc="Automate routines with daily, weekly, or monthly repeats." />
-          <Feature icon={<FaClipboardList />} title="Assigned by Me" desc="See everything you’ve assigned and their statuses." />
-          <Feature icon={<FaComments />} title="World Chat" desc="Broadcast updates and collaborate in real time." />
-          <Feature icon={<FaUserShield />} title="Protected Routes" desc="Only logged‑in users can access work pages." />
-          <Feature icon={<FaCheckCircle />} title="Quick Actions" desc="Accept, update, and complete tasks in a click." />
+          <Feature icon={<FaUserShield />} title="Communities" desc="Create communities and organize teams with approval workflows." />
+          <Feature icon={<FaClipboardList />} title="Department Tasks" desc="Organize tasks by department for better structure and clarity." />
+          <Feature icon={<FaSyncAlt />} title="Recurring Tasks" desc="Automate routine work with daily, weekly, or monthly schedules." />
+          <Feature icon={<FaCalendarCheck />} title="Team Collaboration" desc="Assign tasks to members and track progress together." />
+          <Feature icon={<FaCheckCircle />} title="Progress Tracking" desc="Monitor completion status and review task history." />
+          <Feature icon={<FaComments />} title="World Chat" desc="Real-time communication for quick updates and coordination." />
         </div>
       </section>
 
       {/* Recurring tasks details */}
       <section className="max-w-6xl mx-auto px-4 py-10">
         <div className="bg-white rounded-3xl shadow-xl border border-blue-100 p-6 md:p-8">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-900">Recurring tasks</h3>
+          <h3 className="text-xl md:text-2xl font-bold text-gray-900">Communities & Departments</h3>
           <ul className="list-disc ml-6 mt-3 space-y-1 text-gray-700 text-sm">
-            <li>Choose frequency (Daily / Weekly / Monthly) and start/end dates.</li>
-            <li>They appear in the Recurring list; you can complete or delete each.</li>
-            <li>Use the detail page to track updates or comments over time.</li>
+            <li>Create communities to bring teams together or join existing ones with owner approval.</li>
+            <li>Organize work with departments—both owners and members can create them.</li>
+            <li>Assign tasks within departments to keep work structured and trackable.</li>
+            <li>View all your communities on your profile with task counts assigned to you.</li>
           </ul>
         </div>
       </section>
@@ -123,11 +126,12 @@ const Landing = () => {
         <div className="bg-white rounded-3xl shadow-xl border border-blue-100 p-6 md:p-8">
           <h3 className="text-xl md:text-2xl font-bold text-gray-900">Quick start checklist</h3>
           <ol className="list-decimal ml-6 mt-3 space-y-1 text-gray-700">
-            <li>Create an account and log in</li>
-            <li>Open Dashboard to view your tasks</li>
-            <li>Create a one‑time task or set a recurring task</li>
-            <li>Assign tasks to teammates (by email)</li>
-            <li>Use the sidebar to navigate Tasks, Recurring, My Work, and Chat</li>
+            <li>Sign up and complete your profile</li>
+            <li>Create your first community or apply to join existing ones</li>
+            <li>Set up departments to organize your work</li>
+            <li>Create tasks (one-time or recurring) and assign to members</li>
+            <li>Track your tasks and communities from your dashboard</li>
+            <li>Use World Chat to coordinate with your team in real-time</li>
           </ol>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link to="/login" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow">
@@ -137,16 +141,16 @@ const Landing = () => {
               Create account
             </Link>
             <Link to="/dashboard" className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 px-3 py-3">
-              Go to dashboard
+              Dashboard
+            </Link>
+            <Link to="/communities" className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 px-3 py-3">
+              Communities
             </Link>
             <Link to="/tasks" className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 px-3 py-3">
               Your tasks
             </Link>
             <Link to="/recurring/list" className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 px-3 py-3">
               Recurring tasks
-            </Link>
-            <Link to="/mywork" className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 px-3 py-3">
-              Assigned by me
             </Link>
             <Link to="/chat" className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 px-3 py-3">
               World Chat
@@ -180,7 +184,7 @@ const Landing = () => {
 
       {/* Footer */}
       <footer className="text-center text-sm text-gray-500 py-8">
-        <span>© {new Date().getFullYear()} Donezo. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} Task Tapper. All rights reserved.</span>
       </footer>
     </div>
   );
