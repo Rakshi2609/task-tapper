@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const API_URL = `${import.meta.env.API_BASE_URL}/api/community`;
+const API_URL = `${import.meta.env.VITE_APP_API_URL}/api/community`;
 
 console.log("Loaded API_URL:", API_URL);
 
