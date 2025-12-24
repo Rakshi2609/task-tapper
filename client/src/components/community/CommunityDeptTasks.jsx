@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getCommunityDepartments } from "../../services/community";
+import { getCommunityDepartments, getCommunityById } from "../../services/community";
+import { useAuthStore } from "../../assests/store";
 import axios from "axios";
 
 const CommunityDeptTasks = () => {
   const { communityId, communityDeptId } = useParams();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
 
   const [dept, setDept] = useState(null);
@@ -19,25 +21,47 @@ const CommunityDeptTasks = () => {
     const load = async () => {
       setLoading(true);
 
-      const allDepts = await getCommunityDepartments(communityId);
-      const selected = allDepts.find((d) => d._id === communityDeptId);
-      setDept(selected);
+      try {
+        // Check membership first
+        const communityData = await getCommunityById(communityId);
+        const isOwner = communityData.CreatedBy?.toString() === user?._id;
+        const isMember = communityData.members?.some((m) => m.toString() === user?._id);
+        
+        if (!isOwner && !isMember) {
+          alert("You must be a member of this community to view departments");
+          navigate("/communities");
+          return;
+        }
 
-      const t = await axios.get(
-        `${API_URL}/team/community/${communityId}/${communityDeptId}`
-      );
-      setTasks(t.data || []);
+        const allDepts = await getCommunityDepartments(communityId, user?._id);
+        const selected = allDepts.find((d) => d._id === communityDeptId);
+        setDept(selected);
 
-      const rt = await axios.get(
-        `${API_URL}/recurring/community/${communityId}/${communityDeptId}`
-      );
-      setRecurringTasks(rt.data?.data || []);
+        const t = await axios.get(
+          `${API_URL}/team/community/${communityId}/${communityDeptId}`
+        );
+        setTasks(t.data || []);
 
-      setLoading(false);
+        const rt = await axios.get(
+          `${API_URL}/recurring/community/${communityId}/${communityDeptId}`
+        );
+        setRecurringTasks(rt.data?.data || []);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading tasks:", error);
+        if (error.response?.status === 403) {
+          alert("You must be a member of this community to view departments");
+          navigate("/communities");
+        }
+        setLoading(false);
+      }
     };
 
-    load();
-  }, [communityId, communityDeptId]);
+    if (user?._id) {
+      load();
+    }
+  }, [communityId, communityDeptId, user, navigate]);
 
   const handleOpenTask = (task) => {
     if (task.taskAssignedBy) {

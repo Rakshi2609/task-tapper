@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthStore } from '../assests/store'; // Assuming useAuthStore gives current user's email/details
-import { getTaskById, getTaskUpdates, createTaskUpdate } from '../services/taskService';
+import { getTaskById, getTaskUpdates, createTaskUpdate, completeTask } from '../services/taskService';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCommentAlt, FaPaperPlane, FaSpinner, FaTimesCircle, FaCalendarAlt, FaStar, FaClock, FaUserCircle, FaCheck } from 'react-icons/fa';
@@ -15,6 +15,7 @@ const TaskDetail = () => {
     const [error, setError] = useState(null);
     const [newUpdateText, setNewUpdateText] = useState('');
     const [submittingUpdate, setSubmittingUpdate] = useState(false);
+    const [completingTask, setCompletingTask] = useState(false);
 
     const fetchTaskAndUpdates = async () => {
         setLoading(true);
@@ -68,6 +69,31 @@ const TaskDetail = () => {
             toast.error("Failed to post comment: " + (err.response?.data?.message || err.message));
         } finally {
             setSubmittingUpdate(false);
+        }
+    };
+
+    const handleCompleteTask = async () => {
+        if (!user?.email) {
+            toast.error("You must be logged in to complete tasks.");
+            return;
+        }
+
+        if (task.completedDate) {
+            toast.info("This task is already completed.");
+            return;
+        }
+
+        setCompletingTask(true);
+        try {
+            await completeTask({ taskId: taskId, email: user.email });
+            toast.success("Task marked as completed!");
+            // Refresh task data
+            await fetchTaskAndUpdates();
+        } catch (err) {
+            console.error("Failed to complete task:", err);
+            toast.error("Failed to complete task: " + (err.response?.data?.message || err.message));
+        } finally {
+            setCompletingTask(false);
         }
     };
 
@@ -147,6 +173,33 @@ const TaskDetail = () => {
                         )}
                     </div>
                 </motion.div>
+
+                {/* Mark as Complete Button */}
+                {!task.completedDate && (
+                    <motion.div variants={cardVariants} className="mb-8">
+                        <button
+                            onClick={handleCompleteTask}
+                            disabled={completingTask}
+                            className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
+                                completingTask
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
+                            }`}
+                        >
+                            {completingTask ? (
+                                <>
+                                    <FaSpinner className="animate-spin" />
+                                    Completing...
+                                </>
+                            ) : (
+                                <>
+                                    <FaCheck />
+                                    Mark as Complete
+                                </>
+                            )}
+                        </button>
+                    </motion.div>
+                )}
 
                 {/* Updates/Comments Section */}
                 <motion.div variants={cardVariants}>

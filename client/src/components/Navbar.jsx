@@ -65,7 +65,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
         <div className="flex items-center space-x-2">
           {user ? (
             <>
-              <Link to="/profile">
+              <Link to="/dashboard">
                 <motion.button
                   className={`${navLinkClasses} bg-transparent`}
                   variants={buttonVariants}
