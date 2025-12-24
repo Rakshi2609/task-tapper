@@ -90,17 +90,18 @@ const markSent = async (email) => {
 export const checkAndSendDailySummary = async (userEmail) => {
   console.log(`📩 [checkAndSendDailySummary] Starting for ${userEmail}`);
 
-  const alreadySent = await hasSentToday(userEmail);
-  if (alreadySent) {
-    console.log(`⏭️ Summary already sent today for ${userEmail}`);
-    return;
-  }
+  try {
+    const alreadySent = await hasSentToday(userEmail);
+    if (alreadySent) {
+      console.log(`⏭️ Summary already sent today for ${userEmail}`);
+      return;
+    }
 
-  const user = await User.findOne({ email: userEmail });
-  if (!user) {
-    console.log(`❌ No user found for ${userEmail}`);
-    return;
-  }
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      console.log(`❌ No user found for ${userEmail}`);
+      return;
+    }
 
   const today = new Date();
   const startOfDay = new Date(today.setHours(0, 0, 0, 0));
@@ -173,4 +174,8 @@ Task Tapper
   await sendMail(userEmail, '🗓️ Your Daily Task Summary', summary);
   await markSent(userEmail);
   console.log(`✅ Summary sent and marked for ${userEmail}`);
+  } catch (error) {
+    console.error(`❌ Error in checkAndSendDailySummary for ${userEmail}:`, error.message);
+    throw error;
+  }
 };

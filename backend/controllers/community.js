@@ -3,6 +3,7 @@ import Team from '../models/Team.js';
 import Community from '../models/Community.js';
 import CommunityDept from '../models/CommunityDept.js';
 import RecurringTask from "../models/recurringTaskModel.js";
+import { sendMail } from '../utils/sendMail.js';
 
 import {createTask } from './team.js';
 import { createRecurringTask } from './recurringTaskController.js';
@@ -193,6 +194,37 @@ export const addMemberToCommunity = async (req, res) => {
 
     await community.save();
 
+    // 📧 Send email notification to the added user
+    try {
+      const emailContent = `
+Hi ${user.username || user.email},
+
+🎉 Great news! You have been added to the community "${community.name}".
+
+You can now:
+✅ View and participate in community departments
+✅ Collaborate with other members
+✅ Access community tasks and resources
+
+Visit the community: https://task-tapper-blush.vercel.app/communities/${communityId}/departments
+
+Welcome aboard!
+
+Regards,  
+Task Tapper Team
+      `;
+      
+      await sendMail(
+        user.email,
+        `🎉 You've been added to ${community.name}`,
+        emailContent
+      );
+      console.log(`📧 Welcome email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error("❌ Failed to send welcome email:", emailError.message);
+      // Don't fail the entire operation if email fails
+    }
+
     console.log("✅ Member added successfully");
 
     const updated = await Community.findById(communityId)
@@ -236,13 +268,136 @@ export const deleteCommunity = async (req, res) => {
         }
         await Community.findByIdAndDelete(communityId);
         console.log("Community deleted successfully");
+    // 📧 Send email notifications
+    try {
+      // Get user and owner details
+      const applicant = await User.findById(userId);
+      const owner = await User.findById(community.CreatedBy);
+
+      if (applicant && owner) {
+        // Email to applicant
+        const applicantEmail = `
+Hi ${applicant.username || applicant.email},
+
+✅ Your application to join "${community.name}" has been submitted successfully!
+
+The community owner will review your application shortly. You will receive a notification once your application is reviewed.
+
+Community Details:
+📌 Name: ${community.name}
+📝 Description: ${community.description}
+
+Thank you for your interest!
+
+Regards,  
+Task Tapper Team
+        `;
+
+        await sendMail(
+          applicant.email,
+          `✅ Application Submitted: ${community.name}`,
+          applicantEmail
+        );
+        console.log(`📧 Application confirmation sent to ${applicant.email}`);
+
+        // Email to owner
+        const ownerEmail = `
+Hi ${owner.username || owner.email},
+
+📬 New Application Alert!
+
+${applicant.username || applicant.email} has applied to join your community "${community.name}".
+
+Review the application here: https://task-tapper-blush.vercel.app/communities/${communityId}/pending
+
+You can approve or reject this application from the community management page.
+
+Regards,  
+Task Tapper Team
+        `;
+
+        await sendMail(
+          owner.email,
+          `📬 New Application for ${community.name}`,
+          ownerEmail
+        );
+        console.log(`📧 Application notification sent to owner ${owner.email}`);
+      }
+    } catch (emailError) {
+      console.error("❌ Failed to send application emails:", emailError.message);
+      // Don't fail the entire operation if email fails
+    }
+
         res.json({ message: 'Community deleted successfully' });
     } catch (error) {
         console.log("Error deleting community:", error.message);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+// 📧 Send approval email to the user
+        try {
+          const approvedUser = await User.findById(userId);
+          
+          if (approvedUser) {
+            const emailContent = `
+Hi ${approvedUser.username || approvedUser.email},
 
+🎉 Congratulations! Your application to join "${community.name}" has been approved!
+
+You are now a member of the community and can:
+✅ Access all community departments
+✅ Participate in community tasks
+✅ Collaborate with other members
+
+Visit the community now: https://task-tapper-blush.vercel.app/communities/${communityId}/departments
+
+Welcome to the community!
+
+Regards,  
+Task Tapper Team
+            `;
+
+            await sendMail(
+              approvedUser.email,
+              `🎉 Application Approved: ${community.name}`,
+              emailContent
+            );
+            console.log(`📧 Approval email sent to ${approvedUser.email}`);
+          }
+        } catch (emailError) {
+          console.error("❌ Failed to send approval email:", emailError.message);
+        }
+        // 📧 Send rejection email to the user
+        try {
+          const rejectedUser = await User.findById(userId);
+          
+          if (rejectedUser) {
+            const emailContent = `
+Hi ${rejectedUser.username || rejectedUser.email},
+
+We regret to inform you that your application to join "${community.name}" was not approved at this time.
+
+You can explore other communities or try applying again in the future.
+
+Thank you for your interest!
+
+Regards,  
+Task Tapper Team
+            `;
+
+            await sendMail(
+              rejectedUser.email,
+              `Application Update: ${community.name}`,
+              emailContent
+            );
+            console.log(`📧 Rejection email sent to ${rejectedUser.email}`);
+          }
+        } catch (emailError) {
+          console.error("❌ Failed to send rejection email:", emailError.message);
+        }
+        
+        
+        
 export const applyToJoinCommunity = async (req, res) => {
   console.log("Applying to join community");
 

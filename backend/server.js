@@ -57,14 +57,19 @@ app.get('/', (req, res) => {
 
 app.get("/api/ping", async (req, res) => {
   console.log("✅ Pinged by GitHub Action at", new Date().toLocaleString());
+  res.send("✅ Server is alive");
+});
+
+app.get("/api/trigger-summaries", async (req, res) => {
+  console.log("📧 Daily summary trigger requested at", new Date().toLocaleString());
 
   try {
-    triggerDailySummaries(); 
-    console.log("✅ Daily summary check initiated");
-    res.send("✅ Ping success and summary check triggered");
+    await triggerDailySummaries(); 
+    console.log("✅ Daily summary check completed");
+    res.send("✅ Daily summaries triggered successfully");
   } catch (err) {
-    console.error("❌ Error sending summary:", err.message);
-    res.status(500).send("❌ Failed to send summary");
+    console.error("❌ Error sending summaries:", err.message);
+    res.status(500).send("❌ Failed to send summaries: " + err.message);
   }
 });
 
