@@ -15,7 +15,7 @@ const CommunityDeptTasks = () => {
   const [loading, setLoading] = useState(true);
   const [showTasks, setShowTasks] = useState(false); // 👈 ADDED
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_APP_API_URL;
 
   useEffect(() => {
     const load = async () => {

@@ -4,7 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useAuthStore } from "../../assests/store";
 import axios from "axios";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/community`;
+const API_URL = `${import.meta.env.VITE_APP_API_URL}/api/community`;
 
 const CreateCommunityDept = () => {
   const { communityId } = useParams();

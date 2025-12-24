@@ -17,7 +17,7 @@ const ApplyToJoinCommunity = () => {
     const loadCommunity = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/community/${communityId}`
+          `${import.meta.env.VITE_APP_API_URL}/api/community/${communityId}`
         );
         console.log("Community data:", res.data);
         setCommunity(res.data);

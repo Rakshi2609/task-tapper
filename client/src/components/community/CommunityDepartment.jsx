@@ -61,8 +61,8 @@ const CommunityDepartments = () => {
     if (!showTasks || !communityDeptId) return;
 
     const loadTasks = async () => {
-      const API = import.meta.env.VITE_API_URL;
-      const url = `${API}/community/${communityId}/${communityDeptId}/tasks`;
+      const API = import.meta.env.VITE_APP_API_URL;
+      const url = `${API}/api/community/${communityId}/${communityDeptId}/tasks`;
       
       console.log("🔍 Fetching tasks from:", url);
 
