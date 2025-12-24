@@ -78,6 +78,12 @@ const TaskDetail = () => {
             return;
         }
 
+        // Check if current user is the one assigned to the task
+        if (user.email !== task.assignedTo) {
+            toast.error("Only the person assigned to this task can mark it as complete.");
+            return;
+        }
+
         if (task.completedDate) {
             toast.info("This task is already completed.");
             return;
@@ -177,27 +183,34 @@ const TaskDetail = () => {
                 {/* Mark as Complete Button */}
                 {!task.completedDate && (
                     <motion.div variants={cardVariants} className="mb-8">
-                        <button
-                            onClick={handleCompleteTask}
-                            disabled={completingTask}
-                            className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
-                                completingTask
-                                    ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
-                            }`}
-                        >
-                            {completingTask ? (
-                                <>
-                                    <FaSpinner className="animate-spin" />
-                                    Completing...
-                                </>
-                            ) : (
-                                <>
-                                    <FaCheck />
-                                    Mark as Complete
-                                </>
-                            )}
-                        </button>
+                        {user?.email === task.assignedTo ? (
+                            <button
+                                onClick={handleCompleteTask}
+                                disabled={completingTask}
+                                className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
+                                    completingTask
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
+                                }`}
+                            >
+                                {completingTask ? (
+                                    <>
+                                        <FaSpinner className="animate-spin" />
+                                        Completing...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaCheck />
+                                        Mark as Complete
+                                    </>
+                                )}
+                            </button>
+                        ) : (
+                            <div className="w-full py-3 px-6 rounded-lg font-semibold text-gray-600 bg-gray-200 border-2 border-gray-300 flex items-center justify-center gap-2">
+                                <FaTimesCircle />
+                                Only {task.assignedName} can complete this task
+                            </div>
+                        )}
                     </motion.div>
                 )}
 

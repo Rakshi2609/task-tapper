@@ -121,7 +121,10 @@ export const updateTask = async (req, res) => {
 
         if (!task) {
             console.log(`[updateTask] Error: Task not found or not assigned to email '${email}' for taskId: ${taskId}`);
-            return res.status(404).json({ success: false, message: "Task not found or not assigned to this email." });
+            return res.status(403).json({ 
+                success: false, 
+                message: "Access denied. Only the person assigned to this task can mark it as complete." 
+            });
         }
         console.log(`[updateTask] Task found and updated: ${task._id}, completedDate: ${task.completedDate}`);
 

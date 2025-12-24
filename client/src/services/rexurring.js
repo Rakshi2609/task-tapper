@@ -88,13 +88,10 @@ export const deleteRecurringTaskUpdate = async (updateId) => {
 
 /**
  * Marks a recurring task as complete by its ID.
- * @param {string} id - The ID of the task to complete.
- * @param {Object} data - The data to send, typically { completedDate: new Date() }.
+ * @param {Object} data - Object containing taskId and email.
  * @returns {Promise<Object>} The response data for the updated task.
  */
 export const completeRecurringTask = async ({ taskId, email }) => {
-    // Note: The backend route expects the ID in the URL.
-    // The email can be sent in the body if needed by your backend.
     const res = await axios.put(`${API_URL}/recurring-tasks/complete/${taskId}`, { email });
     return res.data;
 };

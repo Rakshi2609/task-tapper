@@ -148,18 +148,30 @@ export const deleteRecurringTask = async (req, res) => {
 // ✅ MARK RECURRING TASK COMPLETE
 export const completeRecurringTask = async (req, res) => {
   const { id } = req.params;
-  const { completedDate } = req.body;
+  const { completedDate, email } = req.body;
 
   try {
+    // First, find the task to check assignment
+    const existingTask = await RecurringTask.findById(id).populate('taskAssignedTo');
+    
+    if (!existingTask) {
+      return res.status(404).json({ success: false, message: "Task not found" });
+    }
+
+    // Check if the user is the one assigned to the task
+    const assignedEmail = existingTask.taskAssignedTo?.email || existingTask.taskAssignedTo;
+    if (email && assignedEmail !== email) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Access denied. Only the person assigned to this task can mark it as complete." 
+      });
+    }
+
     const task = await RecurringTask.findByIdAndUpdate(
       id,
       { completedDate: completedDate || new Date() },
       { new: true, runValidators: true }
     );
-
-    if (!task) {
-      return res.status(404).json({ success: false, message: "Task not found" });
-    }
 
     res.status(200).json({ success: true, data: task });
   } catch (err) {

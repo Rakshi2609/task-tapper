@@ -46,6 +46,14 @@ const UserTasks = () => {
 
     const handleComplete = async (taskId) => {
         if (!user?.email) return;
+        
+        // Find the task to verify ownership
+        const taskToComplete = tasks?.find(t => t._id === taskId);
+        if (taskToComplete && taskToComplete.assignedTo && taskToComplete.assignedTo !== user.email) {
+            toast.error("You can only complete tasks assigned to you.");
+            return;
+        }
+        
         try {
             await completeTaskAPI({taskId, email: user.email});
             toast.success("Task marked as completed!");
@@ -203,6 +211,17 @@ const UserTasks = () => {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                <div className="text-center">
+                    <FaSpinner className="animate-spin text-6xl text-blue-600 mx-auto mb-4" />
+                    <p className="text-xl font-semibold text-gray-700">Loading your tasks...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
             <motion.div
@@ -273,11 +292,7 @@ const UserTasks = () => {
                     </div>
                 </motion.div>
 
-                {isLoading ? (
-                    <motion.p className="text-center text-blue-600 text-lg font-medium py-10 flex items-center justify-center gap-3">
-                        <FaSpinner className="animate-spin text-2xl" /> Loading tasks...
-                    </motion.p>
-                ) : error ? (
+                {error ? (
                     <motion.p className="text-red-600 text-center text-lg font-medium py-10">
                         <FaRegSadTear className="inline-block mr-2 text-2xl" /> {error}
                     </motion.p>
@@ -310,6 +325,12 @@ const UserTasks = () => {
                                                 <div>
                                                     <h4 className="text-lg font-semibold text-gray-800 break-words">{task.taskName}</h4>
                                                     <p className="text-lg font-semibold text-gray-600 break-words"><span className="text-gray-700">Task Description: </span>{task.taskDescription}</p>
+                                                    {task.communityName && (
+                                                        <p className="text-sm text-purple-600 font-medium flex items-center gap-1">
+                                                            <span className="bg-purple-100 px-2 py-1 rounded">📍 {task.communityName}</span>
+                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded">🏢 {task.departmentName}</span>}
+                                                        </p>
+                                                    )}
                                                     <p className="text-sm text-gray-600 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                                                     </p>
@@ -386,6 +407,12 @@ const UserTasks = () => {
                                             >
                                                 <div>
                                                     <h4 className="text-lg line-through font-medium text-gray-700 break-words">{task.taskName}</h4>
+                                                    {task.communityName && (
+                                                        <p className="text-sm text-purple-600 font-medium flex items-center gap-1">
+                                                            <span className="bg-purple-100 px-2 py-1 rounded">📍 {task.communityName}</span>
+                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded">🏢 {task.departmentName}</span>}
+                                                        </p>
+                                                    )}
                                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                                         <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
                                                     </p>

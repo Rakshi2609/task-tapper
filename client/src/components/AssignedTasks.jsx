@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useAuthStore } from "../assests/store";
 import { Link } from "react-router-dom";
-import { FaSearch, FaCalendarAlt, FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
+import { FaSearch, FaCalendarAlt, FaCheckCircle, FaHourglassHalf, FaSpinner } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { motion } from "framer-motion";
@@ -154,6 +154,17 @@ const AssignedTasks = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-6xl text-blue-600 mx-auto mb-4" />
+          <p className="text-xl font-semibold text-gray-700">Loading assigned tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -245,11 +256,7 @@ const AssignedTasks = () => {
         </motion.div>
       </div>
 
-      {loading && (
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-gray-600 text-lg font-medium py-6">
-          Loading your assigned tasks...
-        </motion.p>
-      )}
+
       {!loading && filteredTasks.length === 0 ? (
         <motion.p
           initial={{ opacity: 0 }}
@@ -281,6 +288,18 @@ const AssignedTasks = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
               <div className="relative z-10">
                 <p className="text-xl font-bold mb-1 text-gray-800">{task.taskName || task.task}</p>
+                {task.communityName && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium">
+                      📍 {task.communityName}
+                    </span>
+                    {task.departmentName && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">
+                        🏢 {task.departmentName}
+                      </span>
+                    )}
+                  </div>
+                )}
                 <p className="text-sm text-gray-600 mb-0.5">
                   <span className="font-semibold">Assigned To:</span>{" "}
                   {task.assignedName || task.assignedTo || task.taskAssignedTo?.email || 'N/A'}
