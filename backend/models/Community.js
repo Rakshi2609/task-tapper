@@ -14,6 +14,26 @@ const CommunitySchema = new mongoose.Schema({
     }
   ],
 
+  memberEmailStatus: [
+    {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      emailSent: {
+        type: Boolean,
+        default: false,
+      },
+      sentAt: {
+        type: Date,
+      },
+      emailType: {
+        type: String,
+        enum: ['welcome', 'approved', 'rejected'],
+      }
+    }
+  ],
+
   name: {
     type: String,
     required: true,

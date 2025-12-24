@@ -216,10 +216,31 @@ export const addMemberToCommunity = async (req, res) => {
       user.email,
       `🎉 You've been added to ${community.name}`,
       emailContent
-    ).then(() => {
+    ).then(async () => {
       console.log(`✅ Welcome email successfully sent to ${user.email}`);
-    }).catch((emailError) => {
+      // Track email sent status
+      await Community.findByIdAndUpdate(communityId, {
+        $push: {
+          memberEmailStatus: {
+            userId: userId,
+            emailSent: true,
+            sentAt: new Date(),
+            emailType: 'welcome'
+          }
+        }
+      });
+    }).catch(async (emailError) => {
       console.error(`❌ Failed to send welcome email to ${user.email}:`, emailError);
+      // Track email failed status
+      await Community.findByIdAndUpdate(communityId, {
+        $push: {
+          memberEmailStatus: {
+            userId: userId,
+            emailSent: false,
+            emailType: 'welcome'
+          }
+        }
+      });
     });
 
     const updated = await Community.findById(communityId)
@@ -391,10 +412,31 @@ export const approveMemberApplication = async (req, res) => {
               approvedUser.email,
               `🎉 Application Approved: ${community.name}`,
               emailContent
-            ).then(() => {
+            ).then(async () => {
               console.log(`📧 Approval email sent to ${approvedUser.email}`);
-            }).catch((err) => {
+              // Track email sent status
+              await Community.findByIdAndUpdate(communityId, {
+                $push: {
+                  memberEmailStatus: {
+                    userId: userId,
+                    emailSent: true,
+                    sentAt: new Date(),
+                    emailType: 'approved'
+                  }
+                }
+              });
+            }).catch(async (err) => {
               console.error("❌ Failed to send approval email:", err.message);
+              // Track email failed status
+              await Community.findByIdAndUpdate(communityId, {
+                $push: {
+                  memberEmailStatus: {
+                    userId: userId,
+                    emailSent: false,
+                    emailType: 'approved'
+                  }
+                }
+              });
             });
           }
         }).catch((err) => {
@@ -446,10 +488,31 @@ export const rejectMemberApplication = async (req, res) => {
               rejectedUser.email,
               `Application Update: ${community.name}`,
               emailContent
-            ).then(() => {
+            ).then(async () => {
               console.log(`📧 Rejection email sent to ${rejectedUser.email}`);
-            }).catch((err) => {
+              // Track email sent status
+              await Community.findByIdAndUpdate(communityId, {
+                $push: {
+                  memberEmailStatus: {
+                    userId: userId,
+                    emailSent: true,
+                    sentAt: new Date(),
+                    emailType: 'rejected'
+                  }
+                }
+              });
+            }).catch(async (err) => {
               console.error("❌ Failed to send rejection email:", err.message);
+              // Track email failed status
+              await Community.findByIdAndUpdate(communityId, {
+                $push: {
+                  memberEmailStatus: {
+                    userId: userId,
+                    emailSent: false,
+                    emailType: 'rejected'
+                  }
+                }
+              });
             });
           }
         }).catch((err) => {
