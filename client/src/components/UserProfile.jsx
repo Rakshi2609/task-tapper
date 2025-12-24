@@ -3,6 +3,7 @@ import { useAuthStore } from "../assests/store";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/firebase";
+import { getAllCommunities } from "../services/community";
 // Removed Recharts bar chart in favor of a calendar view
 import { motion } from "framer-motion";
 import {
@@ -16,12 +17,14 @@ import {
   FaPlusSquare,
   FaExclamationTriangle,
   FaSignOutAlt,
+  FaUsers,
 } from "react-icons/fa";
 
 const UserProfile = () => {
   const { user, isAuthenticated, tasks, getUserTasks, userDetail, fetchUserDetail } = useAuthStore();
   const [todayTasks, setTodayTasks] = useState([]);
   const [overdueTasks, setOverdueTasks] = useState([]);
+  const [userCommunities, setUserCommunities] = useState([]);
   const navigate = useNavigate();
 
   // Fetch tasks when user is available
@@ -34,6 +37,38 @@ const UserProfile = () => {
       }
     }
   }, [user, getUserTasks, fetchUserDetail, userDetail]);
+
+  // Fetch user's communities and calculate tasks assigned to user
+  useEffect(() => {
+    const loadUserCommunities = async () => {
+      if (!user?._id || !user?.email) return;
+      try {
+        const allCommunities = await getAllCommunities();
+        const myCommunities = allCommunities.filter(c => {
+          const isOwner = c.CreatedBy?.toString() === user._id;
+          const isMember = c.members?.some((m) => m.toString() === user._id);
+          return isOwner || isMember;
+        });
+
+        // Calculate tasks assigned to this user in each community
+        const communitiesWithUserTasks = myCommunities.map(community => {
+          const userTasksInCommunity = tasks?.filter(
+            task => task.community?.toString() === community._id && 
+                    task.assignedTo === user.email
+          ) || [];
+          return {
+            ...community,
+            userTaskCount: userTasksInCommunity.length
+          };
+        });
+        
+        setUserCommunities(communitiesWithUserTasks);
+      } catch (error) {
+        console.error("Failed to load communities:", error);
+      }
+    };
+    loadUserCommunities();
+  }, [user, tasks]);
 
   // Filter tasks due today and overdue tasks
   useEffect(() => {
@@ -260,14 +295,15 @@ const UserProfile = () => {
 
               {/* Quick actions */}
               <div className="grid grid-cols-2 gap-2">
-                <Link to="/create">
+                <Link to="/communities">
                   <motion.button
                     className="w-full bg-white border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50"
                     variants={linkButtonVariants}
                     whileHover="hover"
                     whileTap="tap"
                   >
-                    Create Task
+                    <FaUsers className="inline mr-1" />
+                    Communities
                   </motion.button>
                 </Link>
                 <Link to="/chat">
@@ -616,6 +652,65 @@ const UserProfile = () => {
                 </motion.li>
               ))}
             </ul>
+          )}
+        </motion.div>
+
+        {/* My Communities Section */}
+        <motion.div
+          className="mt-6 p-6 bg-purple-50 rounded-xl shadow-md border border-purple-100"
+          variants={itemVariants}
+        >
+          <h3 className="text-xl font-bold mb-4 text-purple-800 flex items-center justify-between gap-2">
+            <FaUsers /> My Communities
+            <Link to="/communities" className="text-sm font-semibold text-purple-700 hover:underline">View all</Link>
+          </h3>
+          {userCommunities.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 italic mb-4">
+                You haven't joined any communities yet.
+              </p>
+              <Link to="/communities">
+                <motion.button
+                  className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+                  variants={linkButtonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  Explore Communities
+                </motion.button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {userCommunities.map((community, index) => {
+                const isOwner = community.CreatedBy?.toString() === user?._id;
+                return (
+                  <motion.div
+                    key={community._id}
+                    className="border border-purple-200 p-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                    onClick={() => navigate(`/communities/${community._id}/departments`)}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="text-lg font-semibold text-gray-800">{community.name}</h4>
+                      {isOwner && (
+                        <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded-full font-bold">
+                          Owner
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">{community.description}</p>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>👥 {community.totalMembers} members</span>
+                      <span>✅ {community.userTaskCount || 0} tasks assigned to you</span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
           )}
         </motion.div>
       </motion.div>

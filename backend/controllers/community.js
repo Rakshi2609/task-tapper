@@ -31,11 +31,25 @@ export const getCommunityDepts = async (req, res) => {
     console.log("Fetching departments for community");
     try {
         const { communityId } = req.params; 
+        const { userId } = req.query; // Get userId from query params
+        
         const community = await Community.findById(communityId);
         if (!community) {
             console.log("Community not found");
             return res.status(404).json({ message: 'Community not found' });
         }
+        
+        // Check if user is member or owner
+        if (userId) {
+            const isOwner = community.CreatedBy.toString() === userId;
+            const isMember = community.members.some(m => m.toString() === userId);
+            
+            if (!isOwner && !isMember) {
+                console.log("User is not a member of this community");
+                return res.status(403).json({ message: 'You must be a member to view departments' });
+            }
+        }
+        
         const depts = await CommunityDept.find({ community: communityId }); 
         console.log(depts);
         res.json(depts);    
