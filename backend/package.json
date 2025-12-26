@@ -13,14 +13,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "firebase-admin": "^13.4.0",
     "form-data": "^4.0.5",
     "mailgun.js": "^12.4.0",
     "mongoose": "^8.16.0",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^6.9.8",
+    "nodemailer": "^6.10.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   }

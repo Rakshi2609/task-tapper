@@ -13,7 +13,7 @@ export const getAllCommunities = async () => {
 
 // ✅ Get departments
 export const getCommunityDepartments = async (communityId, userId = null) => {
-  const url = userId 
+  const url = userId
     ? `${API_URL}/${communityId}/departments?userId=${userId}`
     : `${API_URL}/${communityId}/departments`;
   const res = await axios.get(url);

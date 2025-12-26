@@ -92,7 +92,7 @@ const Home = () => {
     "flex items-center gap-3 bg-white text-gray-800 p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+    <div className="text-30xl min-h-120vh bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
       <div className="max-w-4xl mx-auto text-center">
 
         <motion.p
@@ -151,7 +151,7 @@ const Home = () => {
                   </span>
                 </motion.div>
               </Link>
-              <Link to="/create">
+              <Link to="/communities">
                 <motion.div
                   className={navLinkClasses}
                   variants={buttonVariants}
@@ -159,10 +159,10 @@ const Home = () => {
                   whileTap="tap"
                 >
                   <FaRegCalendarPlus className="text-yellow-500 text-2xl" />
-                  <span className="font-semibold">Create One-Time Task</span>
+                  <span className="font-semibold">Communities</span>
                 </motion.div>
               </Link>
-              <Link to="/recurring/create">
+              {/* <Link to="/recurring/create">
                 <motion.div
                   className={navLinkClasses}
                   variants={buttonVariants}
@@ -172,7 +172,7 @@ const Home = () => {
                   <FaRecycle className="text-purple-500 text-2xl" />
                   <span className="font-semibold">Create Recurring Task</span>
                 </motion.div>
-              </Link>
+              </Link> */}
               <Link to="/chat">
                 <motion.div
                   className={navLinkClasses}
