@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthStore } from '../assests/store'; // Assuming useAuthStore gives current user's email/details
 import { getTaskById, getTaskUpdates, createTaskUpdate, completeTask } from '../services/taskService';
+import { getCommunityById, getCommunityDepartments } from '../services/community';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCommentAlt, FaPaperPlane, FaSpinner, FaTimesCircle, FaCalendarAlt, FaStar, FaClock, FaUserCircle, FaCheck } from 'react-icons/fa';
@@ -11,6 +12,7 @@ const TaskDetail = () => {
     const { user } = useAuthStore(); // Get current logged-in user for 'updatedBy'
     const [task, setTask] = useState(null);
     const [updates, setUpdates] = useState([]);
+    const [communityInfo, setCommunityInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [newUpdateText, setNewUpdateText] = useState('');
@@ -22,7 +24,23 @@ const TaskDetail = () => {
         setError(null);
         try {
             const taskRes = await getTaskById(taskId);
+            console.log('Task data:', taskRes.task); // Debug log
             setTask(taskRes.task);
+
+            // Fetch community and department info if task is part of a community
+            if (taskRes.task.community) {
+                try {
+                    const communityData = await getCommunityById(taskRes.task.community);
+                    const departments = await getCommunityDepartments(taskRes.task.community, user?._id);
+                    const department = departments.find(d => d._id === taskRes.task.communityDept);
+                    setCommunityInfo({
+                        communityName: communityData.name,
+                        departmentName: department?.name || 'Unknown Department'
+                    });
+                } catch (err) {
+                    console.error('Failed to fetch community info:', err);
+                }
+            }
 
             const updatesRes = await getTaskUpdates(taskId);
             setUpdates(updatesRes.updates);
@@ -169,8 +187,14 @@ const TaskDetail = () => {
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">{task.taskName}</h3>
                     <p className="text-md text-gray-700 mb-4">{task.taskDescription}</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
-                        <p className="flex items-center gap-2"><FaUserCircle className="text-indigo-400" /> Assigned To: <span className="font-medium text-blue-700">{task.assignedName} ({task.assignedTo})</span></p>
-                        <p className="flex items-center gap-2"><FaUserCircle className="text-indigo-400" /> Created By: <span className="font-medium text-blue-700">{task.createdBy}</span></p>
+                        {communityInfo && (
+                            <>
+                                <p className="flex items-center gap-2"><FaUserCircle className="text-indigo-400" /> Community: <span className="font-medium text-blue-700">{communityInfo.communityName}</span></p>
+                                <p className="flex items-center gap-2"><FaUserCircle className="text-purple-400" /> Department: <span className="font-medium text-purple-700">{communityInfo.departmentName}</span></p>
+                            </>
+                        )}
+                        <p className="flex items-center gap-2"><FaUserCircle className="text-indigo-400" /> Assigned To: <span className="font-medium text-blue-700">{task.assignedName}</span></p>
+                        <p className="flex items-center gap-2"><FaUserCircle className="text-indigo-400" /> Created By: <span className="font-medium text-blue-700">{task.createdByName || task.createdBy}</span></p>
                         <p className="flex items-center gap-2"><FaCalendarAlt className="text-blue-400" /> Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
                         <p className="flex items-center gap-2"><FaStar className="text-yellow-500" /> Priority: <span className={`font-semibold ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>{task.priority}</span></p>
                         <p className="flex items-center gap-2"><FaClock className="text-purple-500" /> Frequency: {task.taskFrequency}</p>
@@ -242,7 +266,7 @@ const TaskDetail = () => {
                                         exit="hidden" // Ensure exit animation
                                     >
                                         <div className="flex justify-between items-center text-sm text-gray-500 mb-1">
-                                            <span className="font-medium text-blue-700">{update.updatedBy}</span>
+                                            <span className="font-medium text-blue-700">{update.updatedByName || update.updatedBy}</span>
                                             <span className="text-xs">{new Date(update.createdAt).toLocaleString()}</span>
                                         </div>
                                         <p className="text-gray-800">{update.updateText}</p>

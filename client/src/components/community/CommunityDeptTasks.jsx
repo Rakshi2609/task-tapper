@@ -4,15 +4,15 @@ import { getCommunityDepartments, getCommunityById } from "../../services/commun
 import { useAuthStore } from "../../assests/store";
 import axios from "axios";
 import {
-  FaPlus,
-  FaRedo,
-  FaEye,
-  FaEyeSlash,
-  FaArrowLeft,
-  FaUser,
-  FaCalendarAlt,
-  FaClock,
-} from "react-icons/fa";
+  Plus,
+  RotateCw,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  User,
+  Calendar,
+  Clock,
+} from "lucide-react";
 
 const CommunityDeptTasks = () => {
   const { communityId, communityDeptId } = useParams();
@@ -93,7 +93,7 @@ const CommunityDeptTasks = () => {
           <div className="flex flex-col gap-3 w-full min-w-0">
             <div className="flex items-start gap-2 sm:gap-3 w-full">
               <div className="p-2 rounded-lg bg-blue-100 text-blue-600 shrink-0">
-                <FaUser className="text-base sm:text-lg" />
+                <User className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
               <div className="min-w-0 flex-1">
@@ -118,7 +118,7 @@ const CommunityDeptTasks = () => {
               to={`/communities/${communityId}/${communityDeptId}/create-task`}
               className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition active:scale-95 shadow-sm w-full text-sm sm:text-base"
             >
-              <FaPlus className="text-sm" />
+              <Plus className="w-4 h-4" />
               <span>Add Task</span>
             </Link>
 
@@ -126,7 +126,7 @@ const CommunityDeptTasks = () => {
               to={`/communities/${communityId}/${communityDeptId}/recurring/create`}
               className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition active:scale-95 shadow-sm w-full text-sm sm:text-base"
             >
-              <FaRedo className="text-sm" />
+              <RotateCw className="w-4 h-4" />
               <span>Add Recurring</span>
             </Link>
           </div>
@@ -146,11 +146,13 @@ const CommunityDeptTasks = () => {
         >
           {showTasks ? (
             <>
-              <FaEyeSlash /> Hide Tasks
+              <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> 
+              <span>Hide Tasks</span>
             </>
           ) : (
             <>
-              <FaEye /> View All Tasks
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5" /> 
+              <span>View All Tasks</span>
             </>
           )}
         </button>
@@ -194,14 +196,14 @@ const CommunityDeptTasks = () => {
 
                   <div className="space-y-2 pt-3 sm:pt-4 border-t border-gray-100 text-xs sm:text-sm">
                     <div className="flex items-center gap-2 sm:gap-3 text-gray-600">
-                      <FaUser className="text-blue-500 shrink-0 text-xs sm:text-sm" />
+                      <User className="text-blue-500 shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="truncate min-w-0">
                         {t.assignedName || "Unassigned"}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3 text-gray-600">
-                      <FaCalendarAlt className="text-blue-500 shrink-0 text-xs sm:text-sm" />
+                      <Calendar className="text-blue-500 shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="whitespace-nowrap">
                         {new Date(t.dueDate).toLocaleDateString()}
                       </span>
@@ -223,7 +225,7 @@ const CommunityDeptTasks = () => {
                     </h3>
 
                     <span className="flex items-center gap-1 bg-purple-600 text-[9px] sm:text-[10px] text-white px-1.5 sm:px-2 py-1 rounded-full font-black uppercase shrink-0">
-                      <FaRedo size={7} /> Recurring
+                      <RotateCw className="w-2 h-2 sm:w-2.5 sm:h-2.5" /> Recurring
                     </span>
                   </div>
 
@@ -233,14 +235,14 @@ const CommunityDeptTasks = () => {
 
                   <div className="space-y-2 pt-3 sm:pt-4 border-t border-purple-200/50 text-xs sm:text-sm">
                     <div className="flex items-center gap-2 sm:gap-3 text-gray-600">
-                      <FaUser className="text-purple-600 shrink-0 text-xs sm:text-sm" />
+                      <User className="text-purple-600 shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="truncate min-w-0">
                         {t.taskAssignedTo?.email}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3 text-gray-600">
-                      <FaClock className="text-purple-600 shrink-0 text-xs sm:text-sm" />
+                      <Clock className="text-purple-600 shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="whitespace-nowrap">
                         Starts:{" "}
                         {new Date(t.taskStartDate).toLocaleDateString()}
@@ -260,7 +262,7 @@ const CommunityDeptTasks = () => {
           to={`/communities/${communityId}/departments`}
           className="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 font-semibold transition text-sm sm:text-base"
         >
-          <FaArrowLeft className="text-xs sm:text-sm" />
+          <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>Back to all departments</span>
         </Link>
       </div>

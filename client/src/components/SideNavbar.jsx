@@ -36,26 +36,29 @@ const SideNavbar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Backdrop for mobile */}
+      {/* Backdrop */}
       <div
-        className={`fixed inset-x-0 top-16 bottom-0 bg-black/30 transition-opacity lg:hidden ${
+        className={`fixed inset-0 bg-black/30 transition-opacity z-30 ${
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
 
+      {/* Sidebar - Overlay Mode */}
       <aside
-        className={`bg-white ${isOpen ? "border-r border-gray-200" : "lg:border-0"} w-72
+        className={`bg-white border-r border-gray-200 w-72
           fixed top-16 left-0 z-40 overflow-y-auto custom-scrollbar
           h-[calc(100vh-4rem)]
-          transition-[transform,width] duration-200 ease-in-out
-          ${isOpen ? "translate-x-0 lg:w-72" : "-translate-x-full lg:translate-x-0 lg:w-0"}`}
+          transition-transform duration-300 ease-in-out
+          ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
           <span className="font-semibold text-gray-800">Navigation</span>
           {onClose && (
             <button
-              className="lg:hidden inline-flex items-center px-2 py-1 text-sm rounded hover:bg-gray-100"
+              className="inline-flex items-center px-2 py-1 text-sm rounded hover:bg-gray-100"
               onClick={onClose}
               aria-label="Close sidebar"
             >

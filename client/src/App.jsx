@@ -52,8 +52,6 @@ const App = () => {
     return () => unsub();
   }, []);
 
-  const mainOffsetClass = isAuthed && sidebarOpen ? "lg:ml-72" : "lg:ml-0";
-
   return (
     <BrowserRouter>
       <Navbar
@@ -61,7 +59,7 @@ const App = () => {
         isSidebarOpen={sidebarOpen}
         showMenu={isAuthed}
       />
-      <div className={`relative ${mainOffsetClass}`}>
+      <div className="relative">
         {isAuthed && (
           <SideNavbar
             isOpen={sidebarOpen}

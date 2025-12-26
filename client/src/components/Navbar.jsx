@@ -62,7 +62,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
           <div className="flex items-center gap-2">
             {showMenu && (
               <button
-                className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-blue-800/40 lg:hidden"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-blue-800/40"
                 onClick={onMenuClick}
                 aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
                 aria-expanded={isSidebarOpen}
