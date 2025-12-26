@@ -120,14 +120,14 @@ const CommunityDepartments = () => {
     return (
       <div className="p-6">
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
           <h1 className="text-2xl font-bold">Department: {dept.name}</h1>
 
-          <div className="flex space-x-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
             {/* ADD TASK */}
             <Link
               to={`/communities/${communityId}/${communityDeptId}/create-task`}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-center w-full md:w-auto"
             >
               ➕ Add Task
             </Link>
@@ -135,7 +135,7 @@ const CommunityDepartments = () => {
             {/* ADD RECURRING */}
             <Link
               to={`/communities/${communityId}/${communityDeptId}/recurring/create`}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-center w-full md:w-auto"
             >
               🔄 Add Recurring
             </Link>
@@ -143,7 +143,7 @@ const CommunityDepartments = () => {
             {/* VIEW TASKS */}
             <button
               onClick={() => setShowTasks(!showTasks)}
-              className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition"
+              className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition w-full md:w-auto"
             >
               {showTasks ? "Hide Tasks" : "View Tasks"}
             </button>
@@ -160,14 +160,14 @@ const CommunityDepartments = () => {
         ------------------------------------------ */}
         {showTasks && (
           <div className="mt-6">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
               <h2 className="text-xl font-bold">Tasks</h2>
               
               {/* Filter Buttons */}
-              <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                 <button
                   onClick={() => setTaskFilter('all')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                  className={`px-4 py-2 rounded-lg font-medium transition w-full md:w-auto ${
                     taskFilter === 'all'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -177,7 +177,7 @@ const CommunityDepartments = () => {
                 </button>
                 <button
                   onClick={() => setTaskFilter('upcoming')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                  className={`px-4 py-2 rounded-lg font-medium transition w-full md:w-auto ${
                     taskFilter === 'upcoming'
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -187,7 +187,7 @@ const CommunityDepartments = () => {
                 </button>
                 <button
                   onClick={() => setTaskFilter('overdue')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                  className={`px-4 py-2 rounded-lg font-medium transition w-full md:w-auto ${
                     taskFilter === 'overdue'
                       ? 'bg-red-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -197,7 +197,7 @@ const CommunityDepartments = () => {
                 </button>
                 <button
                   onClick={() => setTaskFilter('completed')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                  className={`px-4 py-2 rounded-lg font-medium transition w-full md:w-auto ${
                     taskFilter === 'completed'
                       ? 'bg-purple-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'

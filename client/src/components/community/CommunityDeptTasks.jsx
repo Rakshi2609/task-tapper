@@ -103,17 +103,17 @@ const CommunityDeptTasks = () => {
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 w-full">
+            <div className="flex flex-col gap-2 w-full">
               <Link
                 to={`/communities/${communityId}/${communityDeptId}/create-task`}
-                className="flex items-center gap-1.5 sm:gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-sm font-medium transition shadow-md hover:shadow-lg"
+                className="flex items-center justify-center gap-1.5 sm:gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-sm font-medium transition shadow-md hover:shadow-lg w-full"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Task</span>
               </Link>
               <Link
                 to={`/communities/${communityId}/${communityDeptId}/recurring/create`}
-                className="flex items-center gap-1.5 sm:gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-sm font-medium transition shadow-md hover:shadow-lg"
+                className="flex items-center justify-center gap-1.5 sm:gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-sm font-medium transition shadow-md hover:shadow-lg w-full"
               >
                 <RotateCw className="w-4 h-4" />
                 <span>Add Recurring</span>
@@ -140,11 +140,11 @@ const CommunityDeptTasks = () => {
 
         {/* Tasks Section */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8 overflow-hidden">
-          <div className="flex items-center justify-between mb-4 sm:mb-6 gap-2">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 sm:mb-6 gap-2">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">All Tasks</h2>
             <button
               onClick={() => setShowTasks(!showTasks)}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition shrink-0"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition w-full md:w-auto"
             >
               {showTasks ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               <span className="text-xs sm:text-sm font-medium">{showTasks ? "Hide" : "Show"}</span>
