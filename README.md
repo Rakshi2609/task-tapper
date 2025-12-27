@@ -55,7 +55,7 @@ client/
 - MongoDB connection string (Atlas or self‑hosted)
 - Gmail account App Password (for daily summary emails)
 
-## Environment Variables
+## Environment Variables 
 
 Create a `.env` file in `backend/` with at least:
 
