@@ -116,11 +116,25 @@ const TaskDetail = () => {
     const handleTimeModalSubmit = async () => {
         setCompletingTask(true);
         try {
+            const today = new Date();
+            const todayDateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+            
+            let startTimeISO = null;
+            let endTimeISO = null;
+            
+            // Combine today's date with the time inputs
+            if (timeData.startTime) {
+                startTimeISO = new Date(`${todayDateStr}T${timeData.startTime}`).toISOString();
+            }
+            if (timeData.endTime) {
+                endTimeISO = new Date(`${todayDateStr}T${timeData.endTime}`).toISOString();
+            }
+            
             const payload = { 
                 taskId: taskId, 
                 email: user.email,
-                startTime: timeData.startTime || null,
-                endTime: timeData.endTime || null
+                startTime: startTimeISO,
+                endTime: endTimeISO
             };
             
             await completeTask(payload);
@@ -369,9 +383,15 @@ const TaskDetail = () => {
                         className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6"
                     >
                         <h3 className="text-2xl font-bold text-gray-800 mb-4">Track Your Time</h3>
-                        <p className="text-gray-600 mb-6">
-                            Optionally record when you started and finished this task.
+                        <p className="text-gray-600 mb-4">
+                            Record what time you started and finished this task today.
                         </p>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+                            <p className="text-sm text-blue-800 flex items-center gap-2">
+                                <FaCalendarAlt className="text-blue-600" />
+                                <span className="font-semibold">Date: {new Date().toLocaleDateString('en-US', { dateStyle: 'full' })}</span>
+                            </p>
+                        </div>
                         
                         <div className="space-y-4">
                             <div>
@@ -379,7 +399,7 @@ const TaskDetail = () => {
                                     Start Time (Optional)
                                 </label>
                                 <input
-                                    type="datetime-local"
+                                    type="time"
                                     value={timeData.startTime}
                                     onChange={(e) => setTimeData({ ...timeData, startTime: e.target.value })}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -391,7 +411,7 @@ const TaskDetail = () => {
                                     End Time (Optional)
                                 </label>
                                 <input
-                                    type="datetime-local"
+                                    type="time"
                                     value={timeData.endTime}
                                     onChange={(e) => setTimeData({ ...timeData, endTime: e.target.value })}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
