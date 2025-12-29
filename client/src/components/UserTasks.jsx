@@ -15,6 +15,7 @@ import {
     FaCommentAlt, // Added for the icon next to "View Details"
     FaToggleOn,
     FaToggleOff,
+    FaClock,
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -43,6 +44,9 @@ const UserTasks = () => {
     const [showCompleted, setShowCompleted] = useState(false);
     const [filterOverdue, setFilterOverdue] = useState(false);
     const [searchParams] = useSearchParams();
+    const [showTimeModal, setShowTimeModal] = useState(false);
+    const [selectedTaskId, setSelectedTaskId] = useState(null);
+    const [timeData, setTimeData] = useState({ startTime: '', endTime: '' });
 
     const handleComplete = async (taskId) => {
         if (!user?.email) return;
@@ -54,14 +58,40 @@ const UserTasks = () => {
             return;
         }
         
+        // Show modal to ask for time tracking
+        setSelectedTaskId(taskId);
+        setShowTimeModal(true);
+    };
+
+    const handleTimeModalSubmit = async () => {
+        if (!selectedTaskId || !user?.email) return;
+        
         try {
-            await completeTaskAPI({taskId, email: user.email});
+            const payload = { 
+                taskId: selectedTaskId, 
+                email: user.email,
+                startTime: timeData.startTime || null,
+                endTime: timeData.endTime || null
+            };
+            
+            await completeTaskAPI(payload);
             toast.success("Task marked as completed!");
             getUserTasks(user.email);
             getUserProfile(user.email);
+            
+            // Reset modal state
+            setShowTimeModal(false);
+            setSelectedTaskId(null);
+            setTimeData({ startTime: '', endTime: '' });
         } catch (e) {
             toast.error("Could not complete task: " + (e.response?.data?.message || e.message));
         }
+    };
+
+    const handleTimeModalCancel = () => {
+        setShowTimeModal(false);
+        setSelectedTaskId(null);
+        setTimeData({ startTime: '', endTime: '' });
     };
 
     const handleDelete = async (taskId) => {
@@ -416,6 +446,16 @@ const UserTasks = () => {
                                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                                         <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
                                                     </p>
+                                                    {task.startTime && (
+                                                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                            <FaClock className="text-blue-500" /> Start Time: {new Date(task.startTime).toLocaleString()}
+                                                        </p>
+                                                    )}
+                                                    {task.endTime && (
+                                                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                            <FaClock className="text-purple-500" /> End Time: {new Date(task.endTime).toLocaleString()}
+                                                        </p>
+                                                    )}
                                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                                                     </p>
@@ -449,6 +489,66 @@ const UserTasks = () => {
                     </>
                 )}
             </motion.div>
+
+            {/* Time Tracking Modal */}
+            {showTimeModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6"
+                    >
+                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Track Your Time</h3>
+                        <p className="text-gray-600 mb-6">
+                            Optionally record when you started and finished this task.
+                        </p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Start Time (Optional)
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={timeData.startTime}
+                                    onChange={(e) => setTimeData({ ...timeData, startTime: e.target.value })}
+                                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    End Time (Optional)
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={timeData.endTime}
+                                    onChange={(e) => setTimeData({ ...timeData, endTime: e.target.value })}
+                                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    If you don't provide an end time, it will be set to now.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={handleTimeModalCancel}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleTimeModalSubmit}
+                                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors"
+                            >
+                                Complete Task
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };

@@ -52,8 +52,14 @@ export const acceptTask = async ({ taskId, email }) => { // Expects object for a
     return res.data;
 };
 
-export const completeTask = async ({ taskId, email }) => { // Expects object for arguments
-    const response = await axios.post(`${FUNCTION_API_URL}/updatetask`, { taskId, email });
+export const completeTask = async ({ taskId, email, startTime, endTime }) => { // Expects object for arguments with optional time fields
+    const payload = { taskId, email };
+    
+    // Add optional time fields if provided
+    if (startTime) payload.startTime = startTime;
+    if (endTime) payload.endTime = endTime;
+    
+    const response = await axios.post(`${FUNCTION_API_URL}/updatetask`, payload);
     return response.data;
 };
 

@@ -105,16 +105,27 @@ export const createTask = async (req, res) => {
 
 
 export const updateTask = async (req, res) => {
-    const { taskId, email } = req.body;
+    const { taskId, email, startTime, endTime } = req.body;
     const io = req.io;
 
     console.log("Entered updateTask function");
-    console.log(`[updateTask] Request body: taskId=${taskId}, email=${email}`);
+    console.log(`[updateTask] Request body: taskId=${taskId}, email=${email}, startTime=${startTime}, endTime=${endTime}`);
 
     try {
+        // Prepare the update object
+        const updateData = { 
+            completedDate: new Date(),
+            endTime: endTime ? new Date(endTime) : new Date() // Default to current time if not provided
+        };
+        
+        // Add startTime if provided
+        if (startTime) {
+            updateData.startTime = new Date(startTime);
+        }
+
         const task = await Team.findOneAndUpdate(
             { _id: taskId, assignedTo: email },
-            { completedDate: new Date() },
+            updateData,
             { new: true }
         );
         console.log(`[updateTask] Attempted to find and update task with _id: ${taskId}, assignedTo: ${email}`);
@@ -126,7 +137,7 @@ export const updateTask = async (req, res) => {
                 message: "Access denied. Only the person assigned to this task can mark it as complete." 
             });
         }
-        console.log(`[updateTask] Task found and updated: ${task._id}, completedDate: ${task.completedDate}`);
+        console.log(`[updateTask] Task found and updated: ${task._id}, completedDate: ${task.completedDate}, startTime: ${task.startTime}, endTime: ${task.endTime}`);
 
         const userUpdateResult = await User.updateOne(
             { email },

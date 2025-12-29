@@ -29,7 +29,8 @@ cron.schedule("5 19 * * *", async () => {
       if (shouldGenerate) {
         const newTask = new Team({
           createdBy: task.createdBy,
-          task: task.task,
+          taskName: task.taskName,
+          taskDescription: task.taskDescription,
           assignedTo: task.assignedTo,
           assignedName: task.assignedName,
           taskFrequency: task.taskFrequency,

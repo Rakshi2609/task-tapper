@@ -27,6 +27,14 @@ const teamSchema = new mongoose.Schema({
   },
   priority: String,
   completedDate: Date,
+  startTime: {
+    type: Date,
+    required: false,
+  },
+  endTime: {
+    type: Date,
+    required: false,
+  },
 });
 
 export default mongoose.model("Team", teamSchema);

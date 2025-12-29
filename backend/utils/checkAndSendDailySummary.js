@@ -117,7 +117,7 @@ export const checkAndSendDailySummary = async (userEmail) => {
 
   const checklistToday = tasksToday.map(task => {
     const status = task.completedDate ? '✅' : '🔲';
-    return `${status} ${task.task}`;
+    return `${status} ${task.taskName}`;
   }).join('\n');
 
   // ✅ Overdue tasks (before today and not completed)
@@ -127,7 +127,7 @@ export const checkAndSendDailySummary = async (userEmail) => {
     completedDate: { $exists: false }
   });
 
-  const checklistOverdue = overdueTasks.map(task => `⚠️ ${task.task} (Due: ${new Date(task.dueDate).toLocaleDateString('en-IN')})`).join('\n');
+  const checklistOverdue = overdueTasks.map(task => `⚠️ ${task.taskName} (Due: ${new Date(task.dueDate).toLocaleDateString('en-IN')})`).join('\n');
 
   // 📅 Tomorrow’s tasks and frequency-based tasks
   const tomorrow = new Date();
@@ -144,7 +144,7 @@ export const checkAndSendDailySummary = async (userEmail) => {
   });
 
   const checklistTomorrow = tasksTomorrow.map(task => {
-    return `📌 ${task.task} (${task.taskFrequency || 'OneTime'})`;
+    return `📌 ${task.taskName} (${task.taskFrequency || 'OneTime'})`;
   }).join('\n');
 
   // 📧 Build summary message
