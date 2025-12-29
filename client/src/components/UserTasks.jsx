@@ -446,15 +446,25 @@ const UserTasks = () => {
                                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                                         <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
                                                     </p>
-                                                    {task.startTime && (
-                                                        <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                            <FaClock className="text-blue-500" /> Start Time: {new Date(task.startTime).toLocaleString()}
-                                                        </p>
-                                                    )}
-                                                    {task.endTime && (
-                                                        <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                            <FaClock className="text-purple-500" /> End Time: {new Date(task.endTime).toLocaleString()}
-                                                        </p>
+                                                    {(task.startTime || task.endTime) && (
+                                                        <div className="mt-2 space-y-2">
+                                                            {task.startTime && (
+                                                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1.5 rounded-full border border-blue-300 shadow-sm">
+                                                                    <FaClock className="text-blue-700 text-xs" />
+                                                                    <span className="text-xs font-semibold text-blue-900">
+                                                                        Started: {new Date(task.startTime).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            {task.endTime && (
+                                                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1.5 rounded-full border border-purple-300 shadow-sm ml-2">
+                                                                    <FaClock className="text-purple-700 text-xs" />
+                                                                    <span className="text-xs font-semibold text-purple-900">
+                                                                        Finished: {new Date(task.endTime).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     )}
                                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}

@@ -225,10 +225,26 @@ const TaskDetail = () => {
                             <p className="flex items-center gap-2"><FaCheck className="text-green-500" /> Completed On: {new Date(task.completedDate).toLocaleDateString()}</p>
                         )}
                         {task.startTime && (
-                            <p className="flex items-center gap-2"><FaClock className="text-blue-500" /> Start Time: {new Date(task.startTime).toLocaleString()}</p>
+                            <div className="col-span-2 mt-2">
+                                <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-cyan-50 p-3 rounded-lg border border-blue-200 shadow-sm">
+                                    <FaClock className="text-blue-600 text-lg" />
+                                    <div className="flex-1">
+                                        <span className="text-xs font-semibold text-blue-800 uppercase tracking-wide">Started</span>
+                                        <p className="text-sm font-bold text-blue-900">{new Date(task.startTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                                    </div>
+                                </div>
+                            </div>
                         )}
                         {task.endTime && (
-                            <p className="flex items-center gap-2"><FaClock className="text-indigo-500" /> End Time: {new Date(task.endTime).toLocaleString()}</p>
+                            <div className="col-span-2 mt-2">
+                                <div className="flex items-center gap-2 bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border border-purple-200 shadow-sm">
+                                    <FaClock className="text-purple-600 text-lg" />
+                                    <div className="flex-1">
+                                        <span className="text-xs font-semibold text-purple-800 uppercase tracking-wide">Completed</span>
+                                        <p className="text-sm font-bold text-purple-900">{new Date(task.endTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                                    </div>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </motion.div>
@@ -415,5 +431,6 @@ const TaskDetail = () => {
         </div>
     );
 };
+
 
 export default TaskDetail;
