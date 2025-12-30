@@ -8,6 +8,7 @@ import {
   createRecurringTaskUpdate,
   getRecurringTaskUpdates,
   deleteRecurringTaskUpdate,
+  getTaskInstancesForRecurring,
 } from "../controllers/recurringTaskController.js";
 
 const router = express.Router();
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get("/recurring-tasks", getAllRecurringTasks);
 router.post("/recurring-tasks", createRecurringTask);
 router.get("/recurring-tasks/:id", getRecurringTaskById);
+router.get("/recurring-tasks/:id/instances", getTaskInstancesForRecurring);
 router.delete("/recurring-tasks/:id", deleteRecurringTask);
 router.put("/recurring-tasks/complete/:id", completeRecurringTask);
 

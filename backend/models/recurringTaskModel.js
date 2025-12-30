@@ -28,6 +28,11 @@ const recurringTaskSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  priority: {
+    type: String,
+    enum: ['Low', 'Medium', 'High'],
+    default: 'Medium'
+  },
   completedDate: {
     type: Date,
     default: null

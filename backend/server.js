@@ -13,6 +13,7 @@ import { triggerDailySummaries } from './utils/triggerDailySummaries.js';
 import { setupWorldChat } from './socket/worldChat.js';
 import chatRoutes from './routes/chat.route.js';
 import recurringTaskRoutes from './routes/recurringTaskRoutes.js';
+import { generateRecurringTaskInstances } from './taskScheduler.js';
 
 dotenv.config();
 const app = express();
@@ -70,6 +71,27 @@ app.get("/api/trigger-summaries", async (req, res) => {
   } catch (err) {
     console.error("❌ Error sending summaries:", err.message);
     res.status(500).send("❌ Failed to send summaries: " + err.message);
+  }
+});
+
+// Manual trigger for recurring task generation (for testing)
+app.get("/api/trigger-recurring-tasks", async (req, res) => {
+  console.log("🔁 Manual recurring task generation requested at", new Date().toLocaleString());
+
+  try {
+    const results = await generateRecurringTaskInstances();
+    
+    res.json({
+      success: true,
+      message: "✅ Recurring task generation completed",
+      results: results
+    });
+  } catch (err) {
+    console.error("❌ Error generating recurring tasks:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "❌ Failed to generate recurring tasks: " + err.message
+    });
   }
 });
 

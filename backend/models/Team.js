@@ -35,6 +35,11 @@ const teamSchema = new mongoose.Schema({
     type: Date,
     required: false,
   },
+  recurringTaskId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'RecurringTask',
+    required: false,
+  },
 });
 
 export default mongoose.model("Team", teamSchema);

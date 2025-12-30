@@ -46,7 +46,7 @@ const Login = () => {
 
   console.log("Zustand login success, user stored.");
       toast.success(`Welcome back, ${displayName || email.split("@")[0]}!`);
-  navigate("/profile");
+  navigate("/dashboard");
     } catch (error) {
   console.error("Google Sign-In failed:", error);
       let errorMessage = "Google Sign-In failed. Please try again.";

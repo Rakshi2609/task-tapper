@@ -18,7 +18,6 @@ export const getAllRecurringTasks = async (req, res) => {
   }
 };
 
-// ✅ CREATE RECURRING TASK
 // ✅ CREATE RECURRING TASK (FINAL FIXED VERSION)
 export const createRecurringTask = async (req, res) => {
   const {
@@ -31,12 +30,14 @@ export const createRecurringTask = async (req, res) => {
     taskAssignedBy,
     taskAssignedTo,
     createdBy,
+    priority,
   } = req.body;
 
   console.log("🔥 DEBUG RECURRING COMMUNITY PAYLOAD:", {
     taskAssignedBy,
     taskAssignedTo,
     createdBy,
+    priority,
     community: req.body.community,
     communityDept: req.body.communityDept,
   });
@@ -83,6 +84,7 @@ export const createRecurringTask = async (req, res) => {
       taskAssignedBy: assignedByUser._id,
       taskAssignedTo: assignedToUser._id,
       createdBy,
+      priority: priority || 'Medium',
 
       // ✅ COMMUNITY SUPPORT
       community: req.body.community || null,
@@ -93,7 +95,7 @@ export const createRecurringTask = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "✅ Community recurring task created successfully",
+      message: "✅ Recurring task created successfully. Tasks will be generated daily starting from the start date.",
       data: savedTask,
     });
   } catch (err) {
@@ -261,6 +263,44 @@ export const deleteRecurringTaskUpdate = async (req, res) => {
     res.status(200).json({ success: true, message: "Update deleted successfully" });
   } catch (err) {
     console.error("[deleteRecurringTaskUpdate] Error:", err.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+// ✅ TEST ENDPOINT - Get task instances generated from a recurring task
+export const getTaskInstancesForRecurring = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const Team = (await import("../models/Team.js")).default;
+    
+    const recurringTask = await RecurringTask.findById(id);
+    if (!recurringTask) {
+      return res.status(404).json({ success: false, message: "Recurring task not found" });
+    }
+
+    const taskInstances = await Team.find({ recurringTaskId: id }).sort({ dueDate: 1 });
+
+    res.status(200).json({
+      success: true,
+      recurringTask: {
+        id: recurringTask._id,
+        name: recurringTask.taskName,
+        frequency: recurringTask.taskFrequency,
+        startDate: recurringTask.taskStartDate,
+        endDate: recurringTask.taskEndDate
+      },
+      instanceCount: taskInstances.length,
+      instances: taskInstances.map(task => ({
+        id: task._id,
+        name: task.taskName,
+        dueDate: task.dueDate,
+        completed: !!task.completedDate,
+        assignedTo: task.assignedTo
+      }))
+    });
+  } catch (err) {
+    console.error("[getTaskInstancesForRecurring] Error:", err.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };

@@ -80,7 +80,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                 <FaTasks />
               </motion.div>
               <div className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
-                Donezo  
+                Donzo  
               </div>
             </Link>
           </div>

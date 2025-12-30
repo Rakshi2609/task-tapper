@@ -35,6 +35,7 @@ import CreateCommunityRecurringTask from "./components/community/CreateCommunity
 import CreateCommunityDept from "./components/community/CreateCommunityDept";
 import CommunityDeptTasks from "./components/community/CommunityDeptTasks";
 import PendingApplications from "./components/community/PendingApplications";
+import Dashboard from "./components/Dashboard";
 
 
 
@@ -85,7 +86,7 @@ const App = () => {
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <Home />
+                    <Dashboard />
                   </ProtectedRoute>
                 }
               />
