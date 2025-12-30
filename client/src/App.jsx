@@ -75,7 +75,7 @@ const App = () => {
               <Route
                 path="/"
                 element={
-                  isAuthed ? <Navigate to="/profile" replace /> : <Landing />
+                  isAuthed ? <Navigate to="/dashboard" replace /> : <Landing />
                 }
               />
               <Route path="/login" element={<Login />} />

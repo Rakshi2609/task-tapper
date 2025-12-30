@@ -16,6 +16,9 @@ import {
     FaToggleOn,
     FaToggleOff,
     FaClock,
+    FaFilter,
+    FaEye,
+    FaTrash,
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -47,6 +50,7 @@ const UserTasks = () => {
     const [showTimeModal, setShowTimeModal] = useState(false);
     const [selectedTaskId, setSelectedTaskId] = useState(null);
     const [timeData, setTimeData] = useState({ startTime: '', endTime: '' });
+    const [showFilters, setShowFilters] = useState(false);
 
     const handleComplete = async (taskId) => {
         if (!user?.email) return;
@@ -267,32 +271,44 @@ const UserTasks = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-3 lg:p-4">
             <motion.div
-                className="max-w-4xl mx-auto mt-8 p-6 sm:p-8 bg-white rounded-3xl shadow-2xl border border-blue-200 relative overflow-hidden"
+                className="max-w-4xl mx-auto mt-2 p-4 sm:p-6 bg-white rounded-3xl shadow-2xl border border-blue-200 relative overflow-hidden"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
             >
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/50 via-transparent to-indigo-100/50 opacity-60 rounded-3xl pointer-events-none"></div>
 
-                <motion.h2
-                    className="text-4xl sm:text-5xl font-extrabold mb-8 text-center text-gray-900 drop-shadow-md flex items-center justify-center gap-4"
-                    variants={itemVariants}
-                >
-                    <FaTasks className="text-blue-600 text-4xl sm:text-5xl" /> Your Tasks
-                </motion.h2>
+                <motion.div className="flex items-center justify-center gap-3 mb-6" variants={itemVariants}>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-gray-900 drop-shadow-md flex items-center gap-2">
+                        <FaTasks className="text-blue-600 text-2xl sm:text-3xl" /> Your Tasks
+                    </h2>
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="p-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors duration-200"
+                        title="Toggle Filters"
+                    >
+                        <FaFilter className="text-blue-600 text-lg" />
+                    </button>
+                </motion.div>
 
+                {showFilters && (
                 <motion.div
-                    className="bg-blue-50 p-5 rounded-xl shadow-md border border-blue-100 mb-8 flex flex-wrap justify-between items-center gap-4"
+                    className="bg-blue-50 p-3 rounded-xl shadow-md border border-blue-100 mb-4 space-y-3 relative z-10"
                     variants={itemVariants}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
                 >
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <FaSort className="text-2xl text-blue-600" />
+                    {/* Sort Section */}
+                    <div className="flex items-center gap-2 w-full">
+                        <FaSort className="text-lg sm:text-xl text-blue-600 flex-shrink-0" />
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="border border-blue-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200"
+                            className="flex-1 border border-blue-300 rounded-lg px-2 py-2 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200"
                         >
                             <option value="none">Sort: Default</option>
                             <option value="dueDate">Due Date</option>
@@ -304,30 +320,37 @@ const UserTasks = () => {
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
-                        <FaCalendarAlt className="text-2xl text-blue-600" />
-                        <DatePicker
-                            selected={selectedDate}
-                            onChange={(date) => setSelectedDate(date)}
-                            placeholderText="Filter by Due Date"
-                            className="border border-blue-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200 w-full sm:w-44"
-                            wrapperClassName="w-full sm:w-auto"
-                        />
-                        {selectedDate && (
-                            <motion.button
-                                onClick={() => setSelectedDate(null)}
-                                className="ml-2 text-red-500 hover:text-red-700 font-medium text-sm transition-colors duration-200"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                            >
-                                Clear
-                            </motion.button>
-                        )}
+                    {/* Date Filter Section */}
+                    <div className="flex items-center gap-2 w-full">
+                        <FaCalendarAlt className="text-lg sm:text-xl text-blue-600 flex-shrink-0" />
+                        <div className="flex-1 flex items-center gap-2">
+                            <DatePicker
+                                selected={selectedDate}
+                                onChange={(date) => setSelectedDate(date)}
+                                placeholderText="Filter by Due Date"
+                                className="flex-1 border border-blue-300 px-2 py-2 text-xs sm:text-sm rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 bg-white hover:border-blue-400 transition-all duration-200"
+                                wrapperClassName="flex-1"
+                            />
+                            {selectedDate && (
+                                <motion.button
+                                    onClick={() => setSelectedDate(null)}
+                                    className="text-red-500 hover:text-red-700 font-medium text-xs px-2 py-1 transition-colors duration-200 flex-shrink-0"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                >
+                                    Clear
+                                </motion.button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Completed Toggle Section */}
+                    <div className="w-full">
                         <motion.button
                             onClick={() => setShowCompleted((v) => !v)}
-                            className="ml-0 sm:ml-2 inline-flex items-center gap-2 bg-white border border-blue-300 text-blue-700 px-3 py-2 rounded-lg shadow-sm hover:bg-blue-50 transition-all duration-200 text-sm font-medium w-full sm:w-auto justify-center"
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
+                            className="w-full inline-flex items-center justify-center gap-2 bg-white border border-blue-300 text-blue-700 px-3 py-2 rounded-lg shadow-sm hover:bg-blue-50 transition-all duration-200 text-xs sm:text-sm font-medium"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             title={showCompleted ? "Show Pending Tasks" : "Show Completed Tasks"}
                         >
                             {showCompleted ? <FaToggleOn className="text-green-600" /> : <FaToggleOff className="text-gray-400" />}
@@ -335,6 +358,7 @@ const UserTasks = () => {
                         </motion.button>
                     </div>
                 </motion.div>
+                )}
 
                 {error ? (
                     <motion.p className="text-red-600 text-center text-lg font-medium py-10">
@@ -344,7 +368,7 @@ const UserTasks = () => {
                     <>
                         {!showCompleted ? (
                             <>
-                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800">
+                                <motion.h3 className="text-xl font-bold mt-4 mb-3 text-blue-800">
                                     Pending Tasks
                                 </motion.h3>
 
@@ -360,56 +384,59 @@ const UserTasks = () => {
                                           .map((task, index) => (
                                             <motion.li
                                                 key={task._id || index}
-                                                className={`bg-white border-l-4 ${getPriorityBorderColor(task.priority)} p-5 rounded-lg shadow-md transition-all duration-300`}
+                                                className={`bg-white border-l-4 ${getPriorityBorderColor(task.priority)} p-3 rounded-lg shadow-md transition-all duration-300`}
                                                 variants={taskCardVariants}
                                                 initial="hidden"
                                                 animate="visible"
                                                 whileHover="hover"
                                             >
                                                 <div>
-                                                    <h4 className="text-lg font-semibold text-gray-800 break-words">{task.taskName}</h4>
-                                                    <p className="text-lg font-semibold text-gray-600 break-words"><span className="text-gray-700">Task Description: </span>{task.taskDescription}</p>
+                                                    <h4 className="text-base font-semibold text-gray-800 break-words">{task.taskName}</h4>
+                                                    <p className="text-sm font-medium text-gray-600 break-words"><span className="text-gray-700">Task Description: </span>{task.taskDescription}</p>
                                                     {task.communityName && (
-                                                        <p className="text-sm text-purple-600 font-medium flex items-center gap-1">
-                                                            <span className="bg-purple-100 px-2 py-1 rounded">📍 {task.communityName}</span>
-                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded">🏢 {task.departmentName}</span>}
+                                                        <p className="text-xs text-purple-600 font-medium flex items-center gap-1">
+                                                            <span className="bg-purple-100 px-2 py-1 rounded text-xs">📍 {task.communityName}</span>
+                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded text-xs">🏢 {task.departmentName}</span>}
                                                         </p>
                                                     )}
-                                                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                                                    <p className="text-xs text-gray-600 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                                                     </p>
-                                                    <p className="text-sm text-gray-600">
+                                                    <p className="text-xs text-gray-600">
                                                         <span className={`font-bold ${task.priority === 'High' ? 'text-red-500' : task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>
                                                             Priority: {task.priority}
                                                         </span>
                                                     </p>
-                                                    <p className="text-sm text-gray-600 flex items-center gap-1 min-w-0">
+                                                    <p className="text-xs text-gray-600 flex items-center gap-1 min-w-0">
                                                         <FaUserCircle className="text-indigo-400 flex-shrink-0" />
                                                         <span>Assigned By:</span>
                                                         <span className="font-medium text-blue-700 break-all">{task.createdBy}</span>
                                                     </p>
-                                                    <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
+                                                    <div className="mt-3 flex flex-row gap-2 justify-end">
                                                         <Link
                                                             to={`/tasks/${task._id}`}
-                                                            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-full shadow text-xs font-medium transition-all duration-300"
+                                                            title="View Details"
                                                         >
-                                                            <FaCommentAlt className="inline mr-1" /> View Details
+                                                            <FaEye className="sm:mr-1" /> <span className="hidden sm:inline">View Details</span>
                                                         </Link>
                                                         <motion.button
                                                             onClick={() => handleComplete(task._id)}
-                                                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-full shadow text-xs font-medium transition-all duration-300"
                                                             whileHover={{ scale: 1.05 }}
                                                             whileTap={{ scale: 0.95 }}
+                                                            title="Complete"
                                                         >
-                                                            <FaCheck className="inline mr-1" /> Complete
+                                                            <FaCheck className="sm:mr-1" /> <span className="hidden sm:inline">Complete</span>
                                                         </motion.button>
                                                         <motion.button
                                                             onClick={() => handleDelete(task._id)}
-                                                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-full shadow text-xs font-medium transition-all duration-300"
                                                             whileHover={{ scale: 1.05 }}
                                                             whileTap={{ scale: 0.95 }}
+                                                            title="Delete"
                                                         >
-                                                            Delete
+                                                            <FaTrash className="sm:mr-1" /> <span className="hidden sm:inline">Delete</span>
                                                         </motion.button>
                                                     </div>
                                                 </div>
@@ -427,7 +454,7 @@ const UserTasks = () => {
                             </>
                         ) : (
                             <>
-                                <motion.h3 className="text-2xl font-bold mt-8 mb-4 text-blue-800">
+                                <motion.h3 className="text-xl font-bold mt-4 mb-3 text-blue-800">
                                     Completed Tasks
                                 </motion.h3>
 
@@ -443,27 +470,27 @@ const UserTasks = () => {
                                           .map((task, index) => (
                                             <motion.li
                                                 key={task._id || index}
-                                                className="bg-gray-100 border-l-4 border-green-500 p-5 rounded-lg shadow-sm"
+                                                className="bg-gray-100 border-l-4 border-green-500 p-3 rounded-lg shadow-sm"
                                                 variants={taskCardVariants}
                                                 initial="hidden"
                                                 animate="visible"
                                                 whileHover={{ scale: 1.01 }}
                                             >
                                                 <div>
-                                                    <h4 className="text-lg line-through font-medium text-gray-700 break-words">{task.taskName}</h4>
+                                                    <h4 className="text-base line-through font-medium text-gray-700 break-words">{task.taskName}</h4>
                                                     {task.communityName && (
-                                                        <p className="text-sm text-purple-600 font-medium flex items-center gap-1">
-                                                            <span className="bg-purple-100 px-2 py-1 rounded">📍 {task.communityName}</span>
-                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded">🏢 {task.departmentName}</span>}
+                                                        <p className="text-xs text-purple-600 font-medium flex items-center gap-1">
+                                                            <span className="bg-purple-100 px-2 py-1 rounded text-xs">📍 {task.communityName}</span>
+                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded text-xs">🏢 {task.departmentName}</span>}
                                                         </p>
                                                     )}
-                                                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                    <p className="text-xs text-gray-500 flex items-center gap-1">
                                                         <FaCheck className="text-green-500" /> Completed on: {new Date(task.completedDate).toLocaleDateString()}
                                                     </p>
                                                     {(task.startTime || task.endTime) && (
-                                                        <div className="mt-2 space-y-2">
+                                                        <div className="mt-1 space-y-1">
                                                             {task.startTime && (
-                                                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1.5 rounded-full border border-blue-300 shadow-sm">
+                                                                <div className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-100 to-cyan-100 px-2 py-1 rounded-full border border-blue-300 shadow-sm">
                                                                     <FaClock className="text-blue-700 text-xs" />
                                                                     <span className="text-xs font-semibold text-blue-900">
                                                                         Started: {new Date(task.startTime).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}
@@ -471,7 +498,7 @@ const UserTasks = () => {
                                                                 </div>
                                                             )}
                                                             {task.endTime && (
-                                                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1.5 rounded-full border border-purple-300 shadow-sm ml-2">
+                                                                <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-100 to-pink-100 px-2 py-1 rounded-full border border-purple-300 shadow-sm ml-2">
                                                                     <FaClock className="text-purple-700 text-xs" />
                                                                     <span className="text-xs font-semibold text-purple-900">
                                                                         Finished: {new Date(task.endTime).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}
@@ -480,20 +507,21 @@ const UserTasks = () => {
                                                             )}
                                                         </div>
                                                     )}
-                                                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                    <p className="text-xs text-gray-500 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-blue-400" /> Due: {new Date(task.dueDate).toLocaleDateString()}
                                                     </p>
-                                                    <p className="text-sm text-gray-500 flex items-center gap-1 min-w-0">
+                                                    <p className="text-xs text-gray-500 flex items-center gap-1 min-w-0">
                                                         <FaUserCircle className="text-indigo-300 flex-shrink-0" />
                                                         <span>Assigned By:</span>
                                                         <span className="font-light break-all">{task.createdBy}</span>
                                                     </p>
-                                                    <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
+                                                    <div className="mt-3 flex justify-end">
                                                         <Link
                                                             to={`/tasks/${task._id}`}
-                                                            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow text-sm font-medium transition-all duration-300 w-full sm:w-auto"
+                                                            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-full shadow text-xs font-medium transition-all duration-300"
+                                                            title="View Details"
                                                         >
-                                                            <FaCommentAlt className="inline mr-1" /> View Details
+                                                            <FaEye className="sm:mr-1" /> <span className="hidden sm:inline">View Details</span>
                                                         </Link>
                                                     </div>
                                                 </div>
