@@ -1,190 +1,549 @@
 # Task Tapper
 
-Collaborative task management with recurring tasks, daily email summaries, and a real‑time world chat.
+A modern, feature-rich collaborative task management platform with recurring tasks, communities, departments, real-time chat, and daily email summaries.
 
-## Overview
+## 🌟 Overview
 
-This monorepo contains a Node/Express + MongoDB backend and a React (Vite) frontend. It supports:
+Task Tapper is a comprehensive task management solution designed for teams and communities. Built with a Node/Express + MongoDB backend and a modern React frontend, it provides:
 
-- Create/assign one‑time or recurring tasks (Daily/Weekly/Monthly)
-- Mark tasks complete; recurring tasks auto‑generate the next instance (skip Sundays)
-- Track user stats (assigned, completed, not started)
-- Rich task details and per‑task updates/comments
-- World chat via WebSockets (Socket.io) with persistence
-- Daily summary emails (Gmail + Nodemailer), with de‑duplication
+- **One-Time & Recurring Tasks**: Create and manage both single and recurring tasks (Daily/Weekly/Monthly)
+- **Community Structure**: Organize work into Communities → Departments → Tasks
+- **Smart Task Management**: Auto-generate recurring tasks, skip Sundays, track completion
+- **Real-Time Collaboration**: World chat via WebSockets with message persistence
+- **Email Notifications**: Daily summary emails with de-duplication (Gmail + Nodemailer)
+- **Rich Task Details**: Comments, updates, and priority tracking
+- **User Stats**: Track assigned, completed, and pending tasks
+- **Advanced Filtering**: Filter by status, type, date range with search capabilities
+- **Mobile-First Design**: Responsive UI with compact layouts and pagination
 
-## What This App Does
-Task Tapper is a collaborative platform for teams and communities to manage tasks efficiently. It allows users to:
-- Create and assign one-time or recurring tasks
-- Track progress and completion status
-- Communicate in real-time via world chat
-- Receive daily email summaries of tasks
-- Manage teams, departments, and communities
-- Add comments and updates to tasks for better collaboration
+## ✨ Key Features
 
-It is designed for productivity, transparency, and seamless communication in any organization.
+### Task Management
+- Create one-time or recurring tasks with customizable frequency
+- Assign tasks to team members with priority levels (High/Medium/Low)
+- Auto-generation of recurring task instances
+- Smart date handling (automatically skip Sundays)
+- Task completion tracking with history
+- Comments and updates on tasks
 
-## Tech Stack
+### Community & Organization
+- Multi-level structure: Communities → Departments → Tasks
+- Department-based task organization
+- Member management with pending approvals
+- Owner and member role differentiation
+- Community-wide visibility controls
 
-- Backend: Node.js, Express 5, MongoDB (Mongoose), Socket.io, Nodemailer, dotenv
-- Frontend: React 19, Vite, Tailwind CSS, Zustand, Axios, React Router, Recharts
-- Realtime: Socket.io (server + client)
-- Deploy targets: Vercel (frontend), any Node host for backend
+### Filtering & Search
+- **Status Filters**: All, Upcoming, Overdue, Completed
+- **Type Filters**: All, One-Time, Recurring
+- **Date Filters**: All Dates, Today, This Week, This Month
+- **Search**: Real-time search across tasks, departments, and communities
+- **Pagination**: Mobile-friendly pagination (6 items per page)
 
-## Folder Structure
+### Real-Time Features
+- World chat with Socket.io
+- Message persistence in MongoDB
+- Last 50 messages on connect
+- Live updates across connected clients
+
+### User Experience
+- Modern gradient designs with animations
+- Compact, mobile-first layouts
+- Framer Motion animations
+- Responsive grid layouts (1-4 columns)
+- Toast notifications for user feedback
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Runtime**: Node.js 18+
+- **Framework**: Express 5
+- **Database**: MongoDB with Mongoose
+- **Real-Time**: Socket.io
+- **Email**: Nodemailer with Gmail
+- **Environment**: dotenv
+
+### Frontend
+- **Framework**: React 19
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **HTTP Client**: Axios
+- **Routing**: React Router v6
+- **Animations**: Framer Motion
+- **Charts**: Recharts
+- **Icons**: React Icons
+- **Date Picker**: React Datepicker
+
+### Deployment
+- **Frontend**: Vercel-ready with routing config
+- **Backend**: Any Node.js hosting (Railway, Render, etc.)
+
+## 📁 Project Structure
 
 ```
 backend/
-  server.js                 # Express app + Socket.io + routes
-  taskScheduler.js          # (if used later) scheduling entry
-  config/connectDB.js       # MongoDB connection with retry
-  controllers/              # auth, team (tasks), etc.
-  models/                   # User, Team (tasks), recurring, updates, chat
-  routes/                   # /api/auth, /api/function, /api/chat, /api/recurring-*
-  socket/worldChat.js       # Socket.io world chat wiring
-  utils/                    # email summaries, mail sender, etc.
+  ├── server.js                    # Express app + Socket.io + routes
+  ├── taskScheduler.js             # Task scheduling logic
+  ├── config/
+  │   └── connectDB.js            # MongoDB connection with retry
+  ├── controllers/
+  │   ├── auth.js                 # Authentication logic
+  │   ├── community.js            # Community management
+  │   ├── team.js                 # Task operations
+  │   └── recurringTaskController.js
+  ├── models/
+  │   ├── User.js                 # User schema
+  │   ├── Community.js            # Community schema
+  │   ├── CommunityDept.js        # Department schema
+  │   ├── Team.js                 # One-time tasks
+  │   ├── recurringTaskModel.js   # Recurring tasks
+  │   ├── TaskUpdate.js           # Task updates/comments
+  │   └── WorldChatMessage.js     # Chat messages
+  ├── routes/
+  │   ├── auth.route.js           # Auth endpoints
+  │   ├── community.route.js      # Community endpoints
+  │   ├── team.route.js           # Task endpoints
+  │   └── recurringTaskRoutes.js  # Recurring task endpoints
+  ├── socket/
+  │   └── worldChat.js            # Socket.io chat setup
+  └── utils/
+      ├── checkAndSendDailySummary.js
+      ├── emailTemplates.js
+      └── sendMail.js
+
 client/
-  src/                      # React app
-  vite.config.js            # Vite config
-  vercel.json               # Vercel routing for frontend
+  ├── src/
+  │   ├── App.jsx                 # Main app component
+  │   ├── components/
+  │   │   ├── Dashboard.jsx
+  │   │   ├── UserTasks.jsx       # Task list with filters
+  │   │   ├── TaskDetail.jsx      # Single task view
+  │   │   ├── RecurringTaskDetail.jsx
+  │   │   ├── RecurringTaskForm.jsx
+  │   │   ├── WorldChat.jsx       # Real-time chat
+  │   │   └── community/
+  │   │       ├── AllCommunity.jsx        # Communities list
+  │   │       ├── CommunityMembers.jsx    # Member management
+  │   │       ├── CommunityDepartment.jsx # Departments with filters
+  │   │       ├── CommunityDeptTasks.jsx  # Department tasks
+  │   │       ├── CreateCommunity.jsx
+  │   │       ├── CreateCommunityDept.jsx
+  │   │       ├── CreateCommunityTask.jsx
+  │   │       └── CreateCommunityRecurringTask.jsx
+  │   ├── services/
+  │   │   ├── taskService.js
+  │   │   ├── community.js
+  │   │   └── recurring.js
+  │   └── assests/
+  │       └── store.js            # Zustand state
+  ├── vite.config.js
+  └── vercel.json                 # Vercel deployment config
 ```
 
-## Prerequisites
+## 📋 Prerequisites
 
-- Node.js 18+ recommended
-- MongoDB connection string (Atlas or self‑hosted)
-- Gmail account App Password (for daily summary emails)
+- **Node.js** 18+ (recommended)
+- **MongoDB** connection string (MongoDB Atlas or self-hosted)
+- **Gmail Account** with App Password for email notifications
 
-## Environment Variables 
+## ⚙️ Environment Variables 
 
-Create a `.env` file in `backend/` with at least:
+### Backend Configuration
 
-- MONGO_URI=... (required)
-- MONGO_DB_NAME=... (optional if not embedded in URI)
-- MONGO_MAX_RETRIES=3 (optional)
-- MONGO_RETRY_DELAY_MS=3000 (optional)
-- PORT=5000 (optional; default 5000)
-- EMAIL=your_gmail_address@example.com
-- APP_PASSWORD=your_gmail_app_password
+Create a `.env` file in the `backend/` directory:
 
-## Example .env Files
-#### backend/.env
-```
+```env
+# Required
 MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/dbname
-EMAIL=your_gmail_address@example.com
+EMAIL=your_gmail_address@gmail.com
 APP_PASSWORD=your_gmail_app_password
-PORT=5000
+
+# Optional
+MONGO_DB_NAME=task_tapper          # If not in URI
+MONGO_MAX_RETRIES=3
+MONGO_RETRY_DELAY_MS=3000
+PORT=5000                           # Default: 5000
+TWILIO_SID=...                      # Optional for SMS
 ```
-#### client/.env
-```
+
+### Frontend Configuration
+
+Create a `.env` file in the `client/` directory:
+
+```env
 VITE_APP_API_URL=http://localhost:5000
 ```
 
-## Pros of Task Tapper
-- **Automated Recurring Tasks:** Never miss a deadline with auto-generated tasks and reminders.
-- **Daily Email Summaries:** Stay updated with a summary of your tasks every day.
-- **Real-Time Chat:** Collaborate instantly with your team or community.
-- **Flexible Structure:** Supports teams, departments, and communities for scalable management.
-- **User-Friendly Interface:** Modern React frontend for a smooth experience.
-- **Secure & Private:** Authentication and role-based access for data protection.
-- **Easy Deployment:** Ready for Vercel (frontend) and any Node host (backend).
-- **Open API:** Easily integrate with other tools or automate workflows.
+For production, update to your backend URL:
+```env
+VITE_APP_API_URL=https://your-api-domain.com
+```
 
+## 🚀 Installation & Setup
 
-- TWILIO_SID=... (optional, if SMS used later)
+### 1. Clone the Repository
 
+```bash
+git clone <repository-url>
+cd task-tapper
+```
 
+### 2. Backend Setup
 
-## Install & Run
-
-
-From the repo root, open two terminals.
-
-Backend (port 5000 by default):
-
-```powershell
+```bash
 cd backend
 npm install
 npm run dev
 ```
 
-Frontend (Vite dev server on 5173):
+The backend server will start on `http://localhost:5000`
 
+### 3. Frontend Setup
 
-```powershell
+Open a new terminal:
+
+```bash
 cd client
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173.
+The frontend will start on `http://localhost:5173`
 
-## API Summary
+### 4. Access the Application
 
-Base URL in dev: http://localhost:5000
+Open your browser and navigate to: **http://localhost:5173**
 
+## 📡 API Documentation
 
-- Auth (`/api/auth`)
-  - POST /login { email }
-  - POST /signup { email, username }
-  - POST /user-detail { email, phoneNumber, role }
-  - GET /profile/:email
-  - GET /tasks/:email
-  - GET /assignedByMe?email=me@example.com
+### Base URL
+- **Development**: `http://localhost:5000`
+- **Production**: Set via `VITE_APP_API_URL`
 
-- Tasks (`/api/function`)
-  - POST /createtask { createdBy, taskName, taskDescription, assignedTo, assignedName, taskFrequency, dueDate, priority }
-  - POST /updatetask { taskId, email }   // marks complete, may create next recurring instance
+### Authentication (`/api/auth`)
 
-  - POST /deletetask { taskId }
-  - GET  /email                          // returns all user emails
-  - GET  /tasks/:taskId                  // single task by id
-  - GET  /tasks/:taskId/updates          // list updates for task
+| Method | Endpoint | Description | Body |
+|--------|----------|-------------|------|
+| POST | `/login` | User login | `{ email }` |
+| POST | `/signup` | User registration | `{ email, username }` |
+| POST | `/user-detail` | Update user details | `{ email, phoneNumber, role }` |
+| GET | `/profile/:email` | Get user profile | - |
+| GET | `/tasks/:email` | Get user's tasks | - |
+| GET | `/assignedByMe` | Tasks assigned by user | `?email=user@example.com` |
 
-  - GET  /recurring-tasks
-  - POST /recurring-tasks
-  - GET  /recurring-tasks/:id
-  - DELETE /recurring-tasks/:id
-  - POST /recurring-tasks/:taskId/updates  // { updateText, updatedBy, updateType? }
-  - GET  /recurring-tasks/:taskId/updates
+### Tasks (`/api/function`)
 
-- Health/cron
-  - GET /api/ping                        // triggers daily summary check after 6 PM server time
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/createtask` | Create new task |
+| POST | `/updatetask` | Mark task complete |
+| POST | `/deletetask` | Delete task |
+| GET | `/email` | Get all user emails |
+| GET | `/tasks/:taskId` | Get single task |
+| GET | `/tasks/:taskId/updates` | Get task updates |
 
-
-- Events:
-  - On connect: server emits `world-chat-init` with last 50 messages
-  - Client emits `world-chat-message` { userId, message }
-  - Server broadcasts `world-chat-message` with persisted message
-
-In dev, the client targets:
-
-In production, set `VITE_APP_API_URL` to your backend base (e.g., https://api.example.com) and the client will call `${VITE_APP_API_URL}/api/*` accordingly.
-
-## Development Tips
-
-
-## Scripts
-
-Backend (`backend/package.json`):
-
-Frontend (`client/package.json`):
-
-## Deployment
-
-
-## Git Setup
-
-If you are committing for the first time and see an error about unknown author identity, configure your Git user name and email:
-
-```sh
-# Set your name and email globally
- git config --global user.name "Your Name"
- git config --global user.email "your@email.com"
+**Create Task Body:**
+```json
+{
+  "createdBy": "user@example.com",
+  "taskName": "Task Title",
+  "taskDescription": "Description",
+  "assignedTo": "assignee@example.com",
+  "assignedName": "Assignee Name",
+  "dueDate": "2025-12-31",
+  "priority": "High"
+}
 ```
 
-Replace with your actual name and email. You can omit `--global` to set these only for this repository.
+### Recurring Tasks (`/api/recurring-tasks`)
 
-## License
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | List all recurring tasks |
+| POST | `/` | Create recurring task |
+| GET | `/:id` | Get single recurring task |
+| DELETE | `/:id` | Delete recurring task |
+| POST | `/:taskId/updates` | Add task update |
+| GET | `/:taskId/updates` | Get task updates |
 
-This project is provided as‑is by the authors. Add a proper license if you plan to open source.
+**Create Recurring Task Body:**
+```json
+{
+  "taskName": "Recurring Task",
+  "taskDescription": "Description",
+  "taskAssignedTo": "user@example.com",
+  "taskFrequency": "Daily",
+  "taskStartDate": "2025-01-01",
+  "taskEndDate": "2025-12-31",
+  "taskPriority": "Medium",
+  "taskCreateDaysAhead": 1
+}
+```
+
+### Communities (`/api/community`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Get all communities |
+| POST | `/` | Create community |
+| GET | `/:id` | Get community details |
+| GET | `/:id/members` | Get community members |
+| GET | `/:id/departments` | Get departments |
+| POST | `/:id/departments` | Create department |
+
+### Health Check
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/ping` | Trigger daily summary check |
+
+### WebSocket Events (Socket.io)
+
+#### Client → Server
+- `world-chat-message`: Send chat message
+  ```json
+  { "userId": "user_id", "message": "Hello!" }
+  ```
+
+#### Server → Client
+- `world-chat-init`: Initial 50 messages on connect
+- `world-chat-message`: Broadcast new message to all clients
+
+## 🎨 UI Features
+
+### Modern Design
+- Gradient backgrounds and text effects
+- Smooth animations with Framer Motion
+- Glass-morphism effects with backdrop blur
+- Hover states and transitions
+- Mobile-first responsive layouts
+
+### Compact Views
+- Reduced padding and margins for efficiency
+- Smart text truncation with line-clamp
+- Icon-only buttons on mobile
+- Collapsible filter panels
+
+### Advanced Filtering
+- **Status**: All, Upcoming, Overdue, Completed
+- **Task Type**: All, One-Time, Recurring  
+- **Date Range**: All Dates, Today, This Week, This Month
+- **Search**: Real-time search across all fields
+- Filters work together and reset pagination
+
+### Pagination
+- 6 items per page (customizable)
+- Numbered page buttons (max 5 visible)
+- Previous/Next navigation
+- Smart page number display
+- Mobile-optimized controls
+
+## 💡 Usage Examples
+
+### Creating a Community
+
+1. Navigate to Communities page
+2. Click "Create Community"
+3. Enter community name and description
+4. Submit to create
+
+### Adding a Department
+
+1. Go to Community → Departments
+2. Click "Create Department"
+3. Fill in department details
+4. Tasks can now be organized under this department
+
+### Creating Tasks
+
+**One-Time Task:**
+- Go to Department → Add Task
+- Fill in task details, assignee, due date, priority
+- Submit to create
+
+**Recurring Task:**
+- Go to Department → Add Recurring
+- Set frequency (Daily/Weekly/Monthly)
+- Define start and end dates
+- System auto-generates instances
+
+### Filtering Tasks
+
+1. Click the "Filter" button
+2. Select desired filters:
+   - Status (Upcoming, Overdue, etc.)
+   - Task Type (One-Time or Recurring)
+   - Date Range (Today, This Week, This Month)
+3. Use search bar for specific tasks
+4. Navigate through pages if needed
+
+## 🚢 Deployment
+
+### Frontend (Vercel)
+
+1. Push code to GitHub/GitLab
+2. Import project in Vercel
+3. Set environment variable:
+   ```
+   VITE_APP_API_URL=https://your-backend-url.com
+   ```
+4. Deploy
+
+The `vercel.json` file handles routing for React Router.
+
+### Backend (Railway/Render/Heroku)
+
+1. Choose your hosting platform
+2. Connect your repository
+3. Set environment variables from `.env`
+4. Deploy with Node.js 18+
+5. Ensure MongoDB connection is accessible
+
+### MongoDB Atlas Setup
+
+1. Create a cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a database user
+3. Whitelist IP addresses (0.0.0.0/0 for all IPs or specific IPs)
+4. Get connection string and add to `MONGO_URI`
+
+## 📜 Available Scripts
+
+### Backend
+
+```bash
+npm run dev          # Start development server with nodemon
+npm start            # Start production server
+```
+
+### Frontend
+
+```bash
+npm run dev          # Start Vite dev server (port 5173)
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+```
+
+## 🔧 Development Tips
+
+### Git Configuration
+
+First-time setup:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+```
+
+### Hot Reload
+
+- Backend uses nodemon for auto-restart on file changes
+- Frontend uses Vite's HMR (Hot Module Replacement)
+
+### Debugging
+
+- Backend logs to console via `console.log()`
+- Frontend uses React DevTools and browser console
+- Socket.io has built-in debugging: set `DEBUG=socket.io*` in environment
+
+### Database Queries
+
+Monitor MongoDB operations:
+```javascript
+mongoose.set('debug', true);
+```
+
+## 🎯 Best Practices
+
+### Task Creation
+- Always set priority for better organization
+- Use descriptive task names (50 chars max recommended)
+- Add detailed descriptions for clarity
+- Set realistic due dates
+
+### Recurring Tasks
+- Use "Daily" for everyday tasks
+- Use "Weekly" for weekly meetings/reviews
+- Use "Monthly" for monthly reports
+- Set `taskCreateDaysAhead` to 1-2 for advance notice
+
+### Community Management
+- Create departments by function (Dev, Marketing, etc.)
+- Assign department-specific tasks
+- Keep community descriptions clear and concise
+- Regularly review pending applications
+
+### Performance
+- Use pagination for large task lists
+- Apply filters to narrow down results
+- Search is case-insensitive and searches all fields
+- Indexes on MongoDB collections for faster queries
+
+## 🐛 Troubleshooting
+
+### Backend won't start
+- Check MongoDB connection string
+- Verify environment variables are set
+- Ensure port 5000 is available
+- Check Node.js version (18+)
+
+### Frontend can't connect to backend
+- Verify `VITE_APP_API_URL` in client `.env`
+- Check CORS settings in backend
+- Ensure backend is running
+- Check browser console for errors
+
+### Tasks not appearing
+- Verify user is logged in
+- Check user email matches task assignment
+- Confirm task is not filtered out
+- Check MongoDB for data
+
+### Email summaries not working
+- Verify Gmail App Password (not regular password)
+- Check EMAIL and APP_PASSWORD in `.env`
+- Ensure "Less secure app access" is enabled (or use App Password)
+- Check spam folder
+
+### Socket.io not connecting
+- Verify WebSocket support in browser
+- Check firewall/proxy settings
+- Ensure backend Socket.io is initialized
+- Check browser console for connection errors
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is provided as-is. Add a proper license (MIT, Apache, etc.) if open-sourcing.
+
+## 👥 Authors
+
+- Built with ❤️ for efficient task management
+- Contributions welcome!
+
+## 🙏 Acknowledgments
+
+- React team for amazing frontend framework
+- MongoDB for flexible database solution
+- Socket.io for real-time capabilities
+- Vercel for seamless deployment
+- All open-source contributors
+
+## 📞 Support
+
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Check existing documentation
+- Review troubleshooting section
+
+---
+
+**Made with 💙 by the Task Tapper Team**

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaHome,
@@ -10,26 +10,53 @@ import {
   FaUserCircle,
   FaComments,
   FaUsers,
+  FaChevronDown,
+  FaChevronRight,
 } from "react-icons/fa";
 
 // Contract:
 // props: { isOpen: boolean, onClose?: () => void }
 // Renders a responsive side navigation. On mobile, it overlays and can be closed.
 const SideNavbar = ({ isOpen, onClose }) => {
+  const [openGroups, setOpenGroups] = useState({
+    0: true, // Overview open by default
+    1: true, // Tasks open by default
+    2: true, // Communication open by default
+  });
+
+  const toggleGroup = (index) => {
+    setOpenGroups(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
   const linkBaseClasses =
     "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors";
   const activeClasses = "bg-blue-100 text-blue-700";
 
-  const links = useMemo(
+  const navGroups = useMemo(
     () => [
-      { to: "/dashboard", label: "Dashboard", icon: <FaHome /> },
-      { to: "/communities", label: "Communities", icon: <FaUsers /> },
-      { to: "/communities/create", label: "Create Community", icon: <FaRegCalendarPlus /> },
-      { to: "/tasks", label: "One-Time Tasks", icon: <FaClipboardList /> },
-      { to: "/recurring/list", label: "Recurring Tasks", icon: <FaSyncAlt /> },
-      { to: "/mywork", label: "Assigned by Me", icon: <FaTasks /> },
-      { to: "/chat", label: "World Chat", icon: <FaComments /> },
-      { to: "/profile", label: "Profile", icon: <FaUserCircle /> },
+      {
+        title: "Overview",
+        links: [
+          { to: "/dashboard", label: "Dashboard", icon: <FaHome /> },
+        ]
+      },
+      {
+        title: "Tasks",
+        links: [
+          { to: "/tasks", label: "One-Time Tasks", icon: <FaClipboardList /> },
+          { to: "/recurring/list", label: "Recurring Tasks", icon: <FaSyncAlt /> },
+          { to: "/mywork", label: "Assigned by Me", icon: <FaTasks /> },
+        ]
+      },
+      {
+        title: "Communication",
+        links: [
+          { to: "/chat", label: "World Chat", icon: <FaComments /> },
+        ]
+      },
     ],
     []
   );
@@ -66,19 +93,38 @@ const SideNavbar = ({ isOpen, onClose }) => {
             </button>
           )}
         </div>
-        <nav className="p-3 space-y-1">
-          {links.map(({ to, label, icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `${linkBaseClasses} ${isActive ? activeClasses : "text-gray-700"}`
-              }
-              onClick={onClose}
-            >
-              <span className="text-base">{icon}</span>
-              <span>{label}</span>
-            </NavLink>
+        <nav className="p-3 space-y-2">
+          {navGroups.map((group, groupIndex) => (
+            <div key={groupIndex} className="border-b border-gray-100 pb-2">
+              <button
+                onClick={() => toggleGroup(groupIndex)}
+                className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <span className="uppercase tracking-wider">{group.title}</span>
+                {openGroups[groupIndex] ? (
+                  <FaChevronDown className="text-gray-400 text-xs" />
+                ) : (
+                  <FaChevronRight className="text-gray-400 text-xs" />
+                )}
+              </button>
+              {openGroups[groupIndex] && (
+                <div className="mt-1 space-y-1">
+                  {group.links.map(({ to, label, icon }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      className={({ isActive }) =>
+                        `${linkBaseClasses} ${isActive ? activeClasses : "text-gray-700"}`
+                      }
+                      onClick={onClose}
+                    >
+                      <span className="text-base">{icon}</span>
+                      <span>{label}</span>
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
       </aside>
