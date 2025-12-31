@@ -223,14 +223,14 @@ const Dashboard = () => {
   const myOneTimeTasks = useMemo(() => {
     if (!tasks) return [];
     return tasks.filter(
-      (task) => task.assignedTo === user?.email && task.taskFrequency === "One-time"
+      (task) => task.assignedTo === user?.email && (task.taskFrequency === "One-time" || task.taskFrequency === "OneTime")
     );
   }, [tasks, user]);
 
   const myRecurringTasks = useMemo(() => {
     if (!tasks) return [];
     return tasks.filter(
-      (task) => task.assignedTo === user?.email && task.taskFrequency !== "One-time"
+      (task) => task.assignedTo === user?.email && task.taskFrequency !== "One-time" && task.taskFrequency !== "OneTime"
     );
   }, [tasks, user]);
 
@@ -283,7 +283,7 @@ const Dashboard = () => {
                     onClick={() => task?._id && navigate(`/tasks/${task._id}`)}
                   >
                     <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-0.5">
-                      {task.task}
+                      {task.taskName || task.task}
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-0.5 text-[10px] sm:text-xs text-gray-600">
                       <p>
@@ -360,7 +360,7 @@ const Dashboard = () => {
                     onClick={() => task?._id && navigate(`/tasks/${task._id}`)}
                   >
                     <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-0.5">
-                      {task.task}
+                      {task.taskName || task.task}
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-0.5 text-[10px] sm:text-xs text-gray-600">
                       <p>
@@ -593,7 +593,7 @@ const Dashboard = () => {
           </div>
 
           {/* Task List */}
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-64 overflow-y-auto custom-scrollbar">
             {myTasksTab === "onetime" ? (
               myOneTimeTasks.length === 0 ? (
                 <p className="text-gray-500 italic text-center py-2 text-xs sm:text-sm">
@@ -713,7 +713,7 @@ const Dashboard = () => {
                   onClick={() => task?._id && navigate(`/tasks/${task._id}`)}
                 >
                   <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-0.5">
-                    {task.task}
+                    {task.taskName || task.task}
                   </p>
                   <div className="grid grid-cols-2 gap-y-0.5 text-[10px] sm:text-xs text-gray-600">
                     <p>

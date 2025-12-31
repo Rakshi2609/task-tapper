@@ -1,6 +1,8 @@
 import User from '../models/User.js'
 import Team from '../models/Team.js'; 
 import { UserDetail } from '../models/userDetail.js';
+import RecurringTask from '../models/recurringTaskModel.js';
+import { ensureTasksGeneratedToday } from '../taskScheduler.js';
 
 
 export const glogin = async (req, res) => {
@@ -87,11 +89,46 @@ export const getUserTasks = async (req, res) => {
   const { email } = req.params;
 
   try {
-    const tasks = await Team.find({ assignedTo: email });
+    // Auto-generate recurring tasks if not done today
+    await ensureTasksGeneratedToday();
+
+    // Get user by email to get the user ID
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Fetch one-time tasks (Team model)
+    const oneTimeTasks = await Team.find({ assignedTo: email });
+
+    // Fetch recurring tasks assigned to this user
+    const recurringTasks = await RecurringTask.find({ taskAssignedTo: user._id })
+      .populate('taskAssignedBy', 'email username')
+      .populate('taskAssignedTo', 'email username')
+      .populate('community', 'name');
+
+    // Transform recurring tasks to match the format of one-time tasks
+    const formattedRecurringTasks = recurringTasks.map(rt => ({
+      _id: rt._id,
+      taskName: rt.taskName,
+      taskDescription: rt.taskDescription,
+      taskFrequency: rt.taskFrequency,
+      priority: rt.priority,
+      dueDate: rt.taskStartDate,
+      completedDate: rt.completedDate,
+      assignedTo: rt.taskAssignedTo?.email || email,
+      createdBy: rt.taskAssignedBy?.email || rt.createdBy?.email,
+      communityName: rt.community?.name,
+      departmentName: null,
+      isRecurring: true
+    }));
+
+    // Combine both task types
+    const allTasks = [...oneTimeTasks, ...formattedRecurringTasks];
 
     res.status(200).json({
       success: true,
-      tasks,
+      tasks: allTasks,
     });
   } catch (err) {
     console.error("Get User Tasks Error:", err);
@@ -105,9 +142,42 @@ export const getAssignedByMe = async (req, res) => {
   console.log(`[getAssignedByMe] Fetching tasks created by ${email}`);
 
   try {
-    const tasks = await Team.find({ createdBy: email });
-    console.log(`[getAssignedByMe] Found ${tasks.length} tasks`);
-    res.json({ tasks });
+    // Get user by email to get the user ID
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Fetch one-time tasks created by this user
+    const oneTimeTasks = await Team.find({ createdBy: email });
+
+    // Fetch recurring tasks assigned by this user
+    const recurringTasks = await RecurringTask.find({ taskAssignedBy: user._id })
+      .populate('taskAssignedBy', 'email username')
+      .populate('taskAssignedTo', 'email username')
+      .populate('community', 'name');
+
+    // Transform recurring tasks to match the format
+    const formattedRecurringTasks = recurringTasks.map(rt => ({
+      _id: rt._id,
+      taskName: rt.taskName,
+      taskDescription: rt.taskDescription,
+      taskFrequency: rt.taskFrequency,
+      priority: rt.priority,
+      dueDate: rt.taskStartDate,
+      completedDate: rt.completedDate,
+      assignedTo: rt.taskAssignedTo?.email,
+      createdBy: rt.taskAssignedBy?.email || email,
+      communityName: rt.community?.name,
+      departmentName: null,
+      isRecurring: true
+    }));
+
+    // Combine both task types
+    const allTasks = [...oneTimeTasks, ...formattedRecurringTasks];
+
+    console.log(`[getAssignedByMe] Found ${allTasks.length} tasks (${oneTimeTasks.length} one-time, ${recurringTasks.length} recurring)`);
+    res.json({ tasks: allTasks });
   } catch (err) {
     console.error(`[getAssignedByMe] Error:`, err.message);
     res.status(500).json({ message: "Server Error" });

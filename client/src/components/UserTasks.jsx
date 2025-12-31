@@ -395,8 +395,8 @@ const UserTasks = () => {
                                                     <p className="text-sm font-medium text-gray-600 break-words">{task.taskDescription}</p>
                                                     {task.communityName && (
                                                         <p className="text-xs text-purple-600 font-medium flex items-center gap-1">
-                                                            <span className="bg-purple-100 px-2 py-1 rounded text-xs">📍 {task.communityName}</span>
-                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded text-xs">🏢 {task.departmentName}</span>}
+                                                            <span className="bg-purple-100 px-2 py-1 rounded text-xs">{task.communityName}</span>
+                                                            {task.departmentName && <span className="bg-blue-100 px-2 py-1 rounded text-xs">{task.departmentName}</span>}
                                                         </p>
                                                     )}
                                                     <p className="text-xs text-gray-600 flex items-center gap-1">
@@ -409,7 +409,7 @@ const UserTasks = () => {
                                                     </p>
                                                     <p className="text-xs text-gray-600 flex items-center gap-1 min-w-0">
                                                         <FaUserCircle className="text-indigo-400 flex-shrink-0" />
-                                                        <span>Assigned By:</span>
+                                                        <span>From:</span>
                                                         <span className="font-medium text-blue-700 break-all">{task.createdBy}</span>
                                                     </p>
                                                     <div className="mt-3 flex flex-row gap-2 justify-end">
@@ -512,7 +512,7 @@ const UserTasks = () => {
                                                     </p>
                                                     <p className="text-xs text-gray-500 flex items-center gap-1 min-w-0">
                                                         <FaUserCircle className="text-indigo-300 flex-shrink-0" />
-                                                        <span>Assigned By:</span>
+                                                        <span>From:</span>
                                                         <span className="font-light break-all">{task.createdBy}</span>
                                                     </p>
                                                     <div className="mt-3 flex justify-end">

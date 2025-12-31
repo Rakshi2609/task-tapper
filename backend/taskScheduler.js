@@ -154,4 +154,32 @@ export const generateRecurringTaskInstances = async () => {
   }
 };
 
+// Track last generation time in memory (resets on server restart)
+let lastGenerationDate = null;
+
+// Helper function to check if tasks need to be generated today
+export const shouldGenerateTasksToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  if (!lastGenerationDate) return true;
+  
+  const lastGen = new Date(lastGenerationDate);
+  lastGen.setHours(0, 0, 0, 0);
+  
+  return today > lastGen;
+};
+
+// Wrapper function to auto-generate tasks if needed
+export const ensureTasksGeneratedToday = async () => {
+  if (shouldGenerateTasksToday()) {
+    console.log("🔄 Auto-generating recurring tasks for today...");
+    const results = await generateRecurringTaskInstances();
+    lastGenerationDate = new Date();
+    return results;
+  }
+  console.log("✅ Tasks already generated for today");
+  return { alreadyGenerated: true };
+};
+
 console.log("📅 Recurring task scheduler module loaded");

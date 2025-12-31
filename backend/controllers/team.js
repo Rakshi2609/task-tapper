@@ -3,6 +3,7 @@ import  User from '../models/User.js'; // Assuming User and UserDetail are in Us
 import TaskUpdate from '../models/TaskUpdate.js'; // <-- Import the new TaskUpdate model
 import { emitSystemMessage } from '../socket/worldChat.js';
 import { UserDetail } from '../models/userDetail.js';
+import RecurringTask from '../models/recurringTaskModel.js';
 /**
  * Helper function to calculate the next due date based on frequency, skipping Sundays.
  * @param {Date} baseDate - The date from which to calculate the next due date (e.g., completedDate).
@@ -479,8 +480,14 @@ export const getTaskUpdates = async (req, res) => {
     }
 
     try {
-        // Optional: Verify if the taskId actually exists in the Team collection
-        const existingTask = await Team.findById(taskId);
+        // Check if the taskId exists in either Team or RecurringTask collection
+        let existingTask = await Team.findById(taskId);
+        
+        if (!existingTask) {
+            // If not in Team, check RecurringTask
+            existingTask = await RecurringTask.findById(taskId);
+        }
+        
         if (!existingTask) {
             console.log(`[getTaskUpdates] Error: Task with ID '${taskId}' not found.`);
             return res.status(404).json({ success: false, message: "Task not found." });
@@ -512,12 +519,42 @@ export const getTaskById = async (req, res) => {
     console.log(`[getTaskById] Request param: taskId=${taskId}`);
 
     try {
-        const task = await Team.findById(taskId);
+        // First, try to find in Team (one-time tasks)
+        let task = await Team.findById(taskId);
+        let isRecurring = false;
+
+        // If not found in Team, try RecurringTask
+        if (!task) {
+            task = await RecurringTask.findById(taskId)
+                .populate('taskAssignedBy', 'email username')
+                .populate('taskAssignedTo', 'email username')
+                .populate('community', 'name');
+            
+            if (task) {
+                isRecurring = true;
+                // Transform recurring task to match one-time task format
+                task = {
+                    _id: task._id,
+                    taskName: task.taskName,
+                    taskDescription: task.taskDescription,
+                    taskFrequency: task.taskFrequency,
+                    priority: task.priority,
+                    dueDate: task.taskStartDate,
+                    completedDate: task.completedDate,
+                    assignedTo: task.taskAssignedTo?.email,
+                    createdBy: task.taskAssignedBy?.email || task.createdBy,
+                    communityName: task.community?.name,
+                    isRecurring: true
+                };
+            }
+        }
+
         if (!task) {
             console.log(`[getTaskById] Error: Task with ID '${taskId}' not found.`);
             return res.status(404).json({ success: false, message: "Task not found." });
         }
-        res.status(200).json({ success: true, task });
+
+        res.status(200).json({ success: true, task, isRecurring });
         console.log(`[getTaskById] Task found: ${task._id}`);
     } catch (err) {
         console.error(`[getTaskById] Error: ${err.message}`, err);
