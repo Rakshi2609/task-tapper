@@ -173,7 +173,7 @@ const AssignedTasks = () => {
       className="max-w-5xl mx-auto mt-10 p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl shadow-2xl border border-blue-200"
     >
       <h2 className="text-4xl font-extrabold mb-8 text-center text-gray-900 drop-shadow-md">
-        Tasks You've Assigned
+        Follow Ups
       </h2>
 
       <div className="flex flex-wrap justify-center md:justify-between gap-4 mb-8">

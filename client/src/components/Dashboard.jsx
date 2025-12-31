@@ -691,7 +691,7 @@ const Dashboard = () => {
         >
           <h3 className="text-sm sm:text-base font-bold mb-2 text-orange-800 flex items-center justify-between gap-2">
             <span className="flex items-center gap-1">
-              <FaUserCheck className="text-xs" /> Followups (Tasks Assigned By Me)
+              <FaUserCheck className="text-xs" /> Follow Ups
             </span>
             <Link to="/mywork" className="text-[10px] sm:text-xs font-semibold text-orange-700 hover:underline">View all</Link>
           </h3>
