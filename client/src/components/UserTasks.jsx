@@ -392,7 +392,7 @@ const UserTasks = () => {
                                             >
                                                 <div>
                                                     <h4 className="text-base font-semibold text-gray-800 break-words">{task.taskName}</h4>
-                                                    <p className="text-sm font-medium text-gray-600 break-words"><span className="text-gray-700">Task Description: </span>{task.taskDescription}</p>
+                                                    <p className="text-sm font-medium text-gray-600 break-words">{task.taskDescription}</p>
                                                     {task.communityName && (
                                                         <p className="text-xs text-purple-600 font-medium flex items-center gap-1">
                                                             <span className="bg-purple-100 px-2 py-1 rounded text-xs">📍 {task.communityName}</span>
