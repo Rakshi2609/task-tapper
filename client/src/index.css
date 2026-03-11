@@ -1,46 +1,67 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-blue: #2563eb;
+  --secondary-indigo: #4f46e5;
+  --bg-gradient-start: #f8fafc;
+  --bg-gradient-end: #e0e7ff;
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --premium-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
 
 body {
   font-family: 'Inter', sans-serif;
+  @apply bg-fixed bg-gradient-to-br from-[#f8fafc] to-[#e0e7ff] text-slate-900;
+}
+
+@layer components {
+  .premium-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/40 rounded-3xl shadow-2xl;
+  }
+  
+  .premium-button-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 active:scale-95;
+  }
+
+  .premium-input {
+    @apply bg-white/80 border border-blue-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 outline-none rounded-xl transition-all duration-200;
+  }
 }
 
 @layer utilities {
-  /* Hide scrollbar for Chrome, Safari, and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
-  /* Hide scrollbar for IE, Edge, and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
-/* You can add this to your main CSS file like index.css or a dedicated styles.css */
 .custom-scrollbar {
-  scrollbar-width: thin; /* "auto" or "thin" */
-  scrollbar-color: #90CAF9 #F0F4F8; /* thumb and track color */
+  scrollbar-width: thin;
+  scrollbar-color: #90CAF9 #F0F4F8;
 }
 
-/* WebKit (Chrome, Safari) */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px; /* width of the vertical scrollbar */
-  height: 8px; /* height of the horizontal scrollbar */
+  width: 8px;
+  height: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #F0F4F8; /* color of the track */
+  background: #F0F4F8;
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #90CAF9; /* color of the scroll thumb */
-  border-radius: 10px; /* roundness of the scroll thumb */
-  border: 2px solid #F0F4F8; /* creates padding around scroll thumb */
+  background-color: #90CAF9;
+  border-radius: 10px;
+  border: 2px solid #F0F4F8;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #64B5F6; /* color when hovered */
+  background-color: #64B5F6;
 }

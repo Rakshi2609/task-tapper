@@ -67,8 +67,8 @@ const App = () => {
             onClose={() => setSidebarOpen(false)}
           />
         )}
-        <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-4">
-          <div className="px-4 py-4">
+        <main className="min-h-screen pt-4">
+          <div className="px-4 py-4 max-w-7xl mx-auto">
             {/* content wrapper */}
             <Routes>
               {/* Public routes */}
@@ -207,13 +207,13 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route 
-                path="/communities/create" 
+              <Route
+                path="/communities/create"
                 element={
                   <ProtectedRoute>
                     <CreateCommunity />
                   </ProtectedRoute>
-                } 
+                }
               />
               <Route
                 path="/communities/:communityId/add-people"
