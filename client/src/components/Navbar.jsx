@@ -47,22 +47,22 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
   };
 
   const navLinkClasses =
-    "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-600 hover:shadow-md";
+    "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm";
 
-  const mobileNavLinkClasses = 
-    "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-blue-600 active:bg-blue-700 w-full text-left";
+  const mobileNavLinkClasses =
+    "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 text-slate-700 hover:bg-blue-50 active:bg-blue-100 w-full text-left";
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <nav className="bg-gradient-to-r from-blue-700 to-blue-900 text-white shadow-xl sticky top-0 z-50">
+    <nav className="bg-white/70 backdrop-blur-lg border-b border-white/40 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
             {showMenu && (
               <button
-                className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-blue-800/40"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-md text-slate-600 hover:bg-blue-50"
                 onClick={onMenuClick}
                 aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
                 aria-expanded={isSidebarOpen}
@@ -75,12 +75,12 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                 initial={{ rotate: 0 }}
                 whileHover={{ rotate: 10 }}
                 transition={{ duration: 0.3 }}
-                className="text-2xl sm:text-3xl text-blue-300 group-hover:text-white"
+                className="text-2xl sm:text-3xl text-blue-600 group-hover:text-blue-700"
               >
                 <FaTasks />
               </motion.div>
-              <div className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
-                Donzo  
+              <div className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-wide">
+                Donzo
               </div>
             </Link>
           </div>
@@ -99,7 +99,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                     <FaHome /> Dashboard
                   </motion.button>
                 </Link>
-                
+
                 <Link to="/communities">
                   <motion.button
                     className={`${navLinkClasses} bg-transparent`}
@@ -110,7 +110,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                     <FaUsers /> Communities
                   </motion.button>
                 </Link>
-                
+
                 <Link to="/profile">
                   <motion.button
                     className={`${navLinkClasses} bg-transparent`}
@@ -134,7 +134,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                     <FaHome /> Home
                   </motion.button>
                 </Link>
-                
+
                 <Link to="/login">
                   <motion.button
                     className="px-5 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition"
@@ -145,7 +145,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                     Login
                   </motion.button>
                 </Link>
-                
+
                 <Link to="/signup">
                   <motion.button
                     className="px-5 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-400 transition"
@@ -193,7 +193,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                       <FaHome className="text-xl" /> Dashboard
                     </motion.button>
                   </Link>
-                  
+
                   <Link to="/communities" onClick={closeMobileMenu}>
                     <motion.button
                       className={mobileNavLinkClasses}
@@ -202,7 +202,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                       <FaUsers className="text-xl" /> Communities
                     </motion.button>
                   </Link>
-                  
+
                   <Link to="/profile" onClick={closeMobileMenu}>
                     <motion.button
                       className={mobileNavLinkClasses}
@@ -222,7 +222,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                       <FaHome className="text-xl" /> Home
                     </motion.button>
                   </Link>
-                  
+
                   <Link to="/login" onClick={closeMobileMenu}>
                     <motion.button
                       className="w-full px-4 py-3 bg-white text-blue-700 rounded-lg font-semibold active:bg-blue-50 transition"
@@ -231,7 +231,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen = false, showMenu = false }) => {
                       Login
                     </motion.button>
                   </Link>
-                  
+
                   <Link to="/signup" onClick={closeMobileMenu}>
                     <motion.button
                       className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg font-semibold active:bg-blue-400 transition"
